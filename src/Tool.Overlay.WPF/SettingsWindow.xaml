@@ -1,0 +1,131 @@
+<Window x:Class="PixelAutomation.Tool.Overlay.WPF.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Settings" Height="450" Width="600"
+        WindowStartupLocation="CenterOwner">
+    <Grid Margin="10">
+        <TabControl>
+            <TabItem Header="General">
+                <StackPanel Margin="10">
+                    <GroupBox Header="Capture Settings" Margin="0,0,0,10">
+                        <StackPanel Margin="5">
+                            <Label Content="Capture Mode:"/>
+                            <ComboBox SelectedItem="{Binding CaptureMode}">
+                                <ComboBoxItem>WGC</ComboBoxItem>
+                                <ComboBoxItem>PRINT</ComboBoxItem>
+                                <ComboBoxItem>GPIXEL</ComboBoxItem>
+                            </ComboBox>
+                            
+                            <Label Content="Capture Frequency (Hz):" Margin="0,10,0,0"/>
+                            <Slider x:Name="HzSlider" Minimum="30" Maximum="240" Value="80" TickFrequency="10" IsSnapToTickEnabled="True"/>
+                            <TextBlock Text="{Binding ElementName=HzSlider, Path=Value, StringFormat='{}{0} Hz'}"/>
+                        </StackPanel>
+                    </GroupBox>
+                    
+                    <GroupBox Header="Click Settings" Margin="0,0,0,10">
+                        <StackPanel Margin="5">
+                            <Label Content="Click Mode:"/>
+                            <ComboBox SelectedItem="{Binding ClickMode}">
+                                <ComboBoxItem>message</ComboBoxItem>
+                                <ComboBoxItem>cursor-jump</ComboBoxItem>
+                                <ComboBoxItem>cursor-return</ComboBoxItem>
+                            </ComboBox>
+                            
+                            <CheckBox Content="Enable Auto-Fallback" Margin="0,10,0,0"/>
+                        </StackPanel>
+                    </GroupBox>
+                </StackPanel>
+            </TabItem>
+            
+            <TabItem Header="Probes">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <DataGrid Grid.Row="0" AutoGenerateColumns="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Width="100"/>
+                            <DataGridTextColumn Header="Type" Width="60"/>
+                            <DataGridTextColumn Header="X" Width="50"/>
+                            <DataGridTextColumn Header="Y" Width="50"/>
+                            <DataGridTextColumn Header="Mode" Width="60"/>
+                            <DataGridTextColumn Header="Tolerance" Width="70"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,10,0,0">
+                        <Button Content="Add" Width="75" Margin="0,0,5,0"/>
+                        <Button Content="Edit" Width="75" Margin="0,0,5,0"/>
+                        <Button Content="Delete" Width="75" Margin="0,0,5,0"/>
+                        <Button Content="Get Color" Width="75" Margin="0,0,5,0"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            
+            <TabItem Header="Periodic Clicks">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <DataGrid Grid.Row="0" AutoGenerateColumns="False">
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Header="Enabled" Width="60"/>
+                            <DataGridTextColumn Header="Name" Width="100"/>
+                            <DataGridTextColumn Header="X" Width="50"/>
+                            <DataGridTextColumn Header="Y" Width="50"/>
+                            <DataGridTextColumn Header="Period (ms)" Width="80"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,10,0,0">
+                        <Button Content="Add" Width="75" Margin="0,0,5,0"/>
+                        <Button Content="Edit" Width="75" Margin="0,0,5,0"/>
+                        <Button Content="Delete" Width="75" Margin="0,0,5,0"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            
+            <TabItem Header="Hotkeys">
+                <StackPanel Margin="10">
+                    <Label Content="Configure hotkey bindings:" FontWeight="Bold"/>
+                    <Grid Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="25"/>
+                        </Grid.RowDefinitions>
+                        
+                        <Label Grid.Row="0" Grid.Column="0" Content="Toggle Overlay:"/>
+                        <TextBox Grid.Row="0" Grid.Column="1" Text="Ctrl+~" Margin="0,0,0,2"/>
+                        
+                        <Label Grid.Row="1" Grid.Column="0" Content="Lock Window:"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="F2" Margin="0,0,0,2"/>
+                        
+                        <Label Grid.Row="2" Grid.Column="0" Content="Toggle Snap:"/>
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="F3" Margin="0,0,0,2"/>
+                        
+                        <Label Grid.Row="3" Grid.Column="0" Content="Magnifier:"/>
+                        <TextBox Grid.Row="3" Grid.Column="1" Text="F4" Margin="0,0,0,2"/>
+                        
+                        <Label Grid.Row="4" Grid.Column="0" Content="Save Config:"/>
+                        <TextBox Grid.Row="4" Grid.Column="1" Text="Ctrl+S" Margin="0,0,0,2"/>
+                        
+                        <Label Grid.Row="5" Grid.Column="0" Content="Panic Stop:"/>
+                        <TextBox Grid.Row="5" Grid.Column="1" Text="Pause" Margin="0,0,0,2"/>
+                    </Grid>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

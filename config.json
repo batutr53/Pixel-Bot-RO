@@ -1,0 +1,1487 @@
+{
+  "profiles": {
+    "Test": {
+      "global": {
+        "captureMode": "WGC",
+        "clickMode": "message",
+        "defaultHz": 80,
+        "logLevel": "Info",
+        "enableTelemetry": true,
+        "dryRun": false
+      },
+      "windows": [
+        {
+          "titleRegex": "(Test|MuMu|RO|Ragnarok)",
+          "hwnd": null,
+          "processName": null,
+          "dpiAware": true,
+          "probes": [],
+          "events": [],
+          "periodicClicks": [
+            {
+              "name": "TestClick1",
+              "x": 400,
+              "y": 300,
+              "periodMs": 1000,
+              "enabled": true
+            },
+            {
+              "name": "TestClick2",
+              "x": 500,
+              "y": 400,
+              "periodMs": 2000,
+              "enabled": false
+            }
+          ],
+          "limits": {
+            "maxBurstPerSec": 20,
+            "globalCooldownMs": 20
+          }
+        }
+      ],
+      "hotkeys": "Default"
+    },
+    "TwoMonitor-8Clients": {
+      "global": {
+        "captureMode": "WGC",
+        "clickMode": "message",
+        "defaultHz": 80,
+        "logLevel": "Info",
+        "enableTelemetry": true,
+        "dryRun": false
+      },
+      "windows": [
+        {
+          "titleRegex": "(Client1|MuMu.*1|RO.*1|Ragnarok.*1)",
+          "hwnd": null,
+          "processName": null,
+          "dpiAware": true,
+          "probes": [
+            {
+              "name": "R1",
+              "kind": "point",
+              "x": 320,
+              "y": 420,
+              "box": 5,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [220, 40, 40],
+              "toColor": [0, 0, 0],
+              "tolerance": 30,
+              "debounceMs": 30
+            },
+            {
+              "name": "B1",
+              "kind": "point",
+              "x": 360,
+              "y": 420,
+              "box": 5,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [30, 100, 220],
+              "toColor": [0, 0, 0],
+              "tolerance": 30,
+              "debounceMs": 30
+            },
+            {
+              "name": "HPZone1",
+              "kind": "rect",
+              "x": 200,
+              "y": 380,
+              "width": 40,
+              "height": 10,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [255, 0, 0],
+              "toColor": [0, 0, 0],
+              "tolerance": 25,
+              "debounceMs": 100
+            },
+            {
+              "name": "MPZone1",
+              "kind": "rect",
+              "x": 200,
+              "y": 395,
+              "width": 40,
+              "height": 10,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [0, 0, 255],
+              "toColor": [0, 0, 0],
+              "tolerance": 25,
+              "debounceMs": 100
+            },
+            {
+              "name": "HPBar1",
+              "kind": "rect",
+              "x": 180,
+              "y": 370,
+              "width": 60,
+              "height": 8,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [255, 0, 0],
+              "tolerance": 15,
+              "debounceMs": 80
+            },
+            {
+              "name": "MPBar1",
+              "kind": "rect",
+              "x": 180,
+              "y": 385,
+              "width": 60,
+              "height": 8,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [0, 0, 255],
+              "tolerance": 15,
+              "debounceMs": 80
+            }
+          ],
+          "events": [
+            {
+              "when": "R1:edge-down",
+              "click": { "x": 500, "y": 700 },
+              "cooldownMs": 120,
+              "priority": 1
+            },
+            {
+              "when": "B1:edge-down",
+              "click": { "x": 620, "y": 740 },
+              "cooldownMs": 120,
+              "priority": 1
+            },
+            {
+              "when": "HPZone1:edge-down",
+              "click": { "x": 580, "y": 650 },
+              "cooldownMs": 200,
+              "priority": 2
+            },
+            {
+              "when": "MPZone1:edge-down",
+              "click": { "x": 640, "y": 650 },
+              "cooldownMs": 200,
+              "priority": 2
+            },
+            {
+              "when": "HPBar1:edge-falling",
+              "click": { "x": 580, "y": 650 },
+              "cooldownMs": 150,
+              "priority": 3
+            },
+            {
+              "when": "MPBar1:edge-falling",
+              "click": { "x": 640, "y": 650 },
+              "cooldownMs": 150,
+              "priority": 3
+            }
+          ],
+          "periodicClicks": [
+            {
+              "name": "Y",
+              "x": 540,
+              "y": 760,
+              "periodMs": 120,
+              "enabled": true
+            },
+            {
+              "name": "Extra1",
+              "x": 700,
+              "y": 820,
+              "periodMs": 250,
+              "enabled": false
+            },
+            {
+              "name": "Extra2",
+              "x": 720,
+              "y": 840,
+              "periodMs": 500,
+              "enabled": false
+            },
+            {
+              "name": "Extra3",
+              "x": 740,
+              "y": 860,
+              "periodSec": 1.0,
+              "enabled": false
+            },
+            {
+              "name": "Extra4",
+              "x": 760,
+              "y": 880,
+              "periodSec": 2.0,
+              "enabled": false
+            },
+            {
+              "name": "Extra5",
+              "x": 780,
+              "y": 900,
+              "periodSec": 5.0,
+              "enabled": false
+            }
+          ],
+          "limits": {
+            "maxBurstPerSec": 20,
+            "globalCooldownMs": 20
+          }
+        },
+        {
+          "titleRegex": "(Client2|MuMu.*2|RO.*2|Ragnarok.*2)",
+          "hwnd": null,
+          "processName": null,
+          "dpiAware": true,
+          "probes": [
+            {
+              "name": "R2",
+              "kind": "point",
+              "x": 320,
+              "y": 420,
+              "box": 5,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [220, 40, 40],
+              "toColor": [0, 0, 0],
+              "tolerance": 30,
+              "debounceMs": 30
+            },
+            {
+              "name": "B2",
+              "kind": "point",
+              "x": 360,
+              "y": 420,
+              "box": 5,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [30, 100, 220],
+              "toColor": [0, 0, 0],
+              "tolerance": 30,
+              "debounceMs": 30
+            },
+            {
+              "name": "HPZone2",
+              "kind": "rect",
+              "x": 200,
+              "y": 380,
+              "width": 40,
+              "height": 10,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [255, 0, 0],
+              "toColor": [0, 0, 0],
+              "tolerance": 25,
+              "debounceMs": 100
+            },
+            {
+              "name": "MPZone2",
+              "kind": "rect",
+              "x": 200,
+              "y": 395,
+              "width": 40,
+              "height": 10,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [0, 0, 255],
+              "toColor": [0, 0, 0],
+              "tolerance": 25,
+              "debounceMs": 100
+            },
+            {
+              "name": "HPBar2",
+              "kind": "rect",
+              "x": 180,
+              "y": 370,
+              "width": 60,
+              "height": 8,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [255, 0, 0],
+              "tolerance": 15,
+              "debounceMs": 80
+            },
+            {
+              "name": "MPBar2",
+              "kind": "rect",
+              "x": 180,
+              "y": 385,
+              "width": 60,
+              "height": 8,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [0, 0, 255],
+              "tolerance": 15,
+              "debounceMs": 80
+            }
+          ],
+          "events": [
+            {
+              "when": "R2:edge-down",
+              "click": { "x": 500, "y": 700 },
+              "cooldownMs": 120,
+              "priority": 1
+            },
+            {
+              "when": "B2:edge-down",
+              "click": { "x": 620, "y": 740 },
+              "cooldownMs": 120,
+              "priority": 1
+            },
+            {
+              "when": "HPZone2:edge-down",
+              "click": { "x": 580, "y": 650 },
+              "cooldownMs": 200,
+              "priority": 2
+            },
+            {
+              "when": "MPZone2:edge-down",
+              "click": { "x": 640, "y": 650 },
+              "cooldownMs": 200,
+              "priority": 2
+            },
+            {
+              "when": "HPBar2:edge-falling",
+              "click": { "x": 580, "y": 650 },
+              "cooldownMs": 150,
+              "priority": 3
+            },
+            {
+              "when": "MPBar2:edge-falling",
+              "click": { "x": 640, "y": 650 },
+              "cooldownMs": 150,
+              "priority": 3
+            }
+          ],
+          "periodicClicks": [
+            {
+              "name": "Y",
+              "x": 540,
+              "y": 760,
+              "periodMs": 120,
+              "enabled": true
+            },
+            {
+              "name": "Extra1",
+              "x": 700,
+              "y": 820,
+              "periodMs": 250,
+              "enabled": false
+            },
+            {
+              "name": "Extra2",
+              "x": 720,
+              "y": 840,
+              "periodMs": 500,
+              "enabled": false
+            },
+            {
+              "name": "Extra3",
+              "x": 740,
+              "y": 860,
+              "periodSec": 1.0,
+              "enabled": false
+            },
+            {
+              "name": "Extra4",
+              "x": 760,
+              "y": 880,
+              "periodSec": 2.0,
+              "enabled": false
+            },
+            {
+              "name": "Extra5",
+              "x": 780,
+              "y": 900,
+              "periodSec": 5.0,
+              "enabled": false
+            }
+          ],
+          "limits": {
+            "maxBurstPerSec": 20,
+            "globalCooldownMs": 20
+          }
+        },
+        {
+          "titleRegex": "(Client3|MuMu.*3|RO.*3|Ragnarok.*3)",
+          "hwnd": null,
+          "processName": null,
+          "dpiAware": true,
+          "probes": [
+            {
+              "name": "R3",
+              "kind": "point",
+              "x": 320,
+              "y": 420,
+              "box": 5,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [220, 40, 40],
+              "toColor": [0, 0, 0],
+              "tolerance": 30,
+              "debounceMs": 30
+            },
+            {
+              "name": "B3",
+              "kind": "point",
+              "x": 360,
+              "y": 420,
+              "box": 5,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [30, 100, 220],
+              "toColor": [0, 0, 0],
+              "tolerance": 30,
+              "debounceMs": 30
+            },
+            {
+              "name": "HPZone3",
+              "kind": "rect",
+              "x": 200,
+              "y": 380,
+              "width": 40,
+              "height": 10,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [255, 0, 0],
+              "toColor": [0, 0, 0],
+              "tolerance": 25,
+              "debounceMs": 100
+            },
+            {
+              "name": "MPZone3",
+              "kind": "rect",
+              "x": 200,
+              "y": 395,
+              "width": 40,
+              "height": 10,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [0, 0, 255],
+              "toColor": [0, 0, 0],
+              "tolerance": 25,
+              "debounceMs": 100
+            },
+            {
+              "name": "HPBar3",
+              "kind": "rect",
+              "x": 180,
+              "y": 370,
+              "width": 60,
+              "height": 8,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [255, 0, 0],
+              "tolerance": 15,
+              "debounceMs": 80
+            },
+            {
+              "name": "MPBar3",
+              "kind": "rect",
+              "x": 180,
+              "y": 385,
+              "width": 60,
+              "height": 8,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [0, 0, 255],
+              "tolerance": 15,
+              "debounceMs": 80
+            }
+          ],
+          "events": [
+            {
+              "when": "R3:edge-down",
+              "click": { "x": 500, "y": 700 },
+              "cooldownMs": 120,
+              "priority": 1
+            },
+            {
+              "when": "B3:edge-down",
+              "click": { "x": 620, "y": 740 },
+              "cooldownMs": 120,
+              "priority": 1
+            },
+            {
+              "when": "HPZone3:edge-down",
+              "click": { "x": 580, "y": 650 },
+              "cooldownMs": 200,
+              "priority": 2
+            },
+            {
+              "when": "MPZone3:edge-down",
+              "click": { "x": 640, "y": 650 },
+              "cooldownMs": 200,
+              "priority": 2
+            },
+            {
+              "when": "HPBar3:edge-falling",
+              "click": { "x": 580, "y": 650 },
+              "cooldownMs": 150,
+              "priority": 3
+            },
+            {
+              "when": "MPBar3:edge-falling",
+              "click": { "x": 640, "y": 650 },
+              "cooldownMs": 150,
+              "priority": 3
+            }
+          ],
+          "periodicClicks": [
+            {
+              "name": "Y",
+              "x": 540,
+              "y": 760,
+              "periodMs": 120,
+              "enabled": true
+            },
+            {
+              "name": "Extra1",
+              "x": 700,
+              "y": 820,
+              "periodMs": 250,
+              "enabled": false
+            },
+            {
+              "name": "Extra2",
+              "x": 720,
+              "y": 840,
+              "periodMs": 500,
+              "enabled": false
+            },
+            {
+              "name": "Extra3",
+              "x": 740,
+              "y": 860,
+              "periodSec": 1.0,
+              "enabled": false
+            },
+            {
+              "name": "Extra4",
+              "x": 760,
+              "y": 880,
+              "periodSec": 2.0,
+              "enabled": false
+            },
+            {
+              "name": "Extra5",
+              "x": 780,
+              "y": 900,
+              "periodSec": 5.0,
+              "enabled": false
+            }
+          ],
+          "limits": {
+            "maxBurstPerSec": 20,
+            "globalCooldownMs": 20
+          }
+        },
+        {
+          "titleRegex": "(Client4|MuMu.*4|RO.*4|Ragnarok.*4)",
+          "hwnd": null,
+          "processName": null,
+          "dpiAware": true,
+          "probes": [
+            {
+              "name": "R4",
+              "kind": "point",
+              "x": 320,
+              "y": 420,
+              "box": 5,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [220, 40, 40],
+              "toColor": [0, 0, 0],
+              "tolerance": 30,
+              "debounceMs": 30
+            },
+            {
+              "name": "B4",
+              "kind": "point",
+              "x": 360,
+              "y": 420,
+              "box": 5,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [30, 100, 220],
+              "toColor": [0, 0, 0],
+              "tolerance": 30,
+              "debounceMs": 30
+            },
+            {
+              "name": "HPZone4",
+              "kind": "rect",
+              "x": 200,
+              "y": 380,
+              "width": 40,
+              "height": 10,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [255, 0, 0],
+              "toColor": [0, 0, 0],
+              "tolerance": 25,
+              "debounceMs": 100
+            },
+            {
+              "name": "MPZone4",
+              "kind": "rect",
+              "x": 200,
+              "y": 395,
+              "width": 40,
+              "height": 10,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [0, 0, 255],
+              "toColor": [0, 0, 0],
+              "tolerance": 25,
+              "debounceMs": 100
+            },
+            {
+              "name": "HPBar4",
+              "kind": "rect",
+              "x": 180,
+              "y": 370,
+              "width": 60,
+              "height": 8,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [255, 0, 0],
+              "tolerance": 15,
+              "debounceMs": 80
+            },
+            {
+              "name": "MPBar4",
+              "kind": "rect",
+              "x": 180,
+              "y": 385,
+              "width": 60,
+              "height": 8,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [0, 0, 255],
+              "tolerance": 15,
+              "debounceMs": 80
+            }
+          ],
+          "events": [
+            {
+              "when": "R4:edge-down",
+              "click": { "x": 500, "y": 700 },
+              "cooldownMs": 120,
+              "priority": 1
+            },
+            {
+              "when": "B4:edge-down",
+              "click": { "x": 620, "y": 740 },
+              "cooldownMs": 120,
+              "priority": 1
+            },
+            {
+              "when": "HPZone4:edge-down",
+              "click": { "x": 580, "y": 650 },
+              "cooldownMs": 200,
+              "priority": 2
+            },
+            {
+              "when": "MPZone4:edge-down",
+              "click": { "x": 640, "y": 650 },
+              "cooldownMs": 200,
+              "priority": 2
+            },
+            {
+              "when": "HPBar4:edge-falling",
+              "click": { "x": 580, "y": 650 },
+              "cooldownMs": 150,
+              "priority": 3
+            },
+            {
+              "when": "MPBar4:edge-falling",
+              "click": { "x": 640, "y": 650 },
+              "cooldownMs": 150,
+              "priority": 3
+            }
+          ],
+          "periodicClicks": [
+            {
+              "name": "Y",
+              "x": 540,
+              "y": 760,
+              "periodMs": 120,
+              "enabled": true
+            },
+            {
+              "name": "Extra1",
+              "x": 700,
+              "y": 820,
+              "periodMs": 250,
+              "enabled": false
+            },
+            {
+              "name": "Extra2",
+              "x": 720,
+              "y": 840,
+              "periodMs": 500,
+              "enabled": false
+            },
+            {
+              "name": "Extra3",
+              "x": 740,
+              "y": 860,
+              "periodSec": 1.0,
+              "enabled": false
+            },
+            {
+              "name": "Extra4",
+              "x": 760,
+              "y": 880,
+              "periodSec": 2.0,
+              "enabled": false
+            },
+            {
+              "name": "Extra5",
+              "x": 780,
+              "y": 900,
+              "periodSec": 5.0,
+              "enabled": false
+            }
+          ],
+          "limits": {
+            "maxBurstPerSec": 20,
+            "globalCooldownMs": 20
+          }
+        },
+        {
+          "titleRegex": "(Client5|MuMu.*5|RO.*5|Ragnarok.*5)",
+          "hwnd": null,
+          "processName": null,
+          "dpiAware": true,
+          "probes": [
+            {
+              "name": "R5",
+              "kind": "point",
+              "x": 320,
+              "y": 420,
+              "box": 5,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [220, 40, 40],
+              "toColor": [0, 0, 0],
+              "tolerance": 30,
+              "debounceMs": 30
+            },
+            {
+              "name": "B5",
+              "kind": "point",
+              "x": 360,
+              "y": 420,
+              "box": 5,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [30, 100, 220],
+              "toColor": [0, 0, 0],
+              "tolerance": 30,
+              "debounceMs": 30
+            },
+            {
+              "name": "HPZone5",
+              "kind": "rect",
+              "x": 200,
+              "y": 380,
+              "width": 40,
+              "height": 10,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [255, 0, 0],
+              "toColor": [0, 0, 0],
+              "tolerance": 25,
+              "debounceMs": 100
+            },
+            {
+              "name": "MPZone5",
+              "kind": "rect",
+              "x": 200,
+              "y": 395,
+              "width": 40,
+              "height": 10,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [0, 0, 255],
+              "toColor": [0, 0, 0],
+              "tolerance": 25,
+              "debounceMs": 100
+            },
+            {
+              "name": "HPBar5",
+              "kind": "rect",
+              "x": 180,
+              "y": 370,
+              "width": 60,
+              "height": 8,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [255, 0, 0],
+              "tolerance": 15,
+              "debounceMs": 80
+            },
+            {
+              "name": "MPBar5",
+              "kind": "rect",
+              "x": 180,
+              "y": 385,
+              "width": 60,
+              "height": 8,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [0, 0, 255],
+              "tolerance": 15,
+              "debounceMs": 80
+            }
+          ],
+          "events": [
+            {
+              "when": "R5:edge-down",
+              "click": { "x": 500, "y": 700 },
+              "cooldownMs": 120,
+              "priority": 1
+            },
+            {
+              "when": "B5:edge-down",
+              "click": { "x": 620, "y": 740 },
+              "cooldownMs": 120,
+              "priority": 1
+            },
+            {
+              "when": "HPZone5:edge-down",
+              "click": { "x": 580, "y": 650 },
+              "cooldownMs": 200,
+              "priority": 2
+            },
+            {
+              "when": "MPZone5:edge-down",
+              "click": { "x": 640, "y": 650 },
+              "cooldownMs": 200,
+              "priority": 2
+            },
+            {
+              "when": "HPBar5:edge-falling",
+              "click": { "x": 580, "y": 650 },
+              "cooldownMs": 150,
+              "priority": 3
+            },
+            {
+              "when": "MPBar5:edge-falling",
+              "click": { "x": 640, "y": 650 },
+              "cooldownMs": 150,
+              "priority": 3
+            }
+          ],
+          "periodicClicks": [
+            {
+              "name": "Y",
+              "x": 540,
+              "y": 760,
+              "periodMs": 120,
+              "enabled": true
+            },
+            {
+              "name": "Extra1",
+              "x": 700,
+              "y": 820,
+              "periodMs": 250,
+              "enabled": false
+            },
+            {
+              "name": "Extra2",
+              "x": 720,
+              "y": 840,
+              "periodMs": 500,
+              "enabled": false
+            },
+            {
+              "name": "Extra3",
+              "x": 740,
+              "y": 860,
+              "periodSec": 1.0,
+              "enabled": false
+            },
+            {
+              "name": "Extra4",
+              "x": 760,
+              "y": 880,
+              "periodSec": 2.0,
+              "enabled": false
+            },
+            {
+              "name": "Extra5",
+              "x": 780,
+              "y": 900,
+              "periodSec": 5.0,
+              "enabled": false
+            }
+          ],
+          "limits": {
+            "maxBurstPerSec": 20,
+            "globalCooldownMs": 20
+          }
+        },
+        {
+          "titleRegex": "(Client6|MuMu.*6|RO.*6|Ragnarok.*6)",
+          "hwnd": null,
+          "processName": null,
+          "dpiAware": true,
+          "probes": [
+            {
+              "name": "R6",
+              "kind": "point",
+              "x": 320,
+              "y": 420,
+              "box": 5,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [220, 40, 40],
+              "toColor": [0, 0, 0],
+              "tolerance": 30,
+              "debounceMs": 30
+            },
+            {
+              "name": "B6",
+              "kind": "point",
+              "x": 360,
+              "y": 420,
+              "box": 5,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [30, 100, 220],
+              "toColor": [0, 0, 0],
+              "tolerance": 30,
+              "debounceMs": 30
+            },
+            {
+              "name": "HPZone6",
+              "kind": "rect",
+              "x": 200,
+              "y": 380,
+              "width": 40,
+              "height": 10,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [255, 0, 0],
+              "toColor": [0, 0, 0],
+              "tolerance": 25,
+              "debounceMs": 100
+            },
+            {
+              "name": "MPZone6",
+              "kind": "rect",
+              "x": 200,
+              "y": 395,
+              "width": 40,
+              "height": 10,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [0, 0, 255],
+              "toColor": [0, 0, 0],
+              "tolerance": 25,
+              "debounceMs": 100
+            },
+            {
+              "name": "HPBar6",
+              "kind": "rect",
+              "x": 180,
+              "y": 370,
+              "width": 60,
+              "height": 8,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [255, 0, 0],
+              "tolerance": 15,
+              "debounceMs": 80
+            },
+            {
+              "name": "MPBar6",
+              "kind": "rect",
+              "x": 180,
+              "y": 385,
+              "width": 60,
+              "height": 8,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [0, 0, 255],
+              "tolerance": 15,
+              "debounceMs": 80
+            }
+          ],
+          "events": [
+            {
+              "when": "R6:edge-down",
+              "click": { "x": 500, "y": 700 },
+              "cooldownMs": 120,
+              "priority": 1
+            },
+            {
+              "when": "B6:edge-down",
+              "click": { "x": 620, "y": 740 },
+              "cooldownMs": 120,
+              "priority": 1
+            },
+            {
+              "when": "HPZone6:edge-down",
+              "click": { "x": 580, "y": 650 },
+              "cooldownMs": 200,
+              "priority": 2
+            },
+            {
+              "when": "MPZone6:edge-down",
+              "click": { "x": 640, "y": 650 },
+              "cooldownMs": 200,
+              "priority": 2
+            },
+            {
+              "when": "HPBar6:edge-falling",
+              "click": { "x": 580, "y": 650 },
+              "cooldownMs": 150,
+              "priority": 3
+            },
+            {
+              "when": "MPBar6:edge-falling",
+              "click": { "x": 640, "y": 650 },
+              "cooldownMs": 150,
+              "priority": 3
+            }
+          ],
+          "periodicClicks": [
+            {
+              "name": "Y",
+              "x": 540,
+              "y": 760,
+              "periodMs": 120,
+              "enabled": true
+            },
+            {
+              "name": "Extra1",
+              "x": 700,
+              "y": 820,
+              "periodMs": 250,
+              "enabled": false
+            },
+            {
+              "name": "Extra2",
+              "x": 720,
+              "y": 840,
+              "periodMs": 500,
+              "enabled": false
+            },
+            {
+              "name": "Extra3",
+              "x": 740,
+              "y": 860,
+              "periodSec": 1.0,
+              "enabled": false
+            },
+            {
+              "name": "Extra4",
+              "x": 760,
+              "y": 880,
+              "periodSec": 2.0,
+              "enabled": false
+            },
+            {
+              "name": "Extra5",
+              "x": 780,
+              "y": 900,
+              "periodSec": 5.0,
+              "enabled": false
+            }
+          ],
+          "limits": {
+            "maxBurstPerSec": 20,
+            "globalCooldownMs": 20
+          }
+        },
+        {
+          "titleRegex": "(Client7|MuMu.*7|RO.*7|Ragnarok.*7)",
+          "hwnd": null,
+          "processName": null,
+          "dpiAware": true,
+          "probes": [
+            {
+              "name": "R7",
+              "kind": "point",
+              "x": 320,
+              "y": 420,
+              "box": 5,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [220, 40, 40],
+              "toColor": [0, 0, 0],
+              "tolerance": 30,
+              "debounceMs": 30
+            },
+            {
+              "name": "B7",
+              "kind": "point",
+              "x": 360,
+              "y": 420,
+              "box": 5,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [30, 100, 220],
+              "toColor": [0, 0, 0],
+              "tolerance": 30,
+              "debounceMs": 30
+            },
+            {
+              "name": "HPZone7",
+              "kind": "rect",
+              "x": 200,
+              "y": 380,
+              "width": 40,
+              "height": 10,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [255, 0, 0],
+              "toColor": [0, 0, 0],
+              "tolerance": 25,
+              "debounceMs": 100
+            },
+            {
+              "name": "MPZone7",
+              "kind": "rect",
+              "x": 200,
+              "y": 395,
+              "width": 40,
+              "height": 10,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [0, 0, 255],
+              "toColor": [0, 0, 0],
+              "tolerance": 25,
+              "debounceMs": 100
+            },
+            {
+              "name": "HPBar7",
+              "kind": "rect",
+              "x": 180,
+              "y": 370,
+              "width": 60,
+              "height": 8,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [255, 0, 0],
+              "tolerance": 15,
+              "debounceMs": 80
+            },
+            {
+              "name": "MPBar7",
+              "kind": "rect",
+              "x": 180,
+              "y": 385,
+              "width": 60,
+              "height": 8,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [0, 0, 255],
+              "tolerance": 15,
+              "debounceMs": 80
+            }
+          ],
+          "events": [
+            {
+              "when": "R7:edge-down",
+              "click": { "x": 500, "y": 700 },
+              "cooldownMs": 120,
+              "priority": 1
+            },
+            {
+              "when": "B7:edge-down",
+              "click": { "x": 620, "y": 740 },
+              "cooldownMs": 120,
+              "priority": 1
+            },
+            {
+              "when": "HPZone7:edge-down",
+              "click": { "x": 580, "y": 650 },
+              "cooldownMs": 200,
+              "priority": 2
+            },
+            {
+              "when": "MPZone7:edge-down",
+              "click": { "x": 640, "y": 650 },
+              "cooldownMs": 200,
+              "priority": 2
+            },
+            {
+              "when": "HPBar7:edge-falling",
+              "click": { "x": 580, "y": 650 },
+              "cooldownMs": 150,
+              "priority": 3
+            },
+            {
+              "when": "MPBar7:edge-falling",
+              "click": { "x": 640, "y": 650 },
+              "cooldownMs": 150,
+              "priority": 3
+            }
+          ],
+          "periodicClicks": [
+            {
+              "name": "Y",
+              "x": 540,
+              "y": 760,
+              "periodMs": 120,
+              "enabled": true
+            },
+            {
+              "name": "Extra1",
+              "x": 700,
+              "y": 820,
+              "periodMs": 250,
+              "enabled": false
+            },
+            {
+              "name": "Extra2",
+              "x": 720,
+              "y": 840,
+              "periodMs": 500,
+              "enabled": false
+            },
+            {
+              "name": "Extra3",
+              "x": 740,
+              "y": 860,
+              "periodSec": 1.0,
+              "enabled": false
+            },
+            {
+              "name": "Extra4",
+              "x": 760,
+              "y": 880,
+              "periodSec": 2.0,
+              "enabled": false
+            },
+            {
+              "name": "Extra5",
+              "x": 780,
+              "y": 900,
+              "periodSec": 5.0,
+              "enabled": false
+            }
+          ],
+          "limits": {
+            "maxBurstPerSec": 20,
+            "globalCooldownMs": 20
+          }
+        },
+        {
+          "titleRegex": "(Client8|MuMu.*8|RO.*8|Ragnarok.*8)",
+          "hwnd": null,
+          "processName": null,
+          "dpiAware": true,
+          "probes": [
+            {
+              "name": "R8",
+              "kind": "point",
+              "x": 320,
+              "y": 420,
+              "box": 5,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [220, 40, 40],
+              "toColor": [0, 0, 0],
+              "tolerance": 30,
+              "debounceMs": 30
+            },
+            {
+              "name": "B8",
+              "kind": "point",
+              "x": 360,
+              "y": 420,
+              "box": 5,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [30, 100, 220],
+              "toColor": [0, 0, 0],
+              "tolerance": 30,
+              "debounceMs": 30
+            },
+            {
+              "name": "HPZone8",
+              "kind": "rect",
+              "x": 200,
+              "y": 380,
+              "width": 40,
+              "height": 10,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [255, 0, 0],
+              "toColor": [0, 0, 0],
+              "tolerance": 25,
+              "debounceMs": 100
+            },
+            {
+              "name": "MPZone8",
+              "kind": "rect",
+              "x": 200,
+              "y": 395,
+              "width": 40,
+              "height": 10,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [0, 0, 255],
+              "toColor": [0, 0, 0],
+              "tolerance": 25,
+              "debounceMs": 100
+            },
+            {
+              "name": "HPBar8",
+              "kind": "rect",
+              "x": 180,
+              "y": 370,
+              "width": 60,
+              "height": 8,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [255, 0, 0],
+              "tolerance": 15,
+              "debounceMs": 80
+            },
+            {
+              "name": "MPBar8",
+              "kind": "rect",
+              "x": 180,
+              "y": 385,
+              "width": 60,
+              "height": 8,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [0, 0, 255],
+              "tolerance": 15,
+              "debounceMs": 80
+            }
+          ],
+          "events": [
+            {
+              "when": "R8:edge-down",
+              "click": { "x": 500, "y": 700 },
+              "cooldownMs": 120,
+              "priority": 1
+            },
+            {
+              "when": "B8:edge-down",
+              "click": { "x": 620, "y": 740 },
+              "cooldownMs": 120,
+              "priority": 1
+            },
+            {
+              "when": "HPZone8:edge-down",
+              "click": { "x": 580, "y": 650 },
+              "cooldownMs": 200,
+              "priority": 2
+            },
+            {
+              "when": "MPZone8:edge-down",
+              "click": { "x": 640, "y": 650 },
+              "cooldownMs": 200,
+              "priority": 2
+            },
+            {
+              "when": "HPBar8:edge-falling",
+              "click": { "x": 580, "y": 650 },
+              "cooldownMs": 150,
+              "priority": 3
+            },
+            {
+              "when": "MPBar8:edge-falling",
+              "click": { "x": 640, "y": 650 },
+              "cooldownMs": 150,
+              "priority": 3
+            }
+          ],
+          "periodicClicks": [
+            {
+              "name": "Y",
+              "x": 540,
+              "y": 760,
+              "periodMs": 120,
+              "enabled": true
+            },
+            {
+              "name": "Extra1",
+              "x": 700,
+              "y": 820,
+              "periodMs": 250,
+              "enabled": false
+            },
+            {
+              "name": "Extra2",
+              "x": 720,
+              "y": 840,
+              "periodMs": 500,
+              "enabled": false
+            },
+            {
+              "name": "Extra3",
+              "x": 740,
+              "y": 860,
+              "periodSec": 1.0,
+              "enabled": false
+            },
+            {
+              "name": "Extra4",
+              "x": 760,
+              "y": 880,
+              "periodSec": 2.0,
+              "enabled": false
+            },
+            {
+              "name": "Extra5",
+              "x": 780,
+              "y": 900,
+              "periodSec": 5.0,
+              "enabled": false
+            }
+          ],
+          "limits": {
+            "maxBurstPerSec": 20,
+            "globalCooldownMs": 20
+          }
+        }
+      ],
+      "hotkeys": "Default"
+    }
+  },
+  "hotkeySets": {
+    "Default": {
+      "toggleOverlay": "Ctrl+~",
+      "lockWindow": "F2",
+      "toggleSnap": "F3",
+      "magnifierToggle": "F4",
+      "captureModeCycle": "F6",
+      "clickModeCycle": "F7",
+      "shapePoint": "P",
+      "shapeRect": "R",
+      "deleteShape": "Del",
+      "copyColorAtCursor": "Ctrl+Shift+C",
+      "saveConfig": "Ctrl+S",
+      "openConfig": "Ctrl+O",
+      "profileNext": "Ctrl+Alt+Right",
+      "profilePrev": "Ctrl+Alt+Left",
+      "panicStopAll": "Pause"
+    },
+    "Streamer": {
+      "toggleOverlay": "Alt+`",
+      "lockWindow": "Ctrl+F2",
+      "toggleSnap": "Ctrl+F3",
+      "magnifierToggle": "Ctrl+F4",
+      "captureModeCycle": "Ctrl+F6",
+      "clickModeCycle": "Ctrl+F7",
+      "shapePoint": "Ctrl+P",
+      "shapeRect": "Ctrl+R",
+      "deleteShape": "Ctrl+Del",
+      "copyColorAtCursor": "Ctrl+Alt+C",
+      "saveConfig": "Ctrl+Alt+S",
+      "openConfig": "Ctrl+Alt+O",
+      "profileNext": "Ctrl+Shift+Right",
+      "profilePrev": "Ctrl+Shift+Left",
+      "panicStopAll": "Ctrl+Break"
+    }
+  },
+  "activeHotkeys": "Default"
+}
