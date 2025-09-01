@@ -18,6 +18,9 @@ public partial class MainWindow : Window
     private readonly List<ClientCard> _clientCards = new();
     private readonly DispatcherTimer _updateTimer;
     private bool _isOverlayMode = false;
+    
+    // Public access to overlay canvas for client cards
+    public System.Windows.Controls.Canvas GetOverlayCanvas() => OverlayCanvas;
 
     public MainWindow()
     {
@@ -431,7 +434,13 @@ public partial class MainWindow : Window
         SetMultiMonitorBounds();
         
         OverlayCanvas.Visibility = Visibility.Visible;
-        StatusText.Text = "Overlay mode activated - ESC to exit";
+        StatusText.Text = "Overlay mode activated - ESC to exit, drag HP/MP shapes to adjust";
+        
+        // Show draggable HP/MP shapes for all client cards
+        foreach (var clientCard in _clientCards)
+        {
+            clientCard.ShowOverlayShapes();
+        }
     }
 
     private void OverlayMode_Unchecked(object sender, RoutedEventArgs e)
@@ -444,6 +453,12 @@ public partial class MainWindow : Window
         WindowState = WindowState.Normal;
         OverlayCanvas.Visibility = Visibility.Collapsed;
         StatusText.Text = "Control panel mode";
+        
+        // Hide draggable HP/MP shapes for all client cards
+        foreach (var clientCard in _clientCards)
+        {
+            clientCard.HideOverlayShapes();
+        }
     }
 
     private void PanicStop_Click(object sender, RoutedEventArgs e)

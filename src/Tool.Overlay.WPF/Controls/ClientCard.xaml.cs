@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using PixelAutomation.Tool.Overlay.WPF.Services;
@@ -15,7 +16,7 @@ public partial class ClientCard : UserControl
     public ClientViewModel ViewModel { get; set; }
     
     private CoordinatePicker? _coordinatePicker;
-    private bool _isRunning = false;
+    // private bool _isRunning = false; // Unused field removed
     private DispatcherTimer? _yClickTimer;
     private DispatcherTimer? _extra1Timer;
     private DispatcherTimer? _extra2Timer;
@@ -23,7 +24,22 @@ public partial class ClientCard : UserControl
     private DispatcherTimer? _monitoringTimer;
     private DispatcherTimer? _hpTriggerTimer;
     private DispatcherTimer? _mpTriggerTimer;
+    
+    // BabeBot Style Timers
+    private DispatcherTimer? _babeBotTimer;
     private FastColorSampler? _fastSampler;
+    private int _debugCounter = 0;
+    
+    // HP/MP Shape management
+    private System.Windows.Shapes.Ellipse? _hpShape;
+    private System.Windows.Shapes.Ellipse? _mpShape;
+    private System.Windows.Shapes.Rectangle? _hpPercentageShape;
+    private System.Windows.Shapes.Rectangle? _mpPercentageShape;
+    private bool _isDraggingHp = false;
+    private bool _isDraggingMp = false;
+    private bool _isDraggingHpPercentage = false;
+    private bool _isDraggingMpPercentage = false;
+    private System.Windows.Point _dragStartPoint;
 
     public ClientCard()
     {
@@ -32,6 +48,7 @@ public partial class ClientCard : UserControl
         DataContext = ViewModel;
         AttachTextBoxHandlers();
         _fastSampler = new FastColorSampler();
+        SetupBabeBotUI();
     }
     
     private void AttachTextBoxHandlers()
@@ -43,6 +60,32 @@ public partial class ClientCard : UserControl
         MpX.TextChanged += (s, e) => { if (int.TryParse(MpX.Text, out var v)) ViewModel.MpProbe.X = v; };
         MpY.TextChanged += (s, e) => { if (int.TryParse(MpY.Text, out var v)) ViewModel.MpProbe.Y = v; };
         MpTolerance.TextChanged += (s, e) => { if (int.TryParse(MpTolerance.Text, out var v)) ViewModel.MpProbe.Tolerance = v; };
+        
+        // Percentage-based HP/MP handlers
+        HpPercentageStartX.TextChanged += (s, e) => { if (int.TryParse(HpPercentageStartX.Text, out var v)) { ViewModel.HpPercentageProbe.StartX = v; UpdatePercentageMonitorPosition(); } };
+        HpPercentageEndX.TextChanged += (s, e) => { if (int.TryParse(HpPercentageEndX.Text, out var v)) { ViewModel.HpPercentageProbe.EndX = v; UpdatePercentageMonitorPosition(); } };
+        HpPercentageY.TextChanged += (s, e) => { if (int.TryParse(HpPercentageY.Text, out var v)) ViewModel.HpPercentageProbe.Y = v; };
+        HpPercentageThreshold.TextChanged += (s, e) => { if (double.TryParse(HpPercentageThreshold.Text, out var v)) ViewModel.HpPercentageProbe.MonitorPercentage = v; UpdatePercentageMonitorPosition(); };
+        HpPercentageTolerance.TextChanged += (s, e) => { if (int.TryParse(HpPercentageTolerance.Text, out var v)) ViewModel.HpPercentageProbe.Tolerance = v; };
+        
+        MpPercentageStartX.TextChanged += (s, e) => { if (int.TryParse(MpPercentageStartX.Text, out var v)) { ViewModel.MpPercentageProbe.StartX = v; UpdatePercentageMonitorPosition(); } };
+        MpPercentageEndX.TextChanged += (s, e) => { if (int.TryParse(MpPercentageEndX.Text, out var v)) { ViewModel.MpPercentageProbe.EndX = v; UpdatePercentageMonitorPosition(); } };
+        MpPercentageY.TextChanged += (s, e) => { if (int.TryParse(MpPercentageY.Text, out var v)) ViewModel.MpPercentageProbe.Y = v; };
+        MpPercentageThreshold.TextChanged += (s, e) => { if (double.TryParse(MpPercentageThreshold.Text, out var v)) ViewModel.MpPercentageProbe.MonitorPercentage = v; UpdatePercentageMonitorPosition(); };
+        MpPercentageTolerance.TextChanged += (s, e) => { if (int.TryParse(MpPercentageTolerance.Text, out var v)) ViewModel.MpPercentageProbe.Tolerance = v; };
+        
+        // Percentage monitoring enable/disable
+        PercentageMonitoringEnabled.Checked += (s, e) => { ViewModel.HpPercentageProbe.Enabled = true; ViewModel.MpPercentageProbe.Enabled = true; };
+        PercentageMonitoringEnabled.Unchecked += (s, e) => { ViewModel.HpPercentageProbe.Enabled = false; ViewModel.MpPercentageProbe.Enabled = false; };
+        
+        // Python-style potion coordinate handlers
+        PythonHpPotionX.TextChanged += (s, e) => { if (int.TryParse(PythonHpPotionX.Text, out var v)) ViewModel.PythonHpPotionClick.X = v; };
+        PythonHpPotionY.TextChanged += (s, e) => { if (int.TryParse(PythonHpPotionY.Text, out var v)) ViewModel.PythonHpPotionClick.Y = v; };
+        PythonHpPotionCooldown.TextChanged += (s, e) => { if (int.TryParse(PythonHpPotionCooldown.Text, out var v)) ViewModel.PythonHpPotionClick.CooldownMs = v; };
+        
+        PythonMpPotionX.TextChanged += (s, e) => { if (int.TryParse(PythonMpPotionX.Text, out var v)) ViewModel.PythonMpPotionClick.X = v; };
+        PythonMpPotionY.TextChanged += (s, e) => { if (int.TryParse(PythonMpPotionY.Text, out var v)) ViewModel.PythonMpPotionClick.Y = v; };
+        PythonMpPotionCooldown.TextChanged += (s, e) => { if (int.TryParse(PythonMpPotionCooldown.Text, out var v)) ViewModel.PythonMpPotionClick.CooldownMs = v; };
         
         // Trigger coordinate, cooldown and enable handlers
         HpTriggerX.TextChanged += (s, e) => { if (int.TryParse(HpTriggerX.Text, out var v)) ViewModel.HpTrigger.X = v; };
@@ -89,6 +132,83 @@ public partial class ClientCard : UserControl
         ViewModel.ClientName = clientName;
         ClientNameText.Text = clientName;
         UpdateUI();
+        
+        // Initialize draggable shapes when overlay mode is active
+        InitializeDraggableShapes();
+    }
+    
+    private void InitializeDraggableShapes()
+    {
+        // Create HP shape (red circle)
+        _hpShape = new System.Windows.Shapes.Ellipse
+        {
+            Width = 20,
+            Height = 20,
+            Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(128, 255, 0, 0)),
+            Stroke = new SolidColorBrush(System.Windows.Media.Colors.Red),
+            StrokeThickness = 2,
+            Cursor = System.Windows.Input.Cursors.SizeAll,
+            ToolTip = $"HP Monitor - Client {ClientId} (Drag to move)",
+            Visibility = Visibility.Collapsed
+        };
+        
+        // Create MP shape (blue circle)
+        _mpShape = new System.Windows.Shapes.Ellipse
+        {
+            Width = 20,
+            Height = 20,
+            Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(128, 0, 0, 255)),
+            Stroke = new SolidColorBrush(System.Windows.Media.Colors.Blue),
+            StrokeThickness = 2,
+            Cursor = System.Windows.Input.Cursors.SizeAll,
+            ToolTip = $"MP Monitor - Client {ClientId} (Drag to move)",
+            Visibility = Visibility.Collapsed
+        };
+        
+        // Create HP percentage bar shape (red rectangle)
+        _hpPercentageShape = new System.Windows.Shapes.Rectangle
+        {
+            Width = 150,
+            Height = 8,
+            Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(64, 255, 0, 0)),
+            Stroke = new SolidColorBrush(System.Windows.Media.Colors.Red),
+            StrokeThickness = 1,
+            StrokeDashArray = new DoubleCollection { 2, 2 },
+            Cursor = System.Windows.Input.Cursors.SizeAll,
+            ToolTip = $"HP Bar - Client {ClientId} (Drag to move, resize edges)",
+            Visibility = Visibility.Collapsed
+        };
+        
+        // Create MP percentage bar shape (blue rectangle)
+        _mpPercentageShape = new System.Windows.Shapes.Rectangle
+        {
+            Width = 150,
+            Height = 8,
+            Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(64, 0, 0, 255)),
+            Stroke = new SolidColorBrush(System.Windows.Media.Colors.Blue),
+            StrokeThickness = 1,
+            StrokeDashArray = new DoubleCollection { 2, 2 },
+            Cursor = System.Windows.Input.Cursors.SizeAll,
+            ToolTip = $"MP Bar - Client {ClientId} (Drag to move, resize edges)",
+            Visibility = Visibility.Collapsed
+        };
+        
+        // Add mouse event handlers
+        _hpShape.MouseLeftButtonDown += HpShape_MouseLeftButtonDown;
+        _hpShape.MouseMove += HpShape_MouseMove;
+        _hpShape.MouseLeftButtonUp += HpShape_MouseLeftButtonUp;
+        
+        _mpShape.MouseLeftButtonDown += MpShape_MouseLeftButtonDown;
+        _mpShape.MouseMove += MpShape_MouseMove;
+        _mpShape.MouseLeftButtonUp += MpShape_MouseLeftButtonUp;
+        
+        _hpPercentageShape.MouseLeftButtonDown += HpPercentageShape_MouseLeftButtonDown;
+        _hpPercentageShape.MouseMove += HpPercentageShape_MouseMove;
+        _hpPercentageShape.MouseLeftButtonUp += HpPercentageShape_MouseLeftButtonUp;
+        
+        _mpPercentageShape.MouseLeftButtonDown += MpPercentageShape_MouseLeftButtonDown;
+        _mpPercentageShape.MouseMove += MpPercentageShape_MouseMove;
+        _mpPercentageShape.MouseLeftButtonUp += MpPercentageShape_MouseLeftButtonUp;
     }
 
     private void SelectWindow_Click(object sender, RoutedEventArgs e)
@@ -273,7 +393,7 @@ public partial class ClientCard : UserControl
         });
     }
 
-    private void PickCoordinate(string title, Action<int, int> onPicked)
+    private async void PickCoordinate(string title, Action<int, int> onPicked)
     {
         if (ViewModel.TargetHwnd == IntPtr.Zero)
         {
@@ -282,12 +402,24 @@ public partial class ClientCard : UserControl
             return;
         }
 
-        _coordinatePicker = new CoordinatePicker(ViewModel.TargetHwnd, title);
-        _coordinatePicker.CoordinatePicked += (x, y) => onPicked(x, y);
-        _coordinatePicker.ShowDialog();
+        try
+        {
+            _coordinatePicker = new CoordinatePicker(ViewModel.TargetHwnd, title);
+            _coordinatePicker.CoordinatePicked += (x, y) => onPicked(x, y);
+            
+            // Use Show() instead of ShowDialog() to prevent UI freezing
+            _coordinatePicker.Show();
+            
+            // Optional: Add timeout to prevent indefinite waiting
+            await Task.Delay(100); // Small delay to ensure window is shown
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] Error opening coordinate picker: {ex.Message}");
+        }
     }
     
-    private void PickRectangle(string title, Action<int, int, int, int> onPicked)
+    private async void PickRectangle(string title, Action<int, int, int, int> onPicked)
     {
         if (ViewModel.TargetHwnd == IntPtr.Zero)
         {
@@ -296,9 +428,21 @@ public partial class ClientCard : UserControl
             return;
         }
 
-        var rectanglePicker = new RectanglePicker(ViewModel.TargetHwnd, title);
-        rectanglePicker.RectanglePicked += (x, y, w, h) => onPicked(x, y, w, h);
-        rectanglePicker.ShowDialog();
+        try
+        {
+            var rectanglePicker = new RectanglePicker(ViewModel.TargetHwnd, title);
+            rectanglePicker.RectanglePicked += (x, y, w, h) => onPicked(x, y, w, h);
+            
+            // Use Show() instead of ShowDialog() to prevent UI freezing
+            rectanglePicker.Show();
+            
+            // Small delay to ensure window is shown
+            await Task.Delay(100);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] Error opening rectangle picker: {ex.Message}");
+        }
     }
 
     private void UpdateHpColor(System.Drawing.Color color)
@@ -340,6 +484,768 @@ public partial class ClientCard : UserControl
         MpColorText.Text = $"{color.R},{color.G},{color.B}";
         Console.WriteLine($"[{ViewModel.ClientName}] MP reference synced: RGB({color.R},{color.G},{color.B})");
     }
+    
+    private void PickHpPercentageBar_Click(object sender, RoutedEventArgs e)
+    {
+        PickRectangle("HP Bar Area (Python Style)", (x, y, w, h) =>
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] HP Bar Selected: Raw coordinates ({x},{y}) size ({w}x{h})");
+            
+            HpPercentageStartX.Text = x.ToString();
+            HpPercentageEndX.Text = (x + w).ToString();
+            HpPercentageY.Text = y.ToString();
+            
+            ViewModel.HpPercentageProbe.StartX = x;
+            ViewModel.HpPercentageProbe.EndX = x + w;
+            ViewModel.HpPercentageProbe.Y = y;
+            
+            // OFFSET TEST: Try multiple offset combinations to find correct one
+            if (ViewModel.TargetHwnd != IntPtr.Zero)
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] 🔍 OFFSET TEST - Finding correct MuMu offset:");
+                Console.WriteLine($"[{ViewModel.ClientName}] Selected HP Bar: ({x},{y}) size ({w}x{h})");
+                
+                var testOffsets = new List<(int dx, int dy, string desc)>
+                {
+                    (0, 0, "NO_OFFSET"),
+                    (8, 50, "CURRENT_+8+50"),
+                    (-8, -50, "REVERSE_-8-50"),
+                    (16, 100, "DOUBLE_+16+100"),
+                    (-16, -100, "DOUBLE_NEG"),
+                    (8, 0, "ONLY_X+8"),
+                    (0, 50, "ONLY_Y+50")
+                };
+                
+                int middleX = x + w/2;
+                
+                Console.WriteLine($"[{ViewModel.ClientName}] Testing offset combinations at HP middle position ({middleX},{y}):");
+                
+                foreach (var (dx, dy, desc) in testOffsets)
+                {
+                    try
+                    {
+                        // Temporarily modify offset for this test
+                        var testColor = TestColorSampler.GetColorAtWithOffset(ViewModel.TargetHwnd, middleX, y, dx, dy);
+                        Console.WriteLine($"  {desc}: RGB({testColor.R},{testColor.G},{testColor.B})");
+                        
+                        // Check if it looks like HP color (reddish)
+                        bool looksLikeHP = testColor.R > 100 && testColor.R > testColor.G && testColor.R > testColor.B;
+                        if (looksLikeHP)
+                        {
+                            Console.WriteLine($"    ✅ POSSIBLE HP COLOR! (Red dominant)");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"  {desc}: ERROR - {ex.Message}");
+                    }
+                }
+                
+                // Use current offset for now
+                var middleColor = ColorSampler.GetColorAt(ViewModel.TargetHwnd, middleX, y);
+                ViewModel.HpPercentageProbe.ExpectedColor = middleColor;
+                HpPercentageColorDisplay.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(middleColor.R, middleColor.G, middleColor.B));
+                Console.WriteLine($"[{ViewModel.ClientName}] Current offset used: RGB({middleColor.R},{middleColor.G},{middleColor.B})");
+                
+                UpdatePercentageMonitorPosition();
+            }
+        });
+    }
+    
+    private void PickMpPercentageBar_Click(object sender, RoutedEventArgs e)
+    {
+        PickRectangle("MP Bar Area (Python Style)", (x, y, w, h) =>
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] MP Bar Selected: Raw coordinates ({x},{y}) size ({w}x{h})");
+            
+            MpPercentageStartX.Text = x.ToString();
+            MpPercentageEndX.Text = (x + w).ToString();
+            MpPercentageY.Text = y.ToString();
+            
+            ViewModel.MpPercentageProbe.StartX = x;
+            ViewModel.MpPercentageProbe.EndX = x + w;
+            ViewModel.MpPercentageProbe.Y = y;
+            
+            // TEST: Sample colors at selected coordinates to verify coordinate mapping
+            if (ViewModel.TargetHwnd != IntPtr.Zero)
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] COORDINATE VERIFICATION - Testing selected MP area:");
+                
+                // Test start, middle, end of selected area
+                var startColor = ColorSampler.GetColorAt(ViewModel.TargetHwnd, x, y);
+                var middleColor = ColorSampler.GetColorAt(ViewModel.TargetHwnd, x + w/2, y);
+                var endColor = ColorSampler.GetColorAt(ViewModel.TargetHwnd, x + w - 1, y);
+                
+                Console.WriteLine($"  SELECTED START ({x},{y}) = RGB({startColor.R},{startColor.G},{startColor.B})");
+                Console.WriteLine($"  SELECTED MIDDLE ({x + w/2},{y}) = RGB({middleColor.R},{middleColor.G},{middleColor.B})");
+                Console.WriteLine($"  SELECTED END ({x + w - 1},{y}) = RGB({endColor.R},{endColor.G},{endColor.B})");
+                
+                // For now, use middle color as expected (you can manually verify this is MP blue)
+                ViewModel.MpPercentageProbe.ExpectedColor = middleColor;
+                MpPercentageColorDisplay.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(middleColor.R, middleColor.G, middleColor.B));
+                Console.WriteLine($"[{ViewModel.ClientName}] MP Expected Color set to MIDDLE: RGB({middleColor.R},{middleColor.G},{middleColor.B})");
+                Console.WriteLine($"[{ViewModel.ClientName}] ❗ VERIFY: Is RGB({middleColor.R},{middleColor.G},{middleColor.B}) your MP bar color?");
+                
+                UpdatePercentageMonitorPosition();
+            }
+        });
+    }
+    
+    private void UpdatePercentageMonitorPosition()
+    {
+        try
+        {
+            var hpCalcX = ViewModel.HpPercentageProbe.CalculatedX;
+            var mpCalcX = ViewModel.MpPercentageProbe.CalculatedX;
+            
+            PercentageMonitorPosition.Text = $"HP: {hpCalcX} ({ViewModel.HpPercentageProbe.MonitorPercentage:F0}%) MP: {mpCalcX} ({ViewModel.MpPercentageProbe.MonitorPercentage:F0}%)";
+        }
+        catch
+        {
+            PercentageMonitorPosition.Text = "Error calculating position";
+        }
+    }
+    
+    private void PickPythonHpPotion_Click(object sender, RoutedEventArgs e)
+    {
+        PickCoordinate("Python-Style HP Potion Position", (x, y) =>
+        {
+            PythonHpPotionX.Text = x.ToString();
+            PythonHpPotionY.Text = y.ToString();
+            ViewModel.PythonHpPotionClick.X = x;
+            ViewModel.PythonHpPotionClick.Y = y;
+            Console.WriteLine($"[{ViewModel.ClientName}] Python HP Potion Click set to: ({x},{y})");
+        });
+    }
+    
+    private void PickPythonMpPotion_Click(object sender, RoutedEventArgs e)
+    {
+        PickCoordinate("Python-Style MP Potion Position", (x, y) =>
+        {
+            PythonMpPotionX.Text = x.ToString();
+            PythonMpPotionY.Text = y.ToString();
+            ViewModel.PythonMpPotionClick.X = x;
+            ViewModel.PythonMpPotionClick.Y = y;
+            Console.WriteLine($"[{ViewModel.ClientName}] Python MP Potion Click set to: ({x},{y})");
+        });
+    }
+    
+    private void FindHpMpBars_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.TargetHwnd == IntPtr.Zero)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] No window selected");
+            return;
+        }
+        
+        try
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] 🔍 AUTO-DETECTING HP/MP bars...");
+            
+            // HP Bar Detection
+            var hpBar = DetectBar(true); // true = HP (red)
+            if (hpBar != null)
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] ✅ HP BAR FOUND!");
+                Console.WriteLine($"[{ViewModel.ClientName}] HP Bar: StartX={hpBar.Value.startX}, EndX={hpBar.Value.endX}, Y={hpBar.Value.y}, Width={hpBar.Value.endX - hpBar.Value.startX}");
+                Console.WriteLine($"[{ViewModel.ClientName}] HP Color: RGB({hpBar.Value.color.R},{hpBar.Value.color.G},{hpBar.Value.color.B})");
+                
+                // Auto-fill HP coordinates on UI thread
+                Dispatcher.BeginInvoke(() =>
+                {
+                    HpPercentageStartX.Text = hpBar.Value.startX.ToString();
+                    HpPercentageEndX.Text = hpBar.Value.endX.ToString();
+                    HpPercentageY.Text = hpBar.Value.y.ToString();
+                    
+                    ViewModel.HpPercentageProbe.StartX = hpBar.Value.startX;
+                    ViewModel.HpPercentageProbe.EndX = hpBar.Value.endX;
+                    ViewModel.HpPercentageProbe.Y = hpBar.Value.y;
+                    ViewModel.HpPercentageProbe.ExpectedColor = hpBar.Value.color;
+                    
+                    HpPercentageColorDisplay.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(hpBar.Value.color.R, hpBar.Value.color.G, hpBar.Value.color.B));
+                    
+                    // Show visual HP bar indicator
+                    ShowBarIndicator("HP", hpBar.Value.startX, hpBar.Value.endX, hpBar.Value.y, System.Windows.Media.Colors.Red);
+                });
+            }
+            else
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] ❌ HP BAR NOT FOUND!");
+            }
+            
+            // MP Bar Detection - if HP found, search near it
+            int mpSearchStartY = 30;
+            int mpSearchEndY = 120;
+            if (hpBar != null)
+            {
+                // Search MP bar RIGHT BELOW HP bar (mini bars are very close)
+                mpSearchStartY = hpBar.Value.y + 1;  // Start right after HP
+                mpSearchEndY = hpBar.Value.y + 15;   // Only search 15 pixels below HP
+                Console.WriteLine($"[{ViewModel.ClientName}] HP found at Y={hpBar.Value.y}, searching MP in Y range {mpSearchStartY}-{mpSearchEndY} (right below HP)");
+            }
+            
+            var mpBar = DetectBarInRange(false, mpSearchStartY, mpSearchEndY); // false = MP (blue)
+            if (mpBar != null)
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] ✅ MP BAR FOUND!");
+                Console.WriteLine($"[{ViewModel.ClientName}] MP Bar: StartX={mpBar.Value.startX}, EndX={mpBar.Value.endX}, Y={mpBar.Value.y}, Width={mpBar.Value.endX - mpBar.Value.startX}");
+                Console.WriteLine($"[{ViewModel.ClientName}] MP Color: RGB({mpBar.Value.color.R},{mpBar.Value.color.G},{mpBar.Value.color.B})");
+                
+                // Auto-fill MP coordinates on UI thread
+                Dispatcher.BeginInvoke(() =>
+                {
+                    MpPercentageStartX.Text = mpBar.Value.startX.ToString();
+                    MpPercentageEndX.Text = mpBar.Value.endX.ToString();
+                    MpPercentageY.Text = mpBar.Value.y.ToString();
+                    
+                    ViewModel.MpPercentageProbe.StartX = mpBar.Value.startX;
+                    ViewModel.MpPercentageProbe.EndX = mpBar.Value.endX;
+                    ViewModel.MpPercentageProbe.Y = mpBar.Value.y;
+                    ViewModel.MpPercentageProbe.ExpectedColor = mpBar.Value.color;
+                    
+                    MpPercentageColorDisplay.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(mpBar.Value.color.R, mpBar.Value.color.G, mpBar.Value.color.B));
+                    
+                    // Show visual MP bar indicator
+                    ShowBarIndicator("MP", mpBar.Value.startX, mpBar.Value.endX, mpBar.Value.y, System.Windows.Media.Colors.Blue);
+                });
+            }
+            else
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] ❌ MP BAR NOT FOUND!");
+            }
+            
+            if (hpBar != null || mpBar != null)
+            {
+                UpdatePercentageMonitorPosition();
+                Console.WriteLine($"[{ViewModel.ClientName}] 🎯 AUTO-DETECTION COMPLETE! Coordinates filled automatically.");
+            }
+            
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] Auto-detection error: {ex.Message}");
+        }
+    }
+    
+    private (int startX, int endX, int y, System.Drawing.Color color)? DetectBar(bool isHP)
+    {
+        return DetectBarInRange(isHP, 30, 120);
+    }
+    
+    private (int startX, int endX, int y, System.Drawing.Color color)? DetectBarInRange(bool isHP, int startY, int endY)
+    {
+        string barType = isHP ? "HP" : "MP";
+        Console.WriteLine($"[{ViewModel.ClientName}] Detecting {barType} bar in Y range {startY}-{endY}...");
+        
+        // Search in specified Y range - MINI BARS (very thin)
+        for (int y = startY; y <= endY; y += 1) // Every 1 pixel vertically for thin bars
+        {
+            System.Drawing.Color? barColor = null;
+            int? startX = null;
+            int? endX = null;
+            int consecutivePixels = 0;
+            int minBarLength = isHP ? 20 : 10; // Even smaller minimum for MP mini bars
+            
+            // Scan horizontally to find bar
+            for (int x = 50; x <= 500; x++)
+            {
+                try
+                {
+                    var color = ColorSampler.GetColorAt(ViewModel.TargetHwnd, x, y);
+                    bool isBarColor = false;
+                    
+                    if (isHP)
+                    {
+                        // HP: RED bar detection for mini UI bars
+                        isBarColor = (color.R > 50 && color.R > color.G + 5 && color.R > color.B + 5) ||  // Any reddish
+                                   (color.R > color.G + 30 && color.R > color.B + 30) ||                // Red dominant 
+                                   (color.R > 80 && color.G < 80 && color.B < 80);                       // Bright red
+                    }
+                    else
+                    {
+                        // MP: ULTRA AGGRESSIVE detection - ANY non-black, non-white color that might be MP
+                        isBarColor = (color.B > 15) ||                                                   // ANY blue at all (lowered threshold)
+                                   (color.B > color.R && color.B > color.G) ||                          // Blue is highest
+                                   (color.B > color.R + 3) ||                                           // Even slightly more blue
+                                   (color.R < 120 && color.G < 120 && color.B > 15) ||                // Dark with some blue
+                                   (color.B > 25 && color.R < 100 && color.G < 100) ||                // Any bluish tone
+                                   // Purple/Violet MP bars
+                                   (color.B > 40 && color.R > 40 && color.G < 60) ||                   // Purple (R+B, low G)
+                                   (color.B + color.R > color.G + 40) ||                               // Purple/Magenta dominant
+                                   // Dark colored bars (any non-background color)
+                                   (color.R + color.G + color.B > 60 && color.R + color.G + color.B < 600) || // Any moderate color
+                                   // Specific MP bar colors that might appear
+                                   (color.B > 20 && Math.Abs(color.R - color.B) < 30) ||              // Blueish-purple
+                                   (color.G > 15 && color.B > 15 && color.R < 80);                     // Cyan-ish colors
+                    }
+                    
+                    // DEBUG: For MP detection, print every pixel in the critical area where MP should be
+                    if (!isHP && y <= startY + 5) // Only first 5 rows of MP search to avoid spam
+                    {
+                        if (x % 10 == 0) // Every 10th pixel horizontally
+                        {
+                            Console.WriteLine($"[{ViewModel.ClientName}] MP SCAN Y={y} X={x}: RGB({color.R},{color.G},{color.B}) -> {(isBarColor ? "✅MATCH" : "❌no")}");
+                        }
+                    }
+                    // DEBUG: Print every 20th pixel for HP to see what colors we're getting
+                    else if (isHP && x % 20 == 0 && (y % 5 == 0)) // More frequent sampling for HP
+                    {
+                        Console.WriteLine($"[{ViewModel.ClientName}] HP SCAN Y={y} X={x}: RGB({color.R},{color.G},{color.B}) -> {(isBarColor ? "✅MATCH" : "❌no")}");
+                    }
+                    
+                    if (isBarColor)
+                    {
+                        if (startX == null)
+                        {
+                            startX = x;
+                            barColor = color;
+                        }
+                        consecutivePixels++;
+                        endX = x;
+                    }
+                    else
+                    {
+                        // Check if we found a valid bar
+                        if (startX != null && consecutivePixels >= minBarLength)
+                        {
+                            Console.WriteLine($"[{ViewModel.ClientName}] {barType} bar found at Y={y}: X({startX}-{endX}) length={consecutivePixels} color=RGB({barColor?.R},{barColor?.G},{barColor?.B})");
+                            return (startX.Value, endX.Value, y, barColor.Value);
+                        }
+                        
+                        // Reset for next potential bar
+                        startX = null;
+                        endX = null;
+                        consecutivePixels = 0;
+                        barColor = null;
+                    }
+                }
+                catch { /* Skip errors */ }
+            }
+            
+            // Check if bar extends to edge
+            if (startX != null && consecutivePixels >= minBarLength)
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] {barType} bar found at Y={y}: X({startX}-{endX}) length={consecutivePixels} color=RGB({barColor?.R},{barColor?.G},{barColor?.B})");
+                return (startX.Value, endX.Value, y, barColor.Value);
+            }
+        }
+        
+        Console.WriteLine($"[{ViewModel.ClientName}] {barType} bar not found in search area");
+        return null;
+    }
+    
+    private void ShowBarIndicator(string barType, int startX, int endX, int y, System.Windows.Media.Color color)
+    {
+        if (ViewModel.TargetHwnd == IntPtr.Zero) return;
+        
+        try
+        {
+            // Create overlay window to show the bar location
+            var overlayWindow = new Window
+            {
+                Title = $"{ViewModel.ClientName} - {barType} Bar Indicator",
+                WindowStyle = WindowStyle.None,
+                AllowsTransparency = true,
+                Background = Brushes.Transparent,
+                Topmost = true,
+                ShowInTaskbar = false,
+                ResizeMode = ResizeMode.NoResize
+            };
+            
+            // Get target window position
+            User32.GetWindowRect(ViewModel.TargetHwnd, out var windowRect);
+            User32.GetClientRect(ViewModel.TargetHwnd, out var clientRect);
+            
+            // Calculate border/title offsets
+            int borderWidth = ((windowRect.right - windowRect.left) - (clientRect.right - clientRect.left)) / 2;
+            int titleHeight = ((windowRect.bottom - windowRect.top) - (clientRect.bottom - clientRect.top)) - borderWidth;
+            
+            // Position overlay window over the target window's client area
+            overlayWindow.Left = windowRect.left + borderWidth;
+            overlayWindow.Top = windowRect.top + titleHeight;
+            overlayWindow.Width = clientRect.right - clientRect.left;
+            overlayWindow.Height = clientRect.bottom - clientRect.top;
+            
+            // Create canvas for drawing
+            var canvas = new Canvas
+            {
+                Background = Brushes.Transparent
+            };
+            
+            // Create draggable and resizable bar indicator
+            var barContainer = new Border
+            {
+                Width = endX - startX,
+                Height = 12, // Make it taller for easier interaction
+                BorderBrush = new SolidColorBrush(color),
+                BorderThickness = new Thickness(2),
+                Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(80, color.R, color.G, color.B)),
+                Cursor = System.Windows.Input.Cursors.SizeAll,
+                ToolTip = $"Drag to move {barType} bar, drag edges to resize"
+            };
+            
+            // Position the container - EXPLICIT double cast
+            double initialLeft = (double)startX;
+            double initialTop = (double)(y - 4);
+            Canvas.SetLeft(barContainer, initialLeft);
+            Canvas.SetTop(barContainer, initialTop); // Center it around the detected Y
+            
+            // Add resize handles (left and right)
+            var leftHandle = new System.Windows.Shapes.Rectangle
+            {
+                Width = 8,
+                Height = 12,
+                Fill = new SolidColorBrush(color),
+                Cursor = System.Windows.Input.Cursors.SizeWE,
+                ToolTip = "Drag to resize left edge"
+            };
+            Canvas.SetLeft(leftHandle, startX - 4);
+            Canvas.SetTop(leftHandle, y - 4);
+            
+            var rightHandle = new System.Windows.Shapes.Rectangle
+            {
+                Width = 8,
+                Height = 12,
+                Fill = new SolidColorBrush(color),
+                Cursor = System.Windows.Input.Cursors.SizeWE,
+                ToolTip = "Drag to resize right edge"
+            };
+            Canvas.SetLeft(rightHandle, endX - 4);
+            Canvas.SetTop(rightHandle, y - 4);
+            
+            // Create label that updates with coordinates
+            var label = new TextBlock
+            {
+                Text = $"{barType} ({startX}-{endX},{y}) - Drag to adjust",
+                Foreground = new SolidColorBrush(color),
+                Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(180, 0, 0, 0)),
+                Padding = new Thickness(4),
+                FontSize = 11,
+                FontWeight = FontWeights.Bold
+            };
+            
+            Canvas.SetLeft(label, startX);
+            Canvas.SetTop(label, y - 30); // Above the bar
+            
+            // Add elements to canvas
+            canvas.Children.Add(barContainer);
+            canvas.Children.Add(leftHandle);
+            canvas.Children.Add(rightHandle);
+            canvas.Children.Add(label);
+            
+            // Variables for dragging - EXPLICIT initialization
+            bool isDragging = false;
+            bool isResizingLeft = false;
+            bool isResizingRight = false;
+            System.Windows.Point dragStartPos = new System.Windows.Point();
+            double originalLeft = initialLeft; // Use the same values we set
+            double originalTop = initialTop;
+            double originalWidth = (double)(endX - startX);
+            
+            // Helper function to update coordinates
+            Action updateCoordinates = () =>
+            {
+                var newStartX = (int)Canvas.GetLeft(barContainer);
+                var newEndX = newStartX + (int)barContainer.Width;
+                var newY = (int)(Canvas.GetTop(barContainer) + 4); // Adjust for container offset
+                
+                // Update label
+                label.Text = $"{barType} ({newStartX}-{newEndX},{newY}) - Drag to adjust";
+                Canvas.SetLeft(label, newStartX);
+                Canvas.SetTop(label, newY - 30);
+                
+                // Update handle positions
+                Canvas.SetLeft(leftHandle, newStartX - 4);
+                Canvas.SetTop(leftHandle, newY - 4);
+                Canvas.SetLeft(rightHandle, newEndX - 4);
+                Canvas.SetTop(rightHandle, newY - 4);
+                
+                // Update the actual probe coordinates if this is our client
+                Dispatcher.BeginInvoke(() =>
+                {
+                    if (barType == "HP")
+                    {
+                        HpPercentageStartX.Text = newStartX.ToString();
+                        HpPercentageEndX.Text = newEndX.ToString();
+                        HpPercentageY.Text = newY.ToString();
+                        ViewModel.HpPercentageProbe.StartX = newStartX;
+                        ViewModel.HpPercentageProbe.EndX = newEndX;
+                        ViewModel.HpPercentageProbe.Y = newY;
+                    }
+                    else if (barType == "MP")
+                    {
+                        MpPercentageStartX.Text = newStartX.ToString();
+                        MpPercentageEndX.Text = newEndX.ToString();
+                        MpPercentageY.Text = newY.ToString();
+                        ViewModel.MpPercentageProbe.StartX = newStartX;
+                        ViewModel.MpPercentageProbe.EndX = newEndX;
+                        ViewModel.MpPercentageProbe.Y = newY;
+                    }
+                });
+            };
+            
+            // Bar container drag events - SAFE NaN handling
+            barContainer.MouseLeftButtonDown += (s, e) =>
+            {
+                isDragging = true;
+                dragStartPos = e.GetPosition(canvas);
+                
+                // SAFE way to get current position
+                var currentLeft = Canvas.GetLeft(barContainer);
+                var currentTop = Canvas.GetTop(barContainer);
+                
+                // Handle NaN values
+                originalLeft = double.IsNaN(currentLeft) ? initialLeft : currentLeft;
+                originalTop = double.IsNaN(currentTop) ? initialTop : currentTop;
+                
+                barContainer.CaptureMouse();
+                Console.WriteLine($"[{ViewModel.ClientName}] Drag START at canvas pos: {dragStartPos}, bar pos: ({originalLeft},{originalTop})");
+                e.Handled = true;
+            };
+            
+            barContainer.MouseLeftButtonUp += (s, e) =>
+            {
+                if (isDragging)
+                {
+                    isDragging = false;
+                    barContainer.ReleaseMouseCapture();
+                    var currentPos = e.GetPosition(canvas);
+                    Console.WriteLine($"[{ViewModel.ClientName}] Drag END at canvas pos: {currentPos}");
+                }
+                e.Handled = true;
+            };
+            
+            // Canvas-level mouse move - SIMPLIFIED LOGIC
+            canvas.MouseMove += (s, e) =>
+            {
+                if (isDragging)
+                {
+                    var currentMousePos = e.GetPosition(canvas);
+                    
+                    // Calculate how much mouse moved since drag started
+                    var deltaX = currentMousePos.X - dragStartPos.X;
+                    var deltaY = currentMousePos.Y - dragStartPos.Y;
+                    
+                    // FIRST - Debug current values to see what's happening
+                    if ((int)currentMousePos.X % 10 == 0)
+                    {
+                        Console.WriteLine($"[{ViewModel.ClientName}] DEBUG VALUES: Mouse({currentMousePos.X:F0},{currentMousePos.Y:F0}) startPos({dragStartPos.X:F0},{dragStartPos.Y:F0}) delta({deltaX:F0},{deltaY:F0}) original({originalLeft:F0},{originalTop:F0})");
+                    }
+                    
+                    // SECOND - Calculate new position based on original position + delta  
+                    var newLeft = originalLeft + deltaX;
+                    var newTop = originalTop + deltaY;
+                    
+                    // THIRD - NaN safety check with detailed info
+                    if (double.IsNaN(newLeft) || double.IsNaN(newTop) || double.IsNaN(originalLeft) || double.IsNaN(originalTop))
+                    {
+                        Console.WriteLine($"[{ViewModel.ClientName}] ❌ NaN DETECTED! originalLeft={originalLeft}, originalTop={originalTop}, deltaX={deltaX}, deltaY={deltaY}, newLeft={newLeft}, newTop={newTop}");
+                        return; // Skip this frame
+                    }
+                    
+                    // FOURTH - Keep within canvas bounds
+                    newLeft = Math.Max(0, Math.Min(newLeft, canvas.Width - barContainer.Width));
+                    newTop = Math.Max(0, Math.Min(newTop, canvas.Height - barContainer.Height));
+                    
+                    // FIFTH - Set new position
+                    Canvas.SetLeft(barContainer, newLeft);
+                    Canvas.SetTop(barContainer, newTop);
+                    
+                    // SIXTH - Update coordinates in UI
+                    updateCoordinates();
+                    
+                    // FINAL - Success debug output
+                    if ((int)currentMousePos.X % 10 == 0)
+                    {
+                        Console.WriteLine($"[{ViewModel.ClientName}] ✅ SUCCESS: Bar moved to ({newLeft:F0},{newTop:F0})");
+                    }
+                }
+                else if (isResizingLeft)
+                {
+                    var currentMousePos = e.GetPosition(canvas);
+                    var deltaX = currentMousePos.X - dragStartPos.X;
+                    
+                    var newLeft = originalLeft + deltaX;
+                    var newWidth = originalWidth - deltaX;
+                    
+                    if (newWidth >= 20 && newLeft >= 0)
+                    {
+                        Canvas.SetLeft(barContainer, newLeft);
+                        barContainer.Width = newWidth;
+                        updateCoordinates();
+                    }
+                }
+                else if (isResizingRight)
+                {
+                    var currentMousePos = e.GetPosition(canvas);
+                    var deltaX = currentMousePos.X - dragStartPos.X;
+                    
+                    var newWidth = originalWidth + deltaX;
+                    var maxWidth = canvas.Width - originalLeft;
+                    
+                    if (newWidth >= 20 && newWidth <= maxWidth)
+                    {
+                        barContainer.Width = newWidth;
+                        updateCoordinates();
+                    }
+                }
+            };
+            
+            // Left handle resize events - NaN SAFE
+            leftHandle.MouseLeftButtonDown += (s, e) =>
+            {
+                isResizingLeft = true;
+                dragStartPos = e.GetPosition(canvas);
+                
+                var currentLeft = Canvas.GetLeft(barContainer);
+                originalLeft = double.IsNaN(currentLeft) ? initialLeft : currentLeft;
+                originalWidth = barContainer.Width;
+                
+                leftHandle.CaptureMouse();
+                Console.WriteLine($"[{ViewModel.ClientName}] LEFT RESIZE started - originalLeft={originalLeft}, originalWidth={originalWidth}");
+                e.Handled = true;
+            };
+            
+            leftHandle.MouseLeftButtonUp += (s, e) =>
+            {
+                if (isResizingLeft)
+                {
+                    isResizingLeft = false;
+                    leftHandle.ReleaseMouseCapture();
+                    Console.WriteLine($"[{ViewModel.ClientName}] LEFT RESIZE ended");
+                }
+                e.Handled = true;
+            };
+            
+            // Right handle resize events - NaN SAFE
+            rightHandle.MouseLeftButtonDown += (s, e) =>
+            {
+                isResizingRight = true;
+                dragStartPos = e.GetPosition(canvas);
+                
+                var currentLeft = Canvas.GetLeft(barContainer);
+                originalLeft = double.IsNaN(currentLeft) ? initialLeft : currentLeft;
+                originalWidth = barContainer.Width;
+                
+                rightHandle.CaptureMouse();
+                Console.WriteLine($"[{ViewModel.ClientName}] RIGHT RESIZE started - originalLeft={originalLeft}, originalWidth={originalWidth}");
+                e.Handled = true;
+            };
+            
+            rightHandle.MouseLeftButtonUp += (s, e) =>
+            {
+                if (isResizingRight)
+                {
+                    isResizingRight = false;
+                    rightHandle.ReleaseMouseCapture();
+                    Console.WriteLine($"[{ViewModel.ClientName}] RIGHT RESIZE ended");
+                }
+                e.Handled = true;
+            };
+            
+            overlayWindow.Content = canvas;
+            
+            overlayWindow.Show();
+            
+            // Auto-close after 30 seconds (more time to position)
+            var timer = new System.Windows.Threading.DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(30)
+            };
+            timer.Tick += (s, e) =>
+            {
+                timer.Stop();
+                overlayWindow.Close();
+            };
+            timer.Start();
+            
+            // Close controls
+            overlayWindow.Focusable = true; // Enable keyboard focus
+            overlayWindow.KeyDown += (s, e) =>
+            {
+                if (e.Key == Key.Escape)
+                {
+                    overlayWindow.Close();
+                }
+            };
+            
+            // Double-click label to close
+            label.MouseLeftButtonDown += (s, e) =>
+            {
+                if (e.ClickCount == 2)
+                {
+                    overlayWindow.Close();
+                }
+            };
+            
+            // Set focus to enable keyboard input
+            overlayWindow.Activated += (s, e) => overlayWindow.Focus();
+            
+            Console.WriteLine($"[{ViewModel.ClientName}] 🎯 {barType} bar indicator shown - INTERACTIVE CONTROLS:");
+            Console.WriteLine($"  • DRAG the bar to move position");
+            Console.WriteLine($"  • DRAG LEFT/RIGHT edges to resize");  
+            Console.WriteLine($"  • DOUBLE-CLICK label or press ESC to close");
+            Console.WriteLine($"  • Coordinates auto-update in UI as you adjust");
+            Console.WriteLine($"  • Auto-closes in 30 seconds");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] Error showing {barType} indicator: {ex.Message}");
+        }
+    }
+    
+    private void CaptureCurrentColors_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.TargetHwnd == IntPtr.Zero)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] No window selected for color capture");
+            return;
+        }
+        
+        try
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] === COLOR CAPTURE DEBUG ===");
+            Console.WriteLine($"[{ViewModel.ClientName}] HP Bar: StartX={ViewModel.HpPercentageProbe.StartX} EndX={ViewModel.HpPercentageProbe.EndX} Y={ViewModel.HpPercentageProbe.Y} Threshold={ViewModel.HpPercentageProbe.MonitorPercentage}%");
+            Console.WriteLine($"[{ViewModel.ClientName}] MP Bar: StartX={ViewModel.MpPercentageProbe.StartX} EndX={ViewModel.MpPercentageProbe.EndX} Y={ViewModel.MpPercentageProbe.Y} Threshold={ViewModel.MpPercentageProbe.MonitorPercentage}%");
+            
+            // Capture current HP color at calculated position
+            var hpX = ViewModel.HpPercentageProbe.CalculatedX;
+            var hpY = ViewModel.HpPercentageProbe.Y;
+            Console.WriteLine($"[{ViewModel.ClientName}] HP Monitor Position: X={hpX} (calculated from {ViewModel.HpPercentageProbe.MonitorPercentage}%)");
+            
+            var hpColor = ColorSampler.GetColorAt(ViewModel.TargetHwnd, hpX, hpY);
+            
+            // Capture current MP color at calculated position  
+            var mpX = ViewModel.MpPercentageProbe.CalculatedX;
+            var mpY = ViewModel.MpPercentageProbe.Y;
+            Console.WriteLine($"[{ViewModel.ClientName}] MP Monitor Position: X={mpX} (calculated from {ViewModel.MpPercentageProbe.MonitorPercentage}%)");
+            
+            var mpColor = ColorSampler.GetColorAt(ViewModel.TargetHwnd, mpX, mpY);
+            
+            // Quick verification - just check center pixel
+            // (Detailed sampling removed to reduce log spam)
+            
+            // Update expected colors with current colors
+            ViewModel.HpPercentageProbe.ExpectedColor = hpColor;
+            ViewModel.MpPercentageProbe.ExpectedColor = mpColor;
+            
+            // Update UI displays
+            HpPercentageColorDisplay.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(hpColor.R, hpColor.G, hpColor.B));
+            MpPercentageColorDisplay.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(mpColor.R, mpColor.G, mpColor.B));
+            
+            Console.WriteLine($"[{ViewModel.ClientName}] === COLORS CAPTURED ===");
+            Console.WriteLine($"[{ViewModel.ClientName}] HP Expected Color: RGB({hpColor.R},{hpColor.G},{hpColor.B}) at ({hpX},{hpY})");
+            Console.WriteLine($"[{ViewModel.ClientName}] MP Expected Color: RGB({mpColor.R},{mpColor.G},{mpColor.B}) at ({mpX},{mpY})");
+            
+            // Reset triggered states
+            ViewModel.HpPercentageProbe.IsTriggered = false;
+            ViewModel.MpPercentageProbe.IsTriggered = false;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] Color capture error: {ex.Message}");
+        }
+    }
 
     private void StartClient_Click(object sender, RoutedEventArgs e)
     {
@@ -350,7 +1256,7 @@ public partial class ClientCard : UserControl
             return;
         }
 
-        _isRunning = true;
+        // _isRunning = true; // Removed - using ViewModel.IsRunning instead
         ViewModel.IsRunning = true;
         StartButton.IsEnabled = false;
         StopButton.IsEnabled = true;
@@ -367,7 +1273,7 @@ public partial class ClientCard : UserControl
 
     private void StopClient_Click(object sender, RoutedEventArgs e)
     {
-        _isRunning = false;
+        // _isRunning = false; // Removed - using ViewModel.IsRunning instead
         ViewModel.IsRunning = false;
         StartButton.IsEnabled = true;
         StopButton.IsEnabled = false;
@@ -514,6 +1420,40 @@ public partial class ClientCard : UserControl
         Extra3Y.Text = ViewModel.Extra3Click.Y.ToString();
         Extra3Period.Text = ViewModel.Extra3Click.PeriodMs.ToString();
         Extra3Enabled.IsChecked = ViewModel.Extra3Click.Enabled;
+        
+        // Update percentage probe UI
+        HpPercentageStartX.Text = ViewModel.HpPercentageProbe.StartX.ToString();
+        HpPercentageEndX.Text = ViewModel.HpPercentageProbe.EndX.ToString();
+        HpPercentageY.Text = ViewModel.HpPercentageProbe.Y.ToString();
+        HpPercentageThreshold.Text = ViewModel.HpPercentageProbe.MonitorPercentage.ToString();
+        HpPercentageTolerance.Text = ViewModel.HpPercentageProbe.Tolerance.ToString();
+        HpPercentageColorDisplay.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(
+            ViewModel.HpPercentageProbe.ExpectedColor.R,
+            ViewModel.HpPercentageProbe.ExpectedColor.G,
+            ViewModel.HpPercentageProbe.ExpectedColor.B));
+            
+        MpPercentageStartX.Text = ViewModel.MpPercentageProbe.StartX.ToString();
+        MpPercentageEndX.Text = ViewModel.MpPercentageProbe.EndX.ToString();
+        MpPercentageY.Text = ViewModel.MpPercentageProbe.Y.ToString();
+        MpPercentageThreshold.Text = ViewModel.MpPercentageProbe.MonitorPercentage.ToString();
+        MpPercentageTolerance.Text = ViewModel.MpPercentageProbe.Tolerance.ToString();
+        MpPercentageColorDisplay.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(
+            ViewModel.MpPercentageProbe.ExpectedColor.R,
+            ViewModel.MpPercentageProbe.ExpectedColor.G,
+            ViewModel.MpPercentageProbe.ExpectedColor.B));
+            
+        PercentageMonitoringEnabled.IsChecked = ViewModel.HpPercentageProbe.Enabled || ViewModel.MpPercentageProbe.Enabled;
+        
+        // Update Python-style potion coordinates UI
+        PythonHpPotionX.Text = ViewModel.PythonHpPotionClick.X.ToString();
+        PythonHpPotionY.Text = ViewModel.PythonHpPotionClick.Y.ToString();
+        PythonHpPotionCooldown.Text = ViewModel.PythonHpPotionClick.CooldownMs.ToString();
+        
+        PythonMpPotionX.Text = ViewModel.PythonMpPotionClick.X.ToString();
+        PythonMpPotionY.Text = ViewModel.PythonMpPotionClick.Y.ToString();
+        PythonMpPotionCooldown.Text = ViewModel.PythonMpPotionClick.CooldownMs.ToString();
+        
+        UpdatePercentageMonitorPosition();
     }
 
     public void UpdateStats(double fps, long clicks, long triggers)
@@ -620,6 +1560,14 @@ public partial class ClientCard : UserControl
             _extra3Timer.Stop();
             _extra3Timer = null;
         }
+        
+        // Stop BabeBot timer
+        if (_babeBotTimer != null)
+        {
+            _babeBotTimer.Stop();
+            _babeBotTimer = null;
+        }
+        
         Console.WriteLine($"[{ViewModel.ClientName}] All periodic timers STOPPED and disposed");
     }
     
@@ -627,8 +1575,8 @@ public partial class ClientCard : UserControl
     {
         StopMonitoring();
         
-        // Only start monitoring if HP or MP triggers are enabled
-        if (ViewModel.HpTrigger.Enabled || ViewModel.MpTrigger.Enabled)
+        // Only start monitoring if HP, MP triggers, or percentage monitoring are enabled
+        if (ViewModel.HpTrigger.Enabled || ViewModel.MpTrigger.Enabled || ViewModel.HpPercentageProbe.Enabled || ViewModel.MpPercentageProbe.Enabled)
         {
             // Real-time monitoring for HP/MP changes
             _monitoringTimer = new DispatcherTimer
@@ -741,9 +1689,12 @@ public partial class ClientCard : UserControl
                     Console.WriteLine($"[{ViewModel.ClientName}] TRIGGERED: HP={ViewModel.HpTrigger.IsTriggered} MP={ViewModel.MpTrigger.IsTriggered}");
                 }
                 
-                // Trigger checks background'da yap
+                // Standard HP/MP trigger checks
                 CheckHpTriggerByPercentage(hpPercentage);
                 CheckMpTriggerByPercentage(mpPercentage);
+                
+                // Python-style percentage monitoring 
+                CheckPercentageBasedTriggers();
             }
             catch (Exception ex)
             {
@@ -827,12 +1778,19 @@ public partial class ClientCard : UserControl
         };
         _hpTriggerTimer.Tick += (s, e) =>
         {
+            Console.WriteLine($"[{ViewModel.ClientName}] HP TIMER TICK - KeepClicking={ViewModel.HpTrigger.KeepClicking}, Coords=({ViewModel.HpTrigger.X},{ViewModel.HpTrigger.Y})");
+            
             if (ViewModel.HpTrigger.KeepClicking)
             {
                 Console.WriteLine($"[{ViewModel.ClientName}] HP TRIGGER CLICK at ({ViewModel.HpTrigger.X},{ViewModel.HpTrigger.Y})");
                 PerformBackgroundClick(ViewModel.HpTrigger.X, ViewModel.HpTrigger.Y, "HP_TRIGGER");
                 ViewModel.HpTrigger.ExecutionCount++;
                 ViewModel.TriggerCount++;
+            }
+            else
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] HP TIMER: KeepClicking is FALSE - stopping timer");
+                StopHpTriggerClicking();
             }
         };
         _hpTriggerTimer.Start();
@@ -854,12 +1812,19 @@ public partial class ClientCard : UserControl
         };
         _mpTriggerTimer.Tick += (s, e) =>
         {
+            Console.WriteLine($"[{ViewModel.ClientName}] MP TIMER TICK - KeepClicking={ViewModel.MpTrigger.KeepClicking}, Coords=({ViewModel.MpTrigger.X},{ViewModel.MpTrigger.Y})");
+            
             if (ViewModel.MpTrigger.KeepClicking)
             {
                 Console.WriteLine($"[{ViewModel.ClientName}] MP TRIGGER CLICK at ({ViewModel.MpTrigger.X},{ViewModel.MpTrigger.Y})");
                 PerformBackgroundClick(ViewModel.MpTrigger.X, ViewModel.MpTrigger.Y, "MP_TRIGGER");
                 ViewModel.MpTrigger.ExecutionCount++;
                 ViewModel.TriggerCount++;
+            }
+            else
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] MP TIMER: KeepClicking is FALSE - stopping timer");
+                StopMpTriggerClicking();
             }
         };
         _mpTriggerTimer.Start();
@@ -955,6 +1920,165 @@ public partial class ClientCard : UserControl
     {
         MpColorDisplay.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(color.R, color.G, color.B));
         MpColorText.Text = $"{color.R},{color.G},{color.B}";
+    }
+    
+    private void CheckPercentageBasedTriggers()
+    {
+        if (ViewModel.TargetHwnd == IntPtr.Zero) return;
+        
+        try
+        {
+            // Check HP percentage probe
+            if (ViewModel.HpPercentageProbe.Enabled)
+            {
+                var hpX = ViewModel.HpPercentageProbe.CalculatedX;
+                var hpY = ViewModel.HpPercentageProbe.Y;
+                
+                var currentColor = ColorSampler.GetColorAt(ViewModel.TargetHwnd, hpX, hpY);
+                var distance = ColorSampler.CalculateColorDistance(currentColor, ViewModel.HpPercentageProbe.ExpectedColor);
+                
+                // Python logic: if pixel_color != expected_color then trigger
+                bool hpColorChanged = distance > ViewModel.HpPercentageProbe.Tolerance;
+                
+                // Update current color in ViewModel for real-time tracking
+                ViewModel.HpPercentageProbe.CurrentColor = currentColor;
+                
+                // Update UI with real-time color and status
+                Dispatcher.BeginInvoke(() =>
+                {
+                    // Update current color display
+                    HpCurrentColorDisplay.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(currentColor.R, currentColor.G, currentColor.B));
+                    HpCurrentColorText.Text = $"{currentColor.R},{currentColor.G},{currentColor.B}";
+                    
+                    if (hpColorChanged)
+                    {
+                        HpPercentageStatus.Text = $"LOW ({distance:F1})";
+                        HpPercentageStatus.Foreground = new SolidColorBrush(Colors.Red);
+                    }
+                    else
+                    {
+                        HpPercentageStatus.Text = $"OK ({distance:F1})";
+                        HpPercentageStatus.Foreground = new SolidColorBrush(Colors.LimeGreen);
+                    }
+                    
+                    // Debug info every 200 cycles (roughly every 10 seconds) and only when interesting
+                    if (_debugCounter % 200 == 0 && (hpColorChanged || distance > 50))
+                    {
+                        Console.WriteLine($"[{ViewModel.ClientName}] HP-DEBUG: Current=RGB({currentColor.R},{currentColor.G},{currentColor.B}) Distance={distance:F1} Triggered={hpColorChanged}");
+                    }
+                });
+                
+                // Trigger logic with cooldown check
+                if (hpColorChanged && !ViewModel.HpPercentageProbe.IsTriggered && ViewModel.PythonHpPotionClick.Enabled)
+                {
+                    var now = DateTime.UtcNow;
+                    if ((now - ViewModel.PythonHpPotionClick.LastExecution).TotalMilliseconds >= ViewModel.PythonHpPotionClick.CooldownMs)
+                    {
+                        ViewModel.HpPercentageProbe.IsTriggered = true;
+                        ViewModel.PythonHpPotionClick.LastExecution = now;
+                        Console.WriteLine($"[{ViewModel.ClientName}] PYTHON-HP: Color changed at {hpX},{hpY} (threshold {ViewModel.HpPercentageProbe.MonitorPercentage}%) - RGB({currentColor.R},{currentColor.G},{currentColor.B}) distance={distance:F1}");
+                        
+                        // Trigger Python-style HP potion click
+                        if (ViewModel.PythonHpPotionClick.X > 0 && ViewModel.PythonHpPotionClick.Y > 0)
+                        {
+                            Console.WriteLine($"[{ViewModel.ClientName}] PYTHON-HP: Triggering potion click at ({ViewModel.PythonHpPotionClick.X},{ViewModel.PythonHpPotionClick.Y}) cooldown={ViewModel.PythonHpPotionClick.CooldownMs}ms");
+                            PerformBackgroundClick(ViewModel.PythonHpPotionClick.X, ViewModel.PythonHpPotionClick.Y, "PYTHON_HP_TRIGGER");
+                            ViewModel.TriggerCount++;
+                            ViewModel.PythonHpPotionClick.ExecutionCount++;
+                        }
+                    }
+                    else
+                    {
+                        var remainingCooldown = ViewModel.PythonHpPotionClick.CooldownMs - (now - ViewModel.PythonHpPotionClick.LastExecution).TotalMilliseconds;
+                        Console.WriteLine($"[{ViewModel.ClientName}] PYTHON-HP: On cooldown, {remainingCooldown:F0}ms remaining");
+                    }
+                }
+                else if (!hpColorChanged && ViewModel.HpPercentageProbe.IsTriggered)
+                {
+                    ViewModel.HpPercentageProbe.IsTriggered = false;
+                    Console.WriteLine($"[{ViewModel.ClientName}] PYTHON-HP: Color restored at {hpX},{hpY}");
+                }
+            }
+            
+            // Check MP percentage probe
+            if (ViewModel.MpPercentageProbe.Enabled)
+            {
+                var mpX = ViewModel.MpPercentageProbe.CalculatedX;
+                var mpY = ViewModel.MpPercentageProbe.Y;
+                
+                var currentColor = ColorSampler.GetColorAt(ViewModel.TargetHwnd, mpX, mpY);
+                var distance = ColorSampler.CalculateColorDistance(currentColor, ViewModel.MpPercentageProbe.ExpectedColor);
+                
+                // Python logic: if pixel_color != expected_color then trigger
+                bool mpColorChanged = distance > ViewModel.MpPercentageProbe.Tolerance;
+                
+                // Update current color in ViewModel for real-time tracking
+                ViewModel.MpPercentageProbe.CurrentColor = currentColor;
+                
+                // Update UI with real-time color and status
+                Dispatcher.BeginInvoke(() =>
+                {
+                    // Update current color display
+                    MpCurrentColorDisplay.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(currentColor.R, currentColor.G, currentColor.B));
+                    MpCurrentColorText.Text = $"{currentColor.R},{currentColor.G},{currentColor.B}";
+                    
+                    if (mpColorChanged)
+                    {
+                        MpPercentageStatus.Text = $"LOW ({distance:F1})";
+                        MpPercentageStatus.Foreground = new SolidColorBrush(Colors.Red);
+                    }
+                    else
+                    {
+                        MpPercentageStatus.Text = $"OK ({distance:F1})";
+                        MpPercentageStatus.Foreground = new SolidColorBrush(Colors.CornflowerBlue);
+                    }
+                    
+                    // Debug info every 200 cycles (roughly every 10 seconds) and only when interesting
+                    if (_debugCounter % 200 == 0 && (mpColorChanged || distance > 50))
+                    {
+                        Console.WriteLine($"[{ViewModel.ClientName}] MP-DEBUG: Current=RGB({currentColor.R},{currentColor.G},{currentColor.B}) Distance={distance:F1} Triggered={mpColorChanged}");
+                    }
+                });
+                
+                // Trigger logic with cooldown check
+                if (mpColorChanged && !ViewModel.MpPercentageProbe.IsTriggered && ViewModel.PythonMpPotionClick.Enabled)
+                {
+                    var now = DateTime.UtcNow;
+                    if ((now - ViewModel.PythonMpPotionClick.LastExecution).TotalMilliseconds >= ViewModel.PythonMpPotionClick.CooldownMs)
+                    {
+                        ViewModel.MpPercentageProbe.IsTriggered = true;
+                        ViewModel.PythonMpPotionClick.LastExecution = now;
+                        Console.WriteLine($"[{ViewModel.ClientName}] PYTHON-MP: Color changed at {mpX},{mpY} (threshold {ViewModel.MpPercentageProbe.MonitorPercentage}%) - RGB({currentColor.R},{currentColor.G},{currentColor.B}) distance={distance:F1}");
+                        
+                        // Trigger Python-style MP potion click
+                        if (ViewModel.PythonMpPotionClick.X > 0 && ViewModel.PythonMpPotionClick.Y > 0)
+                        {
+                            Console.WriteLine($"[{ViewModel.ClientName}] PYTHON-MP: Triggering potion click at ({ViewModel.PythonMpPotionClick.X},{ViewModel.PythonMpPotionClick.Y}) cooldown={ViewModel.PythonMpPotionClick.CooldownMs}ms");
+                            PerformBackgroundClick(ViewModel.PythonMpPotionClick.X, ViewModel.PythonMpPotionClick.Y, "PYTHON_MP_TRIGGER");
+                            ViewModel.TriggerCount++;
+                            ViewModel.PythonMpPotionClick.ExecutionCount++;
+                        }
+                    }
+                    else
+                    {
+                        var remainingCooldown = ViewModel.PythonMpPotionClick.CooldownMs - (now - ViewModel.PythonMpPotionClick.LastExecution).TotalMilliseconds;
+                        Console.WriteLine($"[{ViewModel.ClientName}] PYTHON-MP: On cooldown, {remainingCooldown:F0}ms remaining");
+                    }
+                }
+                else if (!mpColorChanged && ViewModel.MpPercentageProbe.IsTriggered)
+                {
+                    ViewModel.MpPercentageProbe.IsTriggered = false;
+                    Console.WriteLine($"[{ViewModel.ClientName}] PYTHON-MP: Color restored at {mpX},{mpY}");
+                }
+            }
+            
+            // Increment debug counter
+            _debugCounter++;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] Percentage monitoring error: {ex.Message}");
+        }
     }
     
     private void PerformClick(int x, int y, string channel)
@@ -1290,7 +2414,13 @@ public partial class ClientCard : UserControl
     
     private void PerformBackgroundClick(int x, int y, string channel)
     {
-        if (ViewModel.TargetHwnd == IntPtr.Zero) return;
+        Console.WriteLine($"[{ViewModel.ClientName}] PerformBackgroundClick called: ({x},{y}) channel={channel} hwnd={ViewModel.TargetHwnd}");
+        
+        if (ViewModel.TargetHwnd == IntPtr.Zero)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] ERROR: TargetHwnd is zero, cannot perform click");
+            return;
+        }
         
         try
         {
@@ -1299,19 +2429,32 @@ public partial class ClientCard : UserControl
             var processName = GetProcessName(ViewModel.TargetHwnd);
             var lParam = (y << 16) | (x & 0xFFFF);
             
-            // Debug coordinate info
-            if (channel.Contains("TEST"))
+            // ALWAYS debug coordinate info for trigger clicks
+            Console.WriteLine($"[{ViewModel.ClientName}] {channel} PostMessage: Process={processName} ClientCoords=({x},{y}) lParam=0x{lParam:X8}");
+            
+            // Check if window still exists
+            if (!User32.IsWindow(ViewModel.TargetHwnd))
             {
-                var targetProcessName = GetProcessName(ViewModel.TargetHwnd);
-                Console.WriteLine($"[{ViewModel.ClientName}] {channel} PostMessage: Process={targetProcessName} ClientCoords=({x},{y}) lParam=0x{lParam:X8}");
+                Console.WriteLine($"[{ViewModel.ClientName}] ERROR: Target window no longer exists");
+                return;
             }
             
-            // Try all message combinations
+            // Try all message combinations with detailed logging
+            Console.WriteLine($"[{ViewModel.ClientName}] Sending WM_MOUSEMOVE...");
             User32.PostMessage(ViewModel.TargetHwnd, User32.WindowMessage.WM_MOUSEMOVE, IntPtr.Zero, (IntPtr)lParam);
-            User32.PostMessage(ViewModel.TargetHwnd, User32.WindowMessage.WM_LBUTTONDOWN, (IntPtr)1, (IntPtr)lParam);
-            User32.PostMessage(ViewModel.TargetHwnd, User32.WindowMessage.WM_LBUTTONUP, IntPtr.Zero, (IntPtr)lParam);
             
+            Console.WriteLine($"[{ViewModel.ClientName}] Sending WM_LBUTTONDOWN (PostMessage)...");
+            bool result1 = User32.PostMessage(ViewModel.TargetHwnd, User32.WindowMessage.WM_LBUTTONDOWN, (IntPtr)1, (IntPtr)lParam);
+            Console.WriteLine($"[{ViewModel.ClientName}] WM_LBUTTONDOWN result: {result1}");
+            
+            Console.WriteLine($"[{ViewModel.ClientName}] Sending WM_LBUTTONUP (PostMessage)...");
+            bool result2 = User32.PostMessage(ViewModel.TargetHwnd, User32.WindowMessage.WM_LBUTTONUP, IntPtr.Zero, (IntPtr)lParam);
+            Console.WriteLine($"[{ViewModel.ClientName}] WM_LBUTTONUP result: {result2}");
+            
+            Console.WriteLine($"[{ViewModel.ClientName}] Sending WM_LBUTTONDOWN (SendMessage)...");
             User32.SendMessage(ViewModel.TargetHwnd, User32.WindowMessage.WM_LBUTTONDOWN, (IntPtr)1, (IntPtr)lParam);
+            
+            Console.WriteLine($"[{ViewModel.ClientName}] Sending WM_LBUTTONUP (SendMessage)...");
             User32.SendMessage(ViewModel.TargetHwnd, User32.WindowMessage.WM_LBUTTONUP, IntPtr.Zero, (IntPtr)lParam);
             
             // Method 3: Try child windows
@@ -1673,4 +2816,1007 @@ public partial class ClientCard : UserControl
         
         Console.WriteLine($"[{ViewModel.ClientName}] {channel} FOCUS-CLICK click at client({x}, {y}) -> screen({point.x}, {point.y})");
     }
+
+    // HP Shape Mouse Event Handlers
+    private void HpShape_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (_hpShape != null)
+        {
+            _isDraggingHp = true;
+            _dragStartPoint = e.GetPosition(GetOverlayCanvas());
+            _hpShape.CaptureMouse();
+            e.Handled = true;
+            Console.WriteLine($"[{ViewModel.ClientName}] Started dragging HP shape");
+        }
+    }
+    
+    private void HpShape_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (_isDraggingHp && _hpShape != null && e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
+        {
+            var canvas = GetOverlayCanvas();
+            if (canvas != null)
+            {
+                var currentPoint = e.GetPosition(canvas);
+                
+                // Calculate new position directly from mouse position
+                var newX = currentPoint.X - 10; // Center the circle on mouse
+                var newY = currentPoint.Y - 10;
+                
+                // Update shape position
+                Canvas.SetLeft(_hpShape, newX);
+                Canvas.SetTop(_hpShape, newY);
+                
+                // Update ViewModel coordinates (center of circle)
+                ViewModel.HpProbe.X = (int)(newX + 10);
+                ViewModel.HpProbe.Y = (int)(newY + 10);
+                
+                // Update UI text boxes
+                HpX.Text = ViewModel.HpProbe.X.ToString();
+                HpY.Text = ViewModel.HpProbe.Y.ToString();
+                
+                Console.WriteLine($"[{ViewModel.ClientName}] HP shape moved to ({ViewModel.HpProbe.X},{ViewModel.HpProbe.Y})");
+            }
+        }
+    }
+    
+    private void HpShape_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (_isDraggingHp && _hpShape != null)
+        {
+            _isDraggingHp = false;
+            _hpShape.ReleaseMouseCapture();
+            Console.WriteLine($"[{ViewModel.ClientName}] Finished dragging HP shape at ({ViewModel.HpProbe.X},{ViewModel.HpProbe.Y})");
+            
+            // Optionally read color at new position
+            if (ViewModel.TargetHwnd != IntPtr.Zero)
+            {
+                var newColor = ColorSampler.GetColorAt(ViewModel.TargetHwnd, ViewModel.HpProbe.X, ViewModel.HpProbe.Y);
+                ViewModel.HpProbe.ExpectedColor = newColor;
+                ViewModel.HpProbe.ReferenceColor = newColor;
+                HpColorDisplay.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(newColor.R, newColor.G, newColor.B));
+                HpColorText.Text = $"{newColor.R},{newColor.G},{newColor.B}";
+                Console.WriteLine($"[{ViewModel.ClientName}] HP color updated: RGB({newColor.R},{newColor.G},{newColor.B})");
+            }
+        }
+    }
+    
+    // MP Shape Mouse Event Handlers
+    private void MpShape_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (_mpShape != null)
+        {
+            _isDraggingMp = true;
+            _dragStartPoint = e.GetPosition(GetOverlayCanvas());
+            _mpShape.CaptureMouse();
+            e.Handled = true;
+            Console.WriteLine($"[{ViewModel.ClientName}] Started dragging MP shape");
+        }
+    }
+    
+    private void MpShape_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (_isDraggingMp && _mpShape != null && e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
+        {
+            var canvas = GetOverlayCanvas();
+            if (canvas != null)
+            {
+                var currentPoint = e.GetPosition(canvas);
+                
+                // Calculate new position directly from mouse position
+                var newX = currentPoint.X - 10; // Center the circle on mouse
+                var newY = currentPoint.Y - 10;
+                
+                // Update shape position
+                Canvas.SetLeft(_mpShape, newX);
+                Canvas.SetTop(_mpShape, newY);
+                
+                // Update ViewModel coordinates (center of circle)
+                ViewModel.MpProbe.X = (int)(newX + 10);
+                ViewModel.MpProbe.Y = (int)(newY + 10);
+                
+                // Update UI text boxes
+                MpX.Text = ViewModel.MpProbe.X.ToString();
+                MpY.Text = ViewModel.MpProbe.Y.ToString();
+                
+                Console.WriteLine($"[{ViewModel.ClientName}] MP shape moved to ({ViewModel.MpProbe.X},{ViewModel.MpProbe.Y})");
+            }
+        }
+    }
+    
+    private void MpShape_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (_isDraggingMp && _mpShape != null)
+        {
+            _isDraggingMp = false;
+            _mpShape.ReleaseMouseCapture();
+            Console.WriteLine($"[{ViewModel.ClientName}] Finished dragging MP shape at ({ViewModel.MpProbe.X},{ViewModel.MpProbe.Y})");
+            
+            // Optionally read color at new position
+            if (ViewModel.TargetHwnd != IntPtr.Zero)
+            {
+                var newColor = ColorSampler.GetColorAt(ViewModel.TargetHwnd, ViewModel.MpProbe.X, ViewModel.MpProbe.Y);
+                ViewModel.MpProbe.ExpectedColor = newColor;
+                ViewModel.MpProbe.ReferenceColor = newColor;
+                MpColorDisplay.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(newColor.R, newColor.G, newColor.B));
+                MpColorText.Text = $"{newColor.R},{newColor.G},{newColor.B}";
+                Console.WriteLine($"[{ViewModel.ClientName}] MP color updated: RGB({newColor.R},{newColor.G},{newColor.B})");
+            }
+        }
+    }
+    
+    // HP Percentage Bar Mouse Event Handlers
+    private void HpPercentageShape_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (_hpPercentageShape != null)
+        {
+            _isDraggingHpPercentage = true;
+            _dragStartPoint = e.GetPosition(GetOverlayCanvas());
+            _hpPercentageShape.CaptureMouse();
+            e.Handled = true;
+            Console.WriteLine($"[{ViewModel.ClientName}] Started dragging HP percentage bar");
+        }
+    }
+    
+    private void HpPercentageShape_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (_isDraggingHpPercentage && _hpPercentageShape != null && e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
+        {
+            var canvas = GetOverlayCanvas();
+            if (canvas != null)
+            {
+                var currentPoint = e.GetPosition(canvas);
+                
+                // Calculate new position directly from mouse position
+                var newX = currentPoint.X - (_hpPercentageShape.Width / 2);
+                var newY = currentPoint.Y - (_hpPercentageShape.Height / 2);
+                
+                // Update shape position
+                Canvas.SetLeft(_hpPercentageShape, newX);
+                Canvas.SetTop(_hpPercentageShape, newY);
+                
+                // Update ViewModel coordinates
+                ViewModel.HpPercentageProbe.StartX = (int)newX;
+                ViewModel.HpPercentageProbe.EndX = (int)(newX + _hpPercentageShape.Width);
+                ViewModel.HpPercentageProbe.Y = (int)(newY + _hpPercentageShape.Height / 2);
+                
+                // Update UI text boxes
+                HpPercentageStartX.Text = ViewModel.HpPercentageProbe.StartX.ToString();
+                HpPercentageEndX.Text = ViewModel.HpPercentageProbe.EndX.ToString();
+                HpPercentageY.Text = ViewModel.HpPercentageProbe.Y.ToString();
+                
+                UpdatePercentageMonitorPosition();
+                Console.WriteLine($"[{ViewModel.ClientName}] HP bar moved to ({ViewModel.HpPercentageProbe.StartX}-{ViewModel.HpPercentageProbe.EndX},{ViewModel.HpPercentageProbe.Y})");
+            }
+        }
+    }
+    
+    private void HpPercentageShape_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (_isDraggingHpPercentage && _hpPercentageShape != null)
+        {
+            _isDraggingHpPercentage = false;
+            _hpPercentageShape.ReleaseMouseCapture();
+            Console.WriteLine($"[{ViewModel.ClientName}] Finished dragging HP percentage bar");
+        }
+    }
+    
+    // MP Percentage Bar Mouse Event Handlers
+    private void MpPercentageShape_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (_mpPercentageShape != null)
+        {
+            _isDraggingMpPercentage = true;
+            _dragStartPoint = e.GetPosition(GetOverlayCanvas());
+            _mpPercentageShape.CaptureMouse();
+            e.Handled = true;
+            Console.WriteLine($"[{ViewModel.ClientName}] Started dragging MP percentage bar");
+        }
+    }
+    
+    private void MpPercentageShape_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (_isDraggingMpPercentage && _mpPercentageShape != null)
+        {
+            var canvas = GetOverlayCanvas();
+            if (canvas != null)
+            {
+                var currentPoint = e.GetPosition(canvas);
+                var deltaX = currentPoint.X - _dragStartPoint.X;
+                var deltaY = currentPoint.Y - _dragStartPoint.Y;
+                
+                var newX = (int)(Canvas.GetLeft(_mpPercentageShape) + deltaX);
+                var newY = (int)(Canvas.GetTop(_mpPercentageShape) + deltaY);
+                
+                // Update shape position
+                Canvas.SetLeft(_mpPercentageShape, newX);
+                Canvas.SetTop(_mpPercentageShape, newY);
+                
+                // Update ViewModel coordinates
+                ViewModel.MpPercentageProbe.StartX = newX;
+                ViewModel.MpPercentageProbe.EndX = newX + (int)_mpPercentageShape.Width;
+                ViewModel.MpPercentageProbe.Y = newY + (int)_mpPercentageShape.Height / 2;
+                
+                // Update UI text boxes
+                MpPercentageStartX.Text = ViewModel.MpPercentageProbe.StartX.ToString();
+                MpPercentageEndX.Text = ViewModel.MpPercentageProbe.EndX.ToString();
+                MpPercentageY.Text = ViewModel.MpPercentageProbe.Y.ToString();
+                
+                _dragStartPoint = currentPoint;
+                UpdatePercentageMonitorPosition();
+                Console.WriteLine($"[{ViewModel.ClientName}] MP bar moved to ({ViewModel.MpPercentageProbe.StartX}-{ViewModel.MpPercentageProbe.EndX},{ViewModel.MpPercentageProbe.Y})");
+            }
+        }
+    }
+    
+    private void MpPercentageShape_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (_isDraggingMpPercentage && _mpPercentageShape != null)
+        {
+            _isDraggingMpPercentage = false;
+            _mpPercentageShape.ReleaseMouseCapture();
+            Console.WriteLine($"[{ViewModel.ClientName}] Finished dragging MP percentage bar");
+        }
+    }
+    
+    // Helper method to get overlay canvas
+    private System.Windows.Controls.Canvas? GetOverlayCanvas()
+    {
+        var mainWindow = Application.Current.MainWindow as MainWindow;
+        return mainWindow?.GetOverlayCanvas();
+    }
+    
+    // Public methods to show/hide shapes in overlay mode
+    public void ShowOverlayShapes()
+    {
+        var canvas = GetOverlayCanvas();
+        if (canvas == null) return;
+        
+        // Add shapes to overlay canvas if not already added
+        if (_hpShape != null && !canvas.Children.Contains(_hpShape))
+        {
+            canvas.Children.Add(_hpShape);
+            // Position HP shape based on current coordinates
+            Canvas.SetLeft(_hpShape, ViewModel.HpProbe.X - 10);
+            Canvas.SetTop(_hpShape, ViewModel.HpProbe.Y - 10);
+            _hpShape.Visibility = Visibility.Visible;
+        }
+        
+        if (_mpShape != null && !canvas.Children.Contains(_mpShape))
+        {
+            canvas.Children.Add(_mpShape);
+            // Position MP shape based on current coordinates
+            Canvas.SetLeft(_mpShape, ViewModel.MpProbe.X - 10);
+            Canvas.SetTop(_mpShape, ViewModel.MpProbe.Y - 10);
+            _mpShape.Visibility = Visibility.Visible;
+        }
+        
+        if (_hpPercentageShape != null && !canvas.Children.Contains(_hpPercentageShape))
+        {
+            canvas.Children.Add(_hpPercentageShape);
+            // Position HP percentage bar
+            Canvas.SetLeft(_hpPercentageShape, ViewModel.HpPercentageProbe.StartX);
+            Canvas.SetTop(_hpPercentageShape, ViewModel.HpPercentageProbe.Y - 4);
+            _hpPercentageShape.Width = ViewModel.HpPercentageProbe.EndX - ViewModel.HpPercentageProbe.StartX;
+            _hpPercentageShape.Visibility = Visibility.Visible;
+        }
+        
+        if (_mpPercentageShape != null && !canvas.Children.Contains(_mpPercentageShape))
+        {
+            canvas.Children.Add(_mpPercentageShape);
+            // Position MP percentage bar
+            Canvas.SetLeft(_mpPercentageShape, ViewModel.MpPercentageProbe.StartX);
+            Canvas.SetTop(_mpPercentageShape, ViewModel.MpPercentageProbe.Y - 4);
+            _mpPercentageShape.Width = ViewModel.MpPercentageProbe.EndX - ViewModel.MpPercentageProbe.StartX;
+            _mpPercentageShape.Visibility = Visibility.Visible;
+        }
+        
+        Console.WriteLine($"[{ViewModel.ClientName}] Overlay shapes shown");
+    }
+    
+    public void HideOverlayShapes()
+    {
+        var canvas = GetOverlayCanvas();
+        if (canvas == null) return;
+        
+        if (_hpShape != null)
+        {
+            _hpShape.Visibility = Visibility.Collapsed;
+            canvas.Children.Remove(_hpShape);
+        }
+        
+        if (_mpShape != null)
+        {
+            _mpShape.Visibility = Visibility.Collapsed;
+            canvas.Children.Remove(_mpShape);
+        }
+        
+        if (_hpPercentageShape != null)
+        {
+            _hpPercentageShape.Visibility = Visibility.Collapsed;
+            canvas.Children.Remove(_hpPercentageShape);
+        }
+        
+        if (_mpPercentageShape != null)
+        {
+            _mpPercentageShape.Visibility = Visibility.Collapsed;
+            canvas.Children.Remove(_mpPercentageShape);
+        }
+        
+        Console.WriteLine($"[{ViewModel.ClientName}] Overlay shapes hidden");
+    }
+   
+    // Show Draggable Shapes Button Event Handler
+    private void ShowDraggableShapes_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.TargetHwnd == IntPtr.Zero)
+        {
+            StatusIndicator.Fill = new SolidColorBrush(Colors.Red);
+            StatusIndicator.ToolTip = "Please select a window first!";
+            Console.WriteLine($"[{ViewModel.ClientName}] Cannot show shapes - no window selected");
+            return;
+        }
+
+        // Show overlay shapes for manual positioning
+        ShowOverlayShapesEnhanced();
+        
+        // Also enable overlay mode in main window if not already enabled
+        var mainWindow = Application.Current.MainWindow as MainWindow;
+        if (mainWindow != null)
+        {
+            // Check if overlay mode is already active
+            var overlayCheckBox = mainWindow.FindName("OverlayModeCheckBox") as CheckBox;
+            if (overlayCheckBox != null && overlayCheckBox.IsChecked != true)
+            {
+                overlayCheckBox.IsChecked = true; // This will trigger overlay mode
+            }
+        }
+        
+        Console.WriteLine($"[{ViewModel.ClientName}] 🎯 DRAGGABLE SHAPES ACTIVATED!");
+        Console.WriteLine($"[{ViewModel.ClientName}] ❤️ RED CIRCLE = HP monitoring point - drag to HP bar");
+        Console.WriteLine($"[{ViewModel.ClientName}] 💙 BLUE CIRCLE = MP monitoring point - drag to MP bar");  
+        Console.WriteLine($"[{ViewModel.ClientName}] 📏 RED RECTANGLE = HP percentage bar - drag and resize");
+        Console.WriteLine($"[{ViewModel.ClientName}] 📏 BLUE RECTANGLE = MP percentage bar - drag and resize");
+        Console.WriteLine($"[{ViewModel.ClientName}] ⏰ Shapes stay visible for 30 seconds - click to close early");
+        Console.WriteLine($"[{ViewModel.ClientName}] 🎯 When you drag shapes, coordinates auto-update in UI!");
+        
+        StatusIndicator.Fill = new SolidColorBrush(Colors.Orange);
+        StatusIndicator.ToolTip = "Draggable shapes active - position them on your HP/MP bars";
+    }
+
+
+    
+    // Enhanced ShowOverlayShapes with better positioning and visual feedback
+    private void ShowOverlayShapesEnhanced()
+    {
+        var canvas = GetOverlayCanvas();
+        if (canvas == null) 
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] Cannot access overlay canvas");
+            return;
+        }
+        
+        // Clear existing shapes first
+        HideOverlayShapes();
+        
+        // Get window bounds for better initial positioning
+        var windowRect = GetWindowBounds();
+        var offsetX = windowRect.Left + 50; // Start shapes 50px from window left
+        var offsetY = windowRect.Top + 50;  // Start shapes 50px from window top
+        
+        // Create and position HP shape (red circle)
+        if (_hpShape != null)
+        {
+            canvas.Children.Add(_hpShape);
+            Canvas.SetLeft(_hpShape, offsetX);
+            Canvas.SetTop(_hpShape, offsetY);
+            _hpShape.Visibility = Visibility.Visible;
+            
+            // Update ViewModel coordinates
+            ViewModel.HpProbe.X = (int)(offsetX + 10);
+            ViewModel.HpProbe.Y = (int)(offsetY + 10);
+            HpX.Text = ViewModel.HpProbe.X.ToString();
+            HpY.Text = ViewModel.HpProbe.Y.ToString();
+        }
+        
+        // Create and position MP shape (blue circle) - slightly below HP
+        if (_mpShape != null)
+        {
+            canvas.Children.Add(_mpShape);
+            Canvas.SetLeft(_mpShape, offsetX);
+            Canvas.SetTop(_mpShape, offsetY + 30);
+            _mpShape.Visibility = Visibility.Visible;
+            
+            // Update ViewModel coordinates
+            ViewModel.MpProbe.X = (int)(offsetX + 10);
+            ViewModel.MpProbe.Y = (int)(offsetY + 40);
+            MpX.Text = ViewModel.MpProbe.X.ToString();
+            MpY.Text = ViewModel.MpProbe.Y.ToString();
+        }
+        
+        // Create and position HP percentage bar (red rectangle)
+        if (_hpPercentageShape != null)
+        {
+            canvas.Children.Add(_hpPercentageShape);
+            Canvas.SetLeft(_hpPercentageShape, offsetX + 200);
+            Canvas.SetTop(_hpPercentageShape, offsetY);
+            _hpPercentageShape.Visibility = Visibility.Visible;
+            
+            // Update ViewModel coordinates
+            ViewModel.HpPercentageProbe.StartX = (int)(offsetX + 200);
+            ViewModel.HpPercentageProbe.EndX = (int)(offsetX + 350);
+            ViewModel.HpPercentageProbe.Y = (int)(offsetY + 4);
+            HpPercentageStartX.Text = ViewModel.HpPercentageProbe.StartX.ToString();
+            HpPercentageEndX.Text = ViewModel.HpPercentageProbe.EndX.ToString();
+            HpPercentageY.Text = ViewModel.HpPercentageProbe.Y.ToString();
+        }
+        
+        // Create and position MP percentage bar (blue rectangle) - below HP bar
+        if (_mpPercentageShape != null)
+        {
+            canvas.Children.Add(_mpPercentageShape);
+            Canvas.SetLeft(_mpPercentageShape, offsetX + 200);
+            Canvas.SetTop(_mpPercentageShape, offsetY + 20);
+            _mpPercentageShape.Visibility = Visibility.Visible;
+            
+            // Update ViewModel coordinates
+            ViewModel.MpPercentageProbe.StartX = (int)(offsetX + 200);
+            ViewModel.MpPercentageProbe.EndX = (int)(offsetX + 350);
+            ViewModel.MpPercentageProbe.Y = (int)(offsetY + 24);
+            MpPercentageStartX.Text = ViewModel.MpPercentageProbe.StartX.ToString();
+            MpPercentageEndX.Text = ViewModel.MpPercentageProbe.EndX.ToString();
+            MpPercentageY.Text = ViewModel.MpPercentageProbe.Y.ToString();
+        }
+        
+        UpdatePercentageMonitorPosition();
+        Console.WriteLine($"[{ViewModel.ClientName}] Overlay shapes positioned at window offset ({offsetX},{offsetY})");
+    }
+    
+    // Helper method to get target window bounds
+    private RECT GetWindowBounds()
+    {
+        if (ViewModel.TargetHwnd != IntPtr.Zero)
+        {
+            User32.GetWindowRect(ViewModel.TargetHwnd, out RECT rect);
+            return rect;
+        }
+        return new RECT { Left = 100, Top = 100, Right = 500, Bottom = 400 }; // Default fallback
+    }
+
+    #region BabeBot Style HP/MP Event Handlers
+    
+    private void BabeBotHpCalibrate_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.TargetHwnd == IntPtr.Zero)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] No window selected for BabeBot HP calibration");
+            return;
+        }
+        
+        Task.Run(() =>
+        {
+            try
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot HP Calibration started...");
+                
+                // Clear existing reference colors
+                ViewModel.BabeBotHp.ReferenceColors.Clear();
+                
+                // BabeBot calibration logic - sample colors at %5-%95
+                for (int percentage = 5; percentage <= 95; percentage += 5)
+                {
+                    int sampleX = ViewModel.BabeBotHp.CalculateXForPercentage(percentage);
+                    var color = ColorSampler.GetColorAt(ViewModel.TargetHwnd, sampleX, ViewModel.BabeBotHp.Y);
+                    
+                    ViewModel.BabeBotHp.ReferenceColors[percentage] = color;
+                    Console.WriteLine($"[{ViewModel.ClientName}] BabeBot HP {percentage}%: X={sampleX}, Color=RGB({color.R},{color.G},{color.B})");
+                    
+                    Thread.Sleep(50); // Small delay between samples
+                }
+                
+                // Set reference color to the threshold percentage
+                var thresholdX = ViewModel.BabeBotHp.MonitorX;
+                var thresholdColor = ColorSampler.GetColorAt(ViewModel.TargetHwnd, thresholdX, ViewModel.BabeBotHp.Y);
+                ViewModel.BabeBotHp.ReferenceColor = thresholdColor;
+                
+                Dispatcher.BeginInvoke(() =>
+                {
+                    BabeBotHpCurrentColor.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(thresholdColor.R, thresholdColor.G, thresholdColor.B));
+                    BabeBotHpCurrentText.Text = $"{thresholdColor.R},{thresholdColor.G},{thresholdColor.B}";
+                    ViewModel.BabeBotHp.Status = "Calibrated";
+                });
+                
+                Console.WriteLine($"[{ViewModel.ClientName}] ✅ BabeBot HP Calibration complete! Monitor X={thresholdX}, Threshold={ViewModel.BabeBotHp.ThresholdPercentage}%");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] BabeBot HP calibration error: {ex.Message}");
+            }
+        });
+    }
+    
+    private void BabeBotMpCalibrate_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.TargetHwnd == IntPtr.Zero)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] No window selected for BabeBot MP calibration");
+            return;
+        }
+        
+        Task.Run(() =>
+        {
+            try
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot MP Calibration started...");
+                
+                // Clear existing reference colors
+                ViewModel.BabeBotMp.ReferenceColors.Clear();
+                
+                // BabeBot calibration logic - sample colors at %5-%95
+                for (int percentage = 5; percentage <= 95; percentage += 5)
+                {
+                    int sampleX = ViewModel.BabeBotMp.CalculateXForPercentage(percentage);
+                    var color = ColorSampler.GetColorAt(ViewModel.TargetHwnd, sampleX, ViewModel.BabeBotMp.Y);
+                    
+                    ViewModel.BabeBotMp.ReferenceColors[percentage] = color;
+                    Console.WriteLine($"[{ViewModel.ClientName}] BabeBot MP {percentage}%: X={sampleX}, Color=RGB({color.R},{color.G},{color.B})");
+                    
+                    Thread.Sleep(50); // Small delay between samples
+                }
+                
+                // Set reference color to the threshold percentage
+                var thresholdX = ViewModel.BabeBotMp.MonitorX;
+                var thresholdColor = ColorSampler.GetColorAt(ViewModel.TargetHwnd, thresholdX, ViewModel.BabeBotMp.Y);
+                ViewModel.BabeBotMp.ReferenceColor = thresholdColor;
+                
+                Dispatcher.BeginInvoke(() =>
+                {
+                    BabeBotMpCurrentColor.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(thresholdColor.R, thresholdColor.G, thresholdColor.B));
+                    BabeBotMpCurrentText.Text = $"{thresholdColor.R},{thresholdColor.G},{thresholdColor.B}";
+                    ViewModel.BabeBotMp.Status = "Calibrated";
+                });
+                
+                Console.WriteLine($"[{ViewModel.ClientName}] ✅ BabeBot MP Calibration complete! Monitor X={thresholdX}, Threshold={ViewModel.BabeBotMp.ThresholdPercentage}%");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] BabeBot MP calibration error: {ex.Message}");
+            }
+        });
+    }
+    
+    private void PickBabeBotHpPotion_Click(object sender, RoutedEventArgs e)
+    {
+        PickCoordinate("BabeBot HP Potion Position", (x, y) =>
+        {
+            BabeBotHpPotionX.Text = x.ToString();
+            BabeBotHpPotionY.Text = y.ToString();
+            ViewModel.BabeBotHp.PotionX = x;
+            ViewModel.BabeBotHp.PotionY = y;
+            Console.WriteLine($"[{ViewModel.ClientName}] BabeBot HP Potion Click set to: ({x},{y})");
+        });
+    }
+    
+    private void PickBabeBotMpPotion_Click(object sender, RoutedEventArgs e)
+    {
+        PickCoordinate("BabeBot MP Potion Position", (x, y) =>
+        {
+            BabeBotMpPotionX.Text = x.ToString();
+            BabeBotMpPotionY.Text = y.ToString();
+            ViewModel.BabeBotMp.PotionX = x;
+            ViewModel.BabeBotMp.PotionY = y;
+            Console.WriteLine($"[{ViewModel.ClientName}] BabeBot MP Potion Click set to: ({x},{y})");
+        });
+    }
+    
+    private void BabeBotHpDetect_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.TargetHwnd == IntPtr.Zero)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] No window selected for BabeBot HP detection");
+            return;
+        }
+        
+        Task.Run(() =>
+        {
+            try
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot HP Bar Detection started...");
+                
+                // Use existing HP bar detection system
+                var hpBar = DetectBar(true); // true = HP (red)
+                if (hpBar != null)
+                {
+                    Console.WriteLine($"[{ViewModel.ClientName}] ✅ BabeBot HP BAR DETECTED!");
+                    Console.WriteLine($"[{ViewModel.ClientName}] HP Bar: StartX={hpBar.Value.startX}, EndX={hpBar.Value.endX}, Y={hpBar.Value.y}");
+                    
+                    // Auto-fill BabeBot HP coordinates
+                    Dispatcher.BeginInvoke(() =>
+                    {
+                        BabeBotHpStart.Text = hpBar.Value.startX.ToString();
+                        BabeBotHpEnd.Text = hpBar.Value.endX.ToString();
+                        BabeBotHpY.Text = hpBar.Value.y.ToString();
+                        
+                        ViewModel.BabeBotHp.StartX = hpBar.Value.startX;
+                        ViewModel.BabeBotHp.EndX = hpBar.Value.endX;
+                        ViewModel.BabeBotHp.Y = hpBar.Value.y;
+                        
+                        // Also set reference color
+                        ViewModel.BabeBotHp.ReferenceColor = hpBar.Value.color;
+                        BabeBotHpCurrentColor.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(hpBar.Value.color.R, hpBar.Value.color.G, hpBar.Value.color.B));
+                        BabeBotHpCurrentText.Text = $"{hpBar.Value.color.R},{hpBar.Value.color.G},{hpBar.Value.color.B}";
+                        ViewModel.BabeBotHp.Status = "Detected";
+                    });
+                    
+                    // Show visual indicator
+                    Dispatcher.BeginInvoke(() =>
+                    {
+                        ShowBarIndicator("BabeBot HP", hpBar.Value.startX, hpBar.Value.endX, hpBar.Value.y, System.Windows.Media.Colors.Red);
+                    });
+                }
+                else
+                {
+                    Console.WriteLine($"[{ViewModel.ClientName}] ❌ BabeBot HP BAR NOT FOUND!");
+                    Dispatcher.BeginInvoke(() =>
+                    {
+                        ViewModel.BabeBotHp.Status = "Not Found";
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] BabeBot HP detection error: {ex.Message}");
+            }
+        });
+    }
+    
+    private void BabeBotMpDetect_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.TargetHwnd == IntPtr.Zero)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] No window selected for BabeBot MP detection");
+            return;
+        }
+        
+        Task.Run(() =>
+        {
+            try
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot MP Bar Detection started...");
+                
+                // First try to detect HP to get better MP search range
+                var hpBar = DetectBar(true);
+                int mpSearchStartY = 30;
+                int mpSearchEndY = 120;
+                
+                if (hpBar != null)
+                {
+                    // Search MP bar right below HP bar
+                    mpSearchStartY = hpBar.Value.y + 1;
+                    mpSearchEndY = hpBar.Value.y + 25;
+                    Console.WriteLine($"[{ViewModel.ClientName}] HP found at Y={hpBar.Value.y}, searching MP in Y range {mpSearchStartY}-{mpSearchEndY}");
+                }
+                
+                var mpBar = DetectBarInRange(false, mpSearchStartY, mpSearchEndY); // false = MP (blue)
+                if (mpBar != null)
+                {
+                    Console.WriteLine($"[{ViewModel.ClientName}] ✅ BabeBot MP BAR DETECTED!");
+                    Console.WriteLine($"[{ViewModel.ClientName}] MP Bar: StartX={mpBar.Value.startX}, EndX={mpBar.Value.endX}, Y={mpBar.Value.y}");
+                    
+                    // Auto-fill BabeBot MP coordinates
+                    Dispatcher.BeginInvoke(() =>
+                    {
+                        BabeBotMpStart.Text = mpBar.Value.startX.ToString();
+                        BabeBotMpEnd.Text = mpBar.Value.endX.ToString();
+                        BabeBotMpY.Text = mpBar.Value.y.ToString();
+                        
+                        ViewModel.BabeBotMp.StartX = mpBar.Value.startX;
+                        ViewModel.BabeBotMp.EndX = mpBar.Value.endX;
+                        ViewModel.BabeBotMp.Y = mpBar.Value.y;
+                        
+                        // Also set reference color
+                        ViewModel.BabeBotMp.ReferenceColor = mpBar.Value.color;
+                        BabeBotMpCurrentColor.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(mpBar.Value.color.R, mpBar.Value.color.G, mpBar.Value.color.B));
+                        BabeBotMpCurrentText.Text = $"{mpBar.Value.color.R},{mpBar.Value.color.G},{mpBar.Value.color.B}";
+                        ViewModel.BabeBotMp.Status = "Detected";
+                    });
+                    
+                    // Show visual indicator
+                    Dispatcher.BeginInvoke(() =>
+                    {
+                        ShowBarIndicator("BabeBot MP", mpBar.Value.startX, mpBar.Value.endX, mpBar.Value.y, System.Windows.Media.Colors.Blue);
+                    });
+                }
+                else
+                {
+                    Console.WriteLine($"[{ViewModel.ClientName}] ❌ BabeBot MP BAR NOT FOUND!");
+                    Dispatcher.BeginInvoke(() =>
+                    {
+                        ViewModel.BabeBotMp.Status = "Not Found";
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] BabeBot MP detection error: {ex.Message}");
+            }
+        });
+    }
+    
+    // BabeBot Timer Management
+    private void StartBabeBotMonitoring()
+    {
+        if (_babeBotTimer != null) return;
+        
+        _babeBotTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(120) // Same as BabeBot timer
+        };
+        _babeBotTimer.Tick += BabeBotTimer_Tick;
+        _babeBotTimer.Start();
+        
+        Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot monitoring started");
+    }
+    
+    private void StopBabeBotMonitoring()
+    {
+        _babeBotTimer?.Stop();
+        _babeBotTimer = null;
+        
+        Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot monitoring stopped");
+    }
+    
+    private void BabeBotTimer_Tick(object sender, EventArgs e)
+    {
+        try
+        {
+            // Check HP if enabled
+            if (ViewModel.BabeBotHp.Enabled)
+            {
+                CheckBabeBotHp();
+            }
+            
+            // Check MP if enabled
+            if (ViewModel.BabeBotMp.Enabled)
+            {
+                CheckBabeBotMp();
+            }
+            
+            // If neither is enabled, stop the timer
+            if (!ViewModel.BabeBotHp.Enabled && !ViewModel.BabeBotMp.Enabled)
+            {
+                StopBabeBotMonitoring();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] BabeBot timer error: {ex.Message}");
+        }
+    }
+    
+    private void CheckBabeBotHp()
+    {
+        if (ViewModel.TargetHwnd == IntPtr.Zero) return;
+        
+        try
+        {
+            // Sample current color at threshold position
+            var currentColor = ColorSampler.GetColorAt(ViewModel.TargetHwnd, ViewModel.BabeBotHp.MonitorX, ViewModel.BabeBotHp.Y);
+            ViewModel.BabeBotHp.CurrentColor = currentColor;
+            
+            // BabeBot logic: if current color != reference color then trigger
+            bool colorChanged = !ColorsMatch(currentColor, ViewModel.BabeBotHp.ReferenceColor);
+            
+            // Update UI
+            Dispatcher.BeginInvoke(() =>
+            {
+                BabeBotHpCurrentColor.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(currentColor.R, currentColor.G, currentColor.B));
+                BabeBotHpCurrentText.Text = $"{currentColor.R},{currentColor.G},{currentColor.B}";
+                
+                if (colorChanged)
+                {
+                    ViewModel.BabeBotHp.Status = $"LOW {ViewModel.BabeBotHp.ThresholdPercentage}%";
+                }
+                else
+                {
+                    ViewModel.BabeBotHp.Status = $"OK {ViewModel.BabeBotHp.ThresholdPercentage}%";
+                }
+            });
+            
+            // Trigger logic - BabeBot style (simplified for testing)
+            if (colorChanged)
+            {
+                var now = DateTime.UtcNow;
+                if ((now - ViewModel.BabeBotHp.LastExecution).TotalMilliseconds >= 500) // 500ms cooldown
+                {
+                    ViewModel.BabeBotHp.LastExecution = now;
+                    
+                    Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot HP TRIGGER: Color changed! Clicking ({ViewModel.BabeBotHp.PotionX},{ViewModel.BabeBotHp.PotionY})");
+                    
+                    // Send mouse click to potion coordinates
+                    PerformBackgroundClick(ViewModel.BabeBotHp.PotionX, ViewModel.BabeBotHp.PotionY, "BABEBOT_HP");
+                    ViewModel.BabeBotHp.ExecutionCount++;
+                    ViewModel.TriggerCount++;
+                }
+                else
+                {
+                    Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot HP on cooldown, {(500 - (now - ViewModel.BabeBotHp.LastExecution).TotalMilliseconds):F0}ms left");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] BabeBot HP check error: {ex.Message}");
+        }
+    }
+    
+    private void CheckBabeBotMp()
+    {
+        if (ViewModel.TargetHwnd == IntPtr.Zero) return;
+        
+        try
+        {
+            // Sample current color at threshold position
+            var currentColor = ColorSampler.GetColorAt(ViewModel.TargetHwnd, ViewModel.BabeBotMp.MonitorX, ViewModel.BabeBotMp.Y);
+            ViewModel.BabeBotMp.CurrentColor = currentColor;
+            
+            // BabeBot logic: if current color != reference color then trigger
+            bool colorChanged = !ColorsMatch(currentColor, ViewModel.BabeBotMp.ReferenceColor);
+            
+            // Update UI
+            Dispatcher.BeginInvoke(() =>
+            {
+                BabeBotMpCurrentColor.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(currentColor.R, currentColor.G, currentColor.B));
+                BabeBotMpCurrentText.Text = $"{currentColor.R},{currentColor.G},{currentColor.B}";
+                
+                if (colorChanged)
+                {
+                    ViewModel.BabeBotMp.Status = $"LOW {ViewModel.BabeBotMp.ThresholdPercentage}%";
+                }
+                else
+                {
+                    ViewModel.BabeBotMp.Status = $"OK {ViewModel.BabeBotMp.ThresholdPercentage}%";
+                }
+            });
+            
+            // Trigger logic - BabeBot style (simplified for testing)
+            if (colorChanged)
+            {
+                var now = DateTime.UtcNow;
+                if ((now - ViewModel.BabeBotMp.LastExecution).TotalMilliseconds >= 500) // 500ms cooldown
+                {
+                    ViewModel.BabeBotMp.LastExecution = now;
+                    
+                    Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot MP TRIGGER: Color changed! Clicking ({ViewModel.BabeBotMp.PotionX},{ViewModel.BabeBotMp.PotionY})");
+                    
+                    // Send mouse click to potion coordinates
+                    PerformBackgroundClick(ViewModel.BabeBotMp.PotionX, ViewModel.BabeBotMp.PotionY, "BABEBOT_MP");
+                    ViewModel.BabeBotMp.ExecutionCount++;
+                    ViewModel.TriggerCount++;
+                }
+                else
+                {
+                    Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot MP on cooldown, {(500 - (now - ViewModel.BabeBotMp.LastExecution).TotalMilliseconds):F0}ms left");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] BabeBot MP check error: {ex.Message}");
+        }
+    }
+    
+    // Helper method for color comparison (simple tolerance-based)
+    private bool ColorsMatch(System.Drawing.Color c1, System.Drawing.Color c2, int tolerance = 15)
+    {
+        return Math.Abs(c1.R - c2.R) <= tolerance &&
+               Math.Abs(c1.G - c2.G) <= tolerance &&
+               Math.Abs(c1.B - c2.B) <= tolerance;
+    }
+    
+    private void SetupBabeBotUI()
+    {
+        // Setup initial UI values from ViewModel
+        BabeBotHpStart.Text = ViewModel.BabeBotHp.StartX.ToString();
+        BabeBotHpEnd.Text = ViewModel.BabeBotHp.EndX.ToString();
+        BabeBotHpY.Text = ViewModel.BabeBotHp.Y.ToString();
+        BabeBotHpPotionX.Text = ViewModel.BabeBotHp.PotionX.ToString();
+        BabeBotHpPotionY.Text = ViewModel.BabeBotHp.PotionY.ToString();
+        BabeBotHpThreshold.SelectedValue = ViewModel.BabeBotHp.ThresholdPercentage.ToString();
+        
+        BabeBotMpStart.Text = ViewModel.BabeBotMp.StartX.ToString();
+        BabeBotMpEnd.Text = ViewModel.BabeBotMp.EndX.ToString();
+        BabeBotMpY.Text = ViewModel.BabeBotMp.Y.ToString();
+        BabeBotMpPotionX.Text = ViewModel.BabeBotMp.PotionX.ToString();
+        BabeBotMpPotionY.Text = ViewModel.BabeBotMp.PotionY.ToString();
+        BabeBotMpThreshold.SelectedValue = ViewModel.BabeBotMp.ThresholdPercentage.ToString();
+        
+        // Attach event handlers for real-time updates
+        BabeBotHpStart.TextChanged += (s, e) => UpdateBabeBotHpFromUI();
+        BabeBotHpEnd.TextChanged += (s, e) => UpdateBabeBotHpFromUI();
+        BabeBotHpY.TextChanged += (s, e) => UpdateBabeBotHpFromUI();
+        BabeBotHpPotionX.TextChanged += (s, e) => UpdateBabeBotHpFromUI();
+        BabeBotHpPotionY.TextChanged += (s, e) => UpdateBabeBotHpFromUI();
+        BabeBotHpThreshold.SelectionChanged += (s, e) => UpdateBabeBotHpFromUI();
+        
+        BabeBotMpStart.TextChanged += (s, e) => UpdateBabeBotMpFromUI();
+        BabeBotMpEnd.TextChanged += (s, e) => UpdateBabeBotMpFromUI();
+        BabeBotMpY.TextChanged += (s, e) => UpdateBabeBotMpFromUI();
+        BabeBotMpPotionX.TextChanged += (s, e) => UpdateBabeBotMpFromUI();
+        BabeBotMpPotionY.TextChanged += (s, e) => UpdateBabeBotMpFromUI();
+        BabeBotMpThreshold.SelectionChanged += (s, e) => UpdateBabeBotMpFromUI();
+        
+        // Enable/Disable checkbox handlers
+        BabeBotHpEnabled.Checked += (s, e) =>
+        {
+            ViewModel.BabeBotHp.Enabled = true;
+            StartBabeBotMonitoring();
+            Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot HP monitoring ENABLED");
+        };
+        
+        BabeBotHpEnabled.Unchecked += (s, e) =>
+        {
+            ViewModel.BabeBotHp.Enabled = false;
+            Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot HP monitoring DISABLED");
+        };
+        
+        BabeBotMpEnabled.Checked += (s, e) =>
+        {
+            ViewModel.BabeBotMp.Enabled = true;
+            StartBabeBotMonitoring();
+            Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot MP monitoring ENABLED");
+        };
+        
+        BabeBotMpEnabled.Unchecked += (s, e) =>
+        {
+            ViewModel.BabeBotMp.Enabled = false;
+            Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot MP monitoring DISABLED");
+        };
+    }
+    
+    private void UpdateBabeBotHpFromUI()
+    {
+        try
+        {
+            if (int.TryParse(BabeBotHpStart.Text, out int startX))
+                ViewModel.BabeBotHp.StartX = startX;
+            if (int.TryParse(BabeBotHpEnd.Text, out int endX))
+                ViewModel.BabeBotHp.EndX = endX;
+            if (int.TryParse(BabeBotHpY.Text, out int y))
+                ViewModel.BabeBotHp.Y = y;
+            if (int.TryParse(BabeBotHpPotionX.Text, out int potionX))
+                ViewModel.BabeBotHp.PotionX = potionX;
+            if (int.TryParse(BabeBotHpPotionY.Text, out int potionY))
+                ViewModel.BabeBotHp.PotionY = potionY;
+            
+            if (BabeBotHpThreshold.SelectedItem is ComboBoxItem item && int.TryParse(item.Content.ToString(), out int threshold))
+                ViewModel.BabeBotHp.ThresholdPercentage = threshold;
+        }
+        catch { /* Ignore parsing errors */ }
+    }
+    
+    private void UpdateBabeBotMpFromUI()
+    {
+        try
+        {
+            if (int.TryParse(BabeBotMpStart.Text, out int startX))
+                ViewModel.BabeBotMp.StartX = startX;
+            if (int.TryParse(BabeBotMpEnd.Text, out int endX))
+                ViewModel.BabeBotMp.EndX = endX;
+            if (int.TryParse(BabeBotMpY.Text, out int y))
+                ViewModel.BabeBotMp.Y = y;
+            if (int.TryParse(BabeBotMpPotionX.Text, out int potionX))
+                ViewModel.BabeBotMp.PotionX = potionX;
+            if (int.TryParse(BabeBotMpPotionY.Text, out int potionY))
+                ViewModel.BabeBotMp.PotionY = potionY;
+            
+            if (BabeBotMpThreshold.SelectedItem is ComboBoxItem item && int.TryParse(item.Content.ToString(), out int threshold))
+                ViewModel.BabeBotMp.ThresholdPercentage = threshold;
+        }
+        catch { /* Ignore parsing errors */ }
+    }
+    
+    #endregion
+
+
 }

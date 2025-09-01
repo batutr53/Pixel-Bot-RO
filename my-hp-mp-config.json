@@ -1,0 +1,84 @@
+{
+  "profiles": {
+    "RevengerOnline": {
+      "global": {
+        "captureMode": "WGC",
+        "clickMode": "message",
+        "defaultHz": 30,
+        "logLevel": "Info",
+        "enableTelemetry": false,
+        "dryRun": false
+      },
+      "windows": [
+        {
+          "titleRegex": "Revenger|LDPlayer|Nox|BlueStacks|MEmu",
+          "hwnd": null,
+          "processName": null,
+          "dpiAware": true,
+          "probes": [
+            {
+              "name": "HP_Bar_Monitor",
+              "kind": "rect",
+              "x": 150,
+              "y": 25,
+              "width": 200,
+              "height": 5,
+              "mode": "level",
+              "metric": "rgb",
+              "refColor": [255, 50, 50],
+              "tolerance": 40,
+              "debounceMs": 200
+            },
+            {
+              "name": "MP_Bar_Monitor",
+              "kind": "rect",
+              "x": 150,
+              "y": 35,
+              "width": 200,
+              "height": 5,
+              "mode": "level",
+              "metric": "rgb",
+              "refColor": [50, 100, 255],
+              "tolerance": 40,
+              "debounceMs": 200
+            }
+          ],
+          "events": [
+            {
+              "when": "HP_Bar_Monitor:level-low",
+              "click": { "x": 100, "y": 100 },
+              "cooldownMs": 2000,
+              "priority": 1
+            },
+            {
+              "when": "MP_Bar_Monitor:level-low",
+              "click": { "x": 150, "y": 100 },
+              "cooldownMs": 2000,
+              "priority": 1
+            }
+          ],
+          "periodicClicks": [],
+          "limits": {
+            "maxBurstPerSec": 5,
+            "globalCooldownMs": 200
+          }
+        }
+      ],
+      "hotkeys": "Default"
+    }
+  },
+  "hotkeySets": {
+    "Default": {
+      "toggleOverlay": "F1",
+      "lockWindow": "F2",
+      "toggleSnap": "F3",
+      "magnifierToggle": "F4",
+      "shapePoint": "P",
+      "shapeRect": "R",
+      "deleteShape": "Del",
+      "saveConfig": "Ctrl+S",
+      "panicStopAll": "Pause"
+    }
+  },
+  "activeHotkeys": "Default"
+}

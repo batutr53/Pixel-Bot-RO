@@ -78,9 +78,11 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="❤️ HP Probe" Style="{StaticResource SectionHeaderStyle}" FontSize="11" Margin="0,0,0,3"/>
-                        <CheckBox Grid.Column="1" x:Name="HpTriggerEnabled" Content="Enable" IsChecked="True" Foreground="#cccccc" FontSize="9"/>
+                        <Button Grid.Column="1" Content="🎯 Show Shapes" Style="{StaticResource SmallButtonStyle}" Click="ShowDraggableShapes_Click" Width="80" Margin="0,0,5,0" FontSize="8"/>
+                        <CheckBox Grid.Column="2" x:Name="HpTriggerEnabled" Content="Enable" IsChecked="True" Foreground="#cccccc" FontSize="9"/>
                     </Grid>
                     
                     <Grid>
@@ -209,6 +211,307 @@
                         <TextBox Grid.Column="2" x:Name="MpTriggerY" Style="{StaticResource CoordTextBoxStyle}" Text="0" ToolTip="MP Potion Click Y"/>
                         <TextBox Grid.Column="3" x:Name="MpTriggerCooldown" Style="{StaticResource CoordTextBoxStyle}" Text="120" ToolTip="Cooldown ms"/>
                         <Button Grid.Column="4" Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickMpTrigger_Click" HorizontalAlignment="Left" Width="25" Margin="5,0,0,0"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+            
+            <!-- Python-Style HP/MP Percentage Monitoring Section -->
+            <Border Background="#0d4f3c" CornerRadius="3" Padding="6" Margin="0,0,0,5">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="🎯 Python-Style HP/MP %" Style="{StaticResource SectionHeaderStyle}" FontSize="11" Margin="0,0,0,3" Foreground="#90EE90"/>
+                        <CheckBox Grid.Column="1" x:Name="PercentageMonitoringEnabled" Content="Enable" IsChecked="False" Foreground="#cccccc" FontSize="9"/>
+                    </Grid>
+                    
+                    <!-- HP Percentage Bar -->
+                    <Grid Margin="0,3,0,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="45"/>
+                            <ColumnDefinition Width="45"/>
+                            <ColumnDefinition Width="45"/>
+                            <ColumnDefinition Width="45"/>
+                            <ColumnDefinition Width="45"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0" Text="❤️HP:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#FF6B6B"/>
+                        <TextBox Grid.Column="1" x:Name="HpPercentageStartX" Style="{StaticResource CoordTextBoxStyle}" Text="100" ToolTip="HP Bar Start X"/>
+                        <TextBox Grid.Column="2" x:Name="HpPercentageEndX" Style="{StaticResource CoordTextBoxStyle}" Text="250" ToolTip="HP Bar End X"/>
+                        <TextBox Grid.Column="3" x:Name="HpPercentageY" Style="{StaticResource CoordTextBoxStyle}" Text="67" ToolTip="HP Bar Y"/>
+                        <TextBox Grid.Column="4" x:Name="HpPercentageThreshold" Style="{StaticResource CoordTextBoxStyle}" Text="50" ToolTip="Trigger below this %"/>
+                        <TextBox Grid.Column="5" x:Name="HpPercentageTolerance" Style="{StaticResource CoordTextBoxStyle}" Text="30" ToolTip="Color tolerance"/>
+                        <StackPanel Grid.Column="6" Orientation="Horizontal" Margin="5,0,0,0">
+                            <Button Content="📏" Style="{StaticResource SmallButtonStyle}" Click="PickHpPercentageBar_Click" Width="25" Margin="0,0,2,0" ToolTip="Pick HP Bar Area"/>
+                            <Rectangle x:Name="HpPercentageColorDisplay" Width="20" Height="16" Fill="#100CFF" Stroke="#555" StrokeThickness="1" Margin="2,0"/>
+                        </StackPanel>
+                    </Grid>
+                    
+                    <!-- MP Percentage Bar -->
+                    <Grid Margin="0,0,0,3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="45"/>
+                            <ColumnDefinition Width="45"/>
+                            <ColumnDefinition Width="45"/>
+                            <ColumnDefinition Width="45"/>
+                            <ColumnDefinition Width="45"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0" Text="💙MP:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#4FC3F7"/>
+                        <TextBox Grid.Column="1" x:Name="MpPercentageStartX" Style="{StaticResource CoordTextBoxStyle}" Text="100" ToolTip="MP Bar Start X"/>
+                        <TextBox Grid.Column="2" x:Name="MpPercentageEndX" Style="{StaticResource CoordTextBoxStyle}" Text="250" ToolTip="MP Bar End X"/>
+                        <TextBox Grid.Column="3" x:Name="MpPercentageY" Style="{StaticResource CoordTextBoxStyle}" Text="84" ToolTip="MP Bar Y"/>
+                        <TextBox Grid.Column="4" x:Name="MpPercentageThreshold" Style="{StaticResource CoordTextBoxStyle}" Text="50" ToolTip="Trigger below this %"/>
+                        <TextBox Grid.Column="5" x:Name="MpPercentageTolerance" Style="{StaticResource CoordTextBoxStyle}" Text="30" ToolTip="Color tolerance"/>
+                        <StackPanel Grid.Column="6" Orientation="Horizontal" Margin="5,0,0,0">
+                            <Button Content="📏" Style="{StaticResource SmallButtonStyle}" Click="PickMpPercentageBar_Click" Width="25" Margin="0,0,2,0" ToolTip="Pick MP Bar Area"/>
+                            <Rectangle x:Name="MpPercentageColorDisplay" Width="20" Height="16" Fill="#FF4D17" Stroke="#555" StrokeThickness="1" Margin="2,0"/>
+                        </StackPanel>
+                    </Grid>
+                    
+                    <!-- Python-style Potion Click Coordinates -->
+                    <Grid Margin="0,5,0,3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="45"/>
+                            <ColumnDefinition Width="45"/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0" Text="🧪HP:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#FF6B6B"/>
+                        <TextBox Grid.Column="1" x:Name="PythonHpPotionX" Style="{StaticResource CoordTextBoxStyle}" Text="400" ToolTip="HP Potion Click X"/>
+                        <TextBox Grid.Column="2" x:Name="PythonHpPotionY" Style="{StaticResource CoordTextBoxStyle}" Text="300" ToolTip="HP Potion Click Y"/>
+                        <TextBox Grid.Column="3" x:Name="PythonHpPotionCooldown" Style="{StaticResource CoordTextBoxStyle}" Text="500" ToolTip="Cooldown ms"/>
+                        <Button Grid.Column="4" Content="📍 Pick HP Potion" Style="{StaticResource SmallButtonStyle}" Click="PickPythonHpPotion_Click" HorizontalAlignment="Left" Width="90" Margin="5,0,0,0"/>
+                    </Grid>
+                    
+                    <Grid Margin="0,0,0,3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="45"/>
+                            <ColumnDefinition Width="45"/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0" Text="💉MP:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#4FC3F7"/>
+                        <TextBox Grid.Column="1" x:Name="PythonMpPotionX" Style="{StaticResource CoordTextBoxStyle}" Text="450" ToolTip="MP Potion Click X"/>
+                        <TextBox Grid.Column="2" x:Name="PythonMpPotionY" Style="{StaticResource CoordTextBoxStyle}" Text="350" ToolTip="MP Potion Click Y"/>
+                        <TextBox Grid.Column="3" x:Name="PythonMpPotionCooldown" Style="{StaticResource CoordTextBoxStyle}" Text="500" ToolTip="Cooldown ms"/>
+                        <Button Grid.Column="4" Content="📍 Pick MP Potion" Style="{StaticResource SmallButtonStyle}" Click="PickPythonMpPotion_Click" HorizontalAlignment="Left" Width="90" Margin="5,0,0,0"/>
+                    </Grid>
+                    
+                    <!-- Current Status Display -->
+                    <Grid Margin="0,5,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="60"/>
+                            <ColumnDefinition Width="60"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="HP Status" Style="{StaticResource LabelStyle}" FontSize="8"/>
+                            <TextBlock x:Name="HpPercentageStatus" Text="100%" Style="{StaticResource ValueStyle}" FontSize="10" Foreground="#90EE90"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,2">
+                                <Rectangle x:Name="HpCurrentColorDisplay" Width="12" Height="12" Fill="#000000" Stroke="#555" StrokeThickness="1" Margin="0,0,2,0"/>
+                                <TextBlock x:Name="HpCurrentColorText" Text="0,0,0" Style="{StaticResource ValueStyle}" FontSize="7" Foreground="#888"/>
+                            </StackPanel>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="MP Status" Style="{StaticResource LabelStyle}" FontSize="8"/>
+                            <TextBlock x:Name="MpPercentageStatus" Text="100%" Style="{StaticResource ValueStyle}" FontSize="10" Foreground="#87CEEB"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,2">
+                                <Rectangle x:Name="MpCurrentColorDisplay" Width="12" Height="12" Fill="#000000" Stroke="#555" StrokeThickness="1" Margin="0,0,2,0"/>
+                                <TextBlock x:Name="MpCurrentColorText" Text="0,0,0" Style="{StaticResource ValueStyle}" FontSize="7" Foreground="#888"/>
+                            </StackPanel>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Monitor Position" Style="{StaticResource LabelStyle}" FontSize="8"/>
+                            <TextBlock x:Name="PercentageMonitorPosition" Text="X: 175 (50%)" Style="{StaticResource ValueStyle}" FontSize="8" Foreground="#FFD700"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,3">
+                                <Button Content="🎨 Capture Current Colors" Style="{StaticResource SmallButtonStyle}" Click="CaptureCurrentColors_Click" FontSize="8" Height="18" Padding="2" Margin="0,0,3,0"/>
+                                <Button Content="🔍 Find HP/MP" Style="{StaticResource SmallButtonStyle}" Click="FindHpMpBars_Click" FontSize="8" Height="18" Padding="2"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+            
+            <!-- BabeBot Style HP/MP System -->
+            <Border Background="#2d1b3d" CornerRadius="3" Padding="6" Margin="0,0,0,5">
+                <StackPanel>
+                    <TextBlock Text="🤖 BabeBot Style HP/MP %" Style="{StaticResource SectionHeaderStyle}" FontSize="11" Margin="0,0,0,5" Foreground="#DA70D6"/>
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- HP Section -->
+                        <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                            <TextBlock Text="🩸 HP Monitor" Style="{StaticResource SectionHeaderStyle}" FontSize="9" Margin="0,0,0,3" Foreground="#FF6B6B"/>
+                            
+                            <!-- HP Bar Coordinates -->
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="30"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <TextBlock Grid.Column="0" Text="Bar:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="8"/>
+                                <TextBox Grid.Column="1" x:Name="BabeBotHpStart" Style="{StaticResource CoordTextBoxStyle}" Text="107" ToolTip="Start X"/>
+                                <TextBox Grid.Column="2" x:Name="BabeBotHpEnd" Style="{StaticResource CoordTextBoxStyle}" Text="325" ToolTip="End X"/>
+                                <TextBox Grid.Column="3" x:Name="BabeBotHpY" Style="{StaticResource CoordTextBoxStyle}" Text="81" ToolTip="Y Position"/>
+                            </Grid>
+                            
+                            <!-- HP Threshold and Potion -->
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="35"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <TextBlock Grid.Column="0" Text="%:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="8"/>
+                                <ComboBox Grid.Column="1" x:Name="BabeBotHpThreshold" FontSize="8" Height="20">
+                                    <ComboBoxItem Content="5" />
+                                    <ComboBoxItem Content="10" />
+                                    <ComboBoxItem Content="15" />
+                                    <ComboBoxItem Content="20" />
+                                    <ComboBoxItem Content="25" />
+                                    <ComboBoxItem Content="30" />
+                                    <ComboBoxItem Content="35" />
+                                    <ComboBoxItem Content="40" />
+                                    <ComboBoxItem Content="45" />
+                                    <ComboBoxItem Content="50" />
+                                    <ComboBoxItem Content="55" />
+                                    <ComboBoxItem Content="60" />
+                                    <ComboBoxItem Content="65" />
+                                    <ComboBoxItem Content="70" />
+                                    <ComboBoxItem Content="75" />
+                                    <ComboBoxItem Content="80" />
+                                    <ComboBoxItem Content="85" />
+                                    <ComboBoxItem Content="90" IsSelected="True"/>
+                                    <ComboBoxItem Content="95" />
+                                </ComboBox>
+                                <TextBox Grid.Column="2" x:Name="BabeBotHpPotionX" Style="{StaticResource CoordTextBoxStyle}" Text="376" ToolTip="HP Potion X"/>
+                                <TextBox Grid.Column="3" x:Name="BabeBotHpPotionY" Style="{StaticResource CoordTextBoxStyle}" Text="236" ToolTip="HP Potion Y"/>
+                            </Grid>
+                            
+                            <!-- HP Controls -->
+                            <Grid Margin="0,0,0,3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="15"/>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <CheckBox Grid.Column="0" x:Name="BabeBotHpEnabled" IsChecked="False" VerticalAlignment="Center"/>
+                                <Button Grid.Column="1" x:Name="BabeBotHpCalibrate" Content="📊 Cal" Style="{StaticResource SmallButtonStyle}" Click="BabeBotHpCalibrate_Click" FontSize="8" Height="20"/>
+                                <Button Grid.Column="3" Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickBabeBotHpPotion_Click" Width="25" HorizontalAlignment="Left" Margin="3,0,0,0"/>
+                            </Grid>
+                            
+                            <!-- HP Status -->
+                            <StackPanel Margin="0,0,0,0">
+                                <StackPanel Orientation="Horizontal" Margin="0,1">
+                                    <Rectangle x:Name="BabeBotHpCurrentColor" Width="15" Height="15" Fill="#000000" Stroke="#555" StrokeThickness="1" Margin="0,0,3,0"/>
+                                    <TextBlock x:Name="BabeBotHpCurrentText" Text="0,0,0" Style="{StaticResource ValueStyle}" FontSize="7" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <TextBlock x:Name="BabeBotHpStatus" Text="--" Style="{StaticResource ValueStyle}" FontSize="8" Foreground="#90EE90"/>
+                            </StackPanel>
+                        </StackPanel>
+                        
+                        <!-- MP Section -->
+                        <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                            <TextBlock Text="💙 MP Monitor" Style="{StaticResource SectionHeaderStyle}" FontSize="9" Margin="0,0,0,3" Foreground="#4FC3F7"/>
+                            
+                            <!-- MP Bar Coordinates -->
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="30"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <TextBlock Grid.Column="0" Text="Bar:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="8"/>
+                                <TextBox Grid.Column="1" x:Name="BabeBotMpStart" Style="{StaticResource CoordTextBoxStyle}" Text="103" ToolTip="Start X"/>
+                                <TextBox Grid.Column="2" x:Name="BabeBotMpEnd" Style="{StaticResource CoordTextBoxStyle}" Text="306" ToolTip="End X"/>
+                                <TextBox Grid.Column="3" x:Name="BabeBotMpY" Style="{StaticResource CoordTextBoxStyle}" Text="104" ToolTip="Y Position"/>
+                            </Grid>
+                            
+                            <!-- MP Threshold and Potion -->
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="35"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <TextBlock Grid.Column="0" Text="%:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="8"/>
+                                <ComboBox Grid.Column="1" x:Name="BabeBotMpThreshold" FontSize="8" Height="20">
+                                    <ComboBoxItem Content="5" />
+                                    <ComboBoxItem Content="10" />
+                                    <ComboBoxItem Content="15" />
+                                    <ComboBoxItem Content="20" />
+                                    <ComboBoxItem Content="25" />
+                                    <ComboBoxItem Content="30" />
+                                    <ComboBoxItem Content="35" />
+                                    <ComboBoxItem Content="40" />
+                                    <ComboBoxItem Content="45" />
+                                    <ComboBoxItem Content="50" />
+                                    <ComboBoxItem Content="55" />
+                                    <ComboBoxItem Content="60" />
+                                    <ComboBoxItem Content="65" />
+                                    <ComboBoxItem Content="70" />
+                                    <ComboBoxItem Content="75" />
+                                    <ComboBoxItem Content="80" />
+                                    <ComboBoxItem Content="85" />
+                                    <ComboBoxItem Content="90" IsSelected="True"/>
+                                    <ComboBoxItem Content="95" />
+                                </ComboBox>
+                                <TextBox Grid.Column="2" x:Name="BabeBotMpPotionX" Style="{StaticResource CoordTextBoxStyle}" Text="376" ToolTip="MP Potion X"/>
+                                <TextBox Grid.Column="3" x:Name="BabeBotMpPotionY" Style="{StaticResource CoordTextBoxStyle}" Text="200" ToolTip="MP Potion Y"/>
+                            </Grid>
+                            
+                            <!-- MP Controls -->
+                            <Grid Margin="0,0,0,3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="15"/>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <CheckBox Grid.Column="0" x:Name="BabeBotMpEnabled" IsChecked="False" VerticalAlignment="Center"/>
+                                <Button Grid.Column="1" x:Name="BabeBotMpCalibrate" Content="📊 Cal" Style="{StaticResource SmallButtonStyle}" Click="BabeBotMpCalibrate_Click" FontSize="8" Height="20"/>
+                                <Button Grid.Column="3" Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickBabeBotMpPotion_Click" Width="25" HorizontalAlignment="Left" Margin="3,0,0,0"/>
+                            </Grid>
+                            
+                            <!-- MP Status -->
+                            <StackPanel Margin="0,0,0,0">
+                                <StackPanel Orientation="Horizontal" Margin="0,1">
+                                    <Rectangle x:Name="BabeBotMpCurrentColor" Width="15" Height="15" Fill="#000000" Stroke="#555" StrokeThickness="1" Margin="0,0,3,0"/>
+                                    <TextBlock x:Name="BabeBotMpCurrentText" Text="0,0,0" Style="{StaticResource ValueStyle}" FontSize="7" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <TextBlock x:Name="BabeBotMpStatus" Text="--" Style="{StaticResource ValueStyle}" FontSize="8" Foreground="#87CEEB"/>
+                            </StackPanel>
+                        </StackPanel>
                     </Grid>
                 </StackPanel>
             </Border>

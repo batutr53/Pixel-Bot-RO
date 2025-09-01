@@ -23,6 +23,7 @@ public class WindowTarget
     public string? ProcessName { get; set; }
     public bool DpiAware { get; set; } = true;
     public List<ProbeConfig> Probes { get; set; } = new();
+    public List<PercentageProbeConfig> PercentageProbes { get; set; } = new();
     public List<EventConfig> Events { get; set; } = new();
     public List<PeriodicClickConfig> PeriodicClicks { get; set; } = new();
     public RateLimitConfig? Limits { get; set; }
@@ -67,6 +68,23 @@ public class PeriodicClickConfig
     public int? PeriodMs { get; set; }
     public double? PeriodSec { get; set; }
     public bool Enabled { get; set; }
+}
+
+public class PercentageProbeConfig
+{
+    public string Name { get; set; } = "";
+    public string Type { get; set; } = "HP"; // HP, MP, Custom
+    public int StartX { get; set; }
+    public int EndX { get; set; }
+    public int Y { get; set; }
+    public double MonitorPercentage { get; set; } = 50.0;
+    public int[] ExpectedColor { get; set; } = new[] { 255, 0, 0 }; // Default red for HP
+    public int[]? EmptyColor { get; set; }
+    public int Tolerance { get; set; } = 30;
+    public int Box { get; set; } = 1;
+    public string Mode { get; set; } = "edge";
+    public string Metric { get; set; } = "rgb";
+    public int? DebounceMs { get; set; } = 100;
 }
 
 public class RateLimitConfig

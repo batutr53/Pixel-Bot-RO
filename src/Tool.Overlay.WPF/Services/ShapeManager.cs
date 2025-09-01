@@ -120,7 +120,7 @@ public class ShapeManager : IDisposable
                 Fill = Brushes.White,
                 Stroke = Brushes.Black,
                 StrokeThickness = 1,
-                Cursor = Cursors.SizeAll,
+                Cursor = System.Windows.Input.Cursors.SizeAll,
                 Visibility = Visibility.Collapsed
             };
 

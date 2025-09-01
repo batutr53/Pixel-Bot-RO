@@ -25,7 +25,7 @@ public class WindowPicker : Window
         Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(40, 0, 0, 0));
         Topmost = true;
         ShowInTaskbar = false;
-        Cursor = Cursors.Cross;
+        Cursor = System.Windows.Input.Cursors.Cross;
         Focusable = true;
         
         // Set bounds to cover all monitors

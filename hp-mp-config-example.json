@@ -1,0 +1,167 @@
+{
+  "profiles": {
+    "HP-MP-Monitor": {
+      "global": {
+        "captureMode": "WGC",
+        "clickMode": "message",
+        "defaultHz": 80,
+        "logLevel": "Info",
+        "enableTelemetry": true,
+        "dryRun": false
+      },
+      "windows": [
+        {
+          "titleRegex": "(RO|Ragnarok|MuMu)",
+          "hwnd": null,
+          "processName": null,
+          "dpiAware": true,
+          "probes": [],
+          "percentageProbes": [
+            {
+              "name": "HP_Monitor_50",
+              "type": "HP",
+              "startX": 100,
+              "endX": 250,
+              "y": 67,
+              "monitorPercentage": 50.0,
+              "expectedColor": [16, 12, 255],
+              "emptyColor": [0, 0, 0],
+              "tolerance": 30,
+              "box": 1,
+              "mode": "edge",
+              "metric": "rgb",
+              "debounceMs": 100
+            },
+            {
+              "name": "HP_Monitor_25",
+              "type": "HP",
+              "startX": 100,
+              "endX": 250,
+              "y": 67,
+              "monitorPercentage": 25.0,
+              "expectedColor": [16, 12, 255],
+              "emptyColor": [0, 0, 0],
+              "tolerance": 30,
+              "box": 1,
+              "mode": "edge",
+              "metric": "rgb",
+              "debounceMs": 100
+            },
+            {
+              "name": "HP_Monitor_75",
+              "type": "HP",
+              "startX": 100,
+              "endX": 250,
+              "y": 67,
+              "monitorPercentage": 75.0,
+              "expectedColor": [16, 12, 255],
+              "emptyColor": [0, 0, 0],
+              "tolerance": 30,
+              "box": 1,
+              "mode": "edge",
+              "metric": "rgb",
+              "debounceMs": 100
+            },
+            {
+              "name": "MP_Monitor_50",
+              "type": "MP",
+              "startX": 100,
+              "endX": 250,
+              "y": 84,
+              "monitorPercentage": 50.0,
+              "expectedColor": [255, 77, 23],
+              "emptyColor": [0, 0, 0],
+              "tolerance": 30,
+              "box": 1,
+              "mode": "edge",
+              "metric": "rgb",
+              "debounceMs": 100
+            },
+            {
+              "name": "MP_Monitor_25",
+              "type": "MP",
+              "startX": 100,
+              "endX": 250,
+              "y": 84,
+              "monitorPercentage": 25.0,
+              "expectedColor": [255, 77, 23],
+              "emptyColor": [0, 0, 0],
+              "tolerance": 30,
+              "box": 1,
+              "mode": "edge",
+              "metric": "rgb",
+              "debounceMs": 100
+            },
+            {
+              "name": "MP_Monitor_75",
+              "type": "MP",
+              "startX": 100,
+              "endX": 250,
+              "y": 84,
+              "monitorPercentage": 75.0,
+              "expectedColor": [255, 77, 23],
+              "emptyColor": [0, 0, 0],
+              "tolerance": 30,
+              "box": 1,
+              "mode": "edge",
+              "metric": "rgb",
+              "debounceMs": 100
+            }
+          ],
+          "events": [
+            {
+              "when": "HP_Monitor_50:threshold-below",
+              "click": { "x": 400, "y": 300 },
+              "cooldownMs": 500,
+              "priority": 1
+            },
+            {
+              "when": "HP_Monitor_25:threshold-below",
+              "click": { "x": 400, "y": 300 },
+              "cooldownMs": 300,
+              "priority": 2
+            },
+            {
+              "when": "MP_Monitor_50:threshold-below",
+              "click": { "x": 450, "y": 350 },
+              "cooldownMs": 500,
+              "priority": 1
+            },
+            {
+              "when": "MP_Monitor_25:threshold-below",
+              "click": { "x": 450, "y": 350 },
+              "cooldownMs": 300,
+              "priority": 2
+            }
+          ],
+          "periodicClicks": [],
+          "limits": {
+            "maxBurstPerSec": 20,
+            "globalCooldownMs": 50
+          }
+        }
+      ],
+      "hotkeys": "Default"
+    }
+  },
+  "hotkeySets": {
+    "Default": {
+      "toggleOverlay": "Ctrl+~",
+      "lockWindow": "F2",
+      "toggleSnap": "F3",
+      "magnifierToggle": "F4",
+      "captureModeCycle": "F6",
+      "clickModeCycle": "F7",
+      "shapePoint": "P",
+      "shapeRect": "R",
+      "deleteShape": "Del",
+      "copyColorAtCursor": "Ctrl+Shift+C",
+      "saveConfig": "Ctrl+S",
+      "openConfig": "Ctrl+O",
+      "profileNext": "Ctrl+Alt+Right",
+      "profilePrev": "Ctrl+Alt+Left",
+      "panicStopAll": "Pause"
+    }
+  },
+  "activeHotkeys": "Default"
+}

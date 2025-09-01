@@ -18,12 +18,12 @@ public static class ColorSampler
             var processName = GetProcessName(hwnd);
             if (processName.Contains("NemuPlayer") || processName.Contains("MuMuPlayer") || processName.Contains("MuMuNxDevice"))
             {
-                // Same offset as CoordinatePicker - but REVERSE for color sampling
-                compensatedX = clientX + 8;
-                compensatedY = clientY + 50;
+                // FIXED: Use SAME offset direction as CoordinatePicker
+                compensatedX = clientX + 8;  // CoordinatePicker does -8, so for reading we need +8
+                compensatedY = clientY + 50; // CoordinatePicker does -50, so for reading we need +50
                 
-                // Debug color sampling coordinates
-                if (clientX < 1000 && clientY < 1000) // Avoid spam, only log reasonable coordinates
+                // Debug color sampling coordinates (reduced frequency)
+                if (clientX < 1000 && clientY < 1000 && (clientX + clientY) % 100 == 0) // Log every 100th coordinate
                 {
                     System.Console.WriteLine($"ColorSampler MuMu OFFSET: Original({clientX},{clientY}) -> Compensated({compensatedX},{compensatedY}) Process:{processName}");
                 }

@@ -28,7 +28,7 @@ public class CoordinatePicker : Window
         Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(50, 0, 0, 0));
         Topmost = true;
         ShowInTaskbar = false;
-        Cursor = Cursors.Cross;
+        Cursor = System.Windows.Input.Cursors.Cross;
         
         // Set bounds to cover all monitors
         SetMultiMonitorBounds();
