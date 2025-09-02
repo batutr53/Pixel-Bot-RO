@@ -197,6 +197,50 @@ public partial class MainWindow : Window
             card.ViewModel.Extra3Click.PeriodMs = extra3Click.PeriodMs ?? (int)(extra3Click.PeriodSec * 1000 ?? 1000);
             card.ViewModel.Extra3Click.Enabled = extra3Click.Enabled;
         }
+
+        // Load BabeBot percentage probes
+        var babeBotHp = windowConfig.PercentageProbes.FirstOrDefault(p => p.Name.Contains("BabeBotHP"));
+        if (babeBotHp != null)
+        {
+            card.ViewModel.BabeBotHp.StartX = babeBotHp.StartX;
+            card.ViewModel.BabeBotHp.EndX = babeBotHp.EndX;
+            card.ViewModel.BabeBotHp.Y = babeBotHp.Y;
+            card.ViewModel.BabeBotHp.ThresholdPercentage = (int)babeBotHp.MonitorPercentage;
+            if (babeBotHp.ExpectedColor.Length >= 3)
+            {
+                var color = System.Drawing.Color.FromArgb(babeBotHp.ExpectedColor[0], babeBotHp.ExpectedColor[1], babeBotHp.ExpectedColor[2]);
+                card.ViewModel.BabeBotHp.ReferenceColor = color;
+            }
+        }
+
+        var babeBotMp = windowConfig.PercentageProbes.FirstOrDefault(p => p.Name.Contains("BabeBotMP"));
+        if (babeBotMp != null)
+        {
+            card.ViewModel.BabeBotMp.StartX = babeBotMp.StartX;
+            card.ViewModel.BabeBotMp.EndX = babeBotMp.EndX;
+            card.ViewModel.BabeBotMp.Y = babeBotMp.Y;
+            card.ViewModel.BabeBotMp.ThresholdPercentage = (int)babeBotMp.MonitorPercentage;
+            if (babeBotMp.ExpectedColor.Length >= 3)
+            {
+                var color = System.Drawing.Color.FromArgb(babeBotMp.ExpectedColor[0], babeBotMp.ExpectedColor[1], babeBotMp.ExpectedColor[2]);
+                card.ViewModel.BabeBotMp.ReferenceColor = color;
+            }
+        }
+
+        // Load BabeBot potion clicks
+        var babeBotHpClick = windowConfig.PeriodicClicks.FirstOrDefault(p => p.Name == "BabeBotHP");
+        if (babeBotHpClick != null)
+        {
+            card.ViewModel.BabeBotHp.PotionX = babeBotHpClick.X;
+            card.ViewModel.BabeBotHp.PotionY = babeBotHpClick.Y;
+        }
+
+        var babeBotMpClick = windowConfig.PeriodicClicks.FirstOrDefault(p => p.Name == "BabeBotMP");
+        if (babeBotMpClick != null)
+        {
+            card.ViewModel.BabeBotMp.PotionX = babeBotMpClick.X;
+            card.ViewModel.BabeBotMp.PotionY = babeBotMpClick.Y;
+        }
     }
 
     private void UpdateTimer_Tick(object? sender, EventArgs e)
@@ -328,8 +372,49 @@ public partial class MainWindow : Window
                         Priority = 1
                     }
                 },
+                PercentageProbes = new List<PercentageProbeConfig>
+                {
+                    new PercentageProbeConfig
+                    {
+                        Name = $"BabeBotHP{card.ClientId}",
+                        Type = "HP",
+                        StartX = card.ViewModel.BabeBotHp.StartX,
+                        EndX = card.ViewModel.BabeBotHp.EndX,
+                        Y = card.ViewModel.BabeBotHp.Y,
+                        MonitorPercentage = GetBabeBotThresholdValue(card, "HP"),
+                        ExpectedColor = new[] { (int)card.ViewModel.BabeBotHp.ReferenceColor.R, (int)card.ViewModel.BabeBotHp.ReferenceColor.G, (int)card.ViewModel.BabeBotHp.ReferenceColor.B },
+                        Tolerance = 30
+                    },
+                    new PercentageProbeConfig
+                    {
+                        Name = $"BabeBotMP{card.ClientId}",
+                        Type = "MP",
+                        StartX = card.ViewModel.BabeBotMp.StartX,
+                        EndX = card.ViewModel.BabeBotMp.EndX,
+                        Y = card.ViewModel.BabeBotMp.Y,
+                        MonitorPercentage = GetBabeBotThresholdValue(card, "MP"),
+                        ExpectedColor = new[] { (int)card.ViewModel.BabeBotMp.ReferenceColor.R, (int)card.ViewModel.BabeBotMp.ReferenceColor.G, (int)card.ViewModel.BabeBotMp.ReferenceColor.B },
+                        Tolerance = 30
+                    }
+                },
                 PeriodicClicks = new List<PeriodicClickConfig>
                 {
+                    new PeriodicClickConfig
+                    {
+                        Name = "BabeBotHP",
+                        X = card.ViewModel.BabeBotHp.PotionX,
+                        Y = card.ViewModel.BabeBotHp.PotionY,
+                        PeriodMs = 500, // Default cooldown
+                        Enabled = card.ViewModel.BabeBotHp.Enabled
+                    },
+                    new PeriodicClickConfig
+                    {
+                        Name = "BabeBotMP",
+                        X = card.ViewModel.BabeBotMp.PotionX,
+                        Y = card.ViewModel.BabeBotMp.PotionY,
+                        PeriodMs = 500, // Default cooldown
+                        Enabled = card.ViewModel.BabeBotMp.Enabled
+                    },
                     new PeriodicClickConfig
                     {
                         Name = "Y",
@@ -461,11 +546,26 @@ public partial class MainWindow : Window
         }
     }
 
+    private void PanicStart_Click(object sender, RoutedEventArgs e)
+    {
+        int startedCount = 0;
+        foreach (var card in _clientCards)
+        {
+            if (card.ViewModel.TargetHwnd != IntPtr.Zero)
+            {
+                card.StartClient();
+                startedCount++;
+            }
+        }
+        
+        StatusText.Text = $"🚀 PANIC START - {startedCount} clients started";
+    }
+
     private void PanicStop_Click(object sender, RoutedEventArgs e)
     {
         foreach (var card in _clientCards)
         {
-            card.ViewModel.IsRunning = false;
+            card.StopClient();
         }
         
         StatusText.Text = "🚨 PANIC STOP - All automation stopped";
@@ -754,5 +854,19 @@ public partial class MainWindow : Window
         }
         
         return null;
+    }
+    
+    private double GetBabeBotThresholdValue(ClientCard card, string type)
+    {
+        if (type == "HP")
+        {
+            return card.GetBabeBotHpThreshold();
+        }
+        else if (type == "MP")
+        {
+            return card.GetBabeBotMpThreshold();
+        }
+        
+        return 90.0; // Default threshold
     }
 }

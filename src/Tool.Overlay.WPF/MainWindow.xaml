@@ -101,6 +101,7 @@
                     <Button Content="📁 Load" Style="{StaticResource ActionButtonStyle}" Click="LoadConfig_Click" Margin="0,0,5,0"/>
                     <Button Content="⚙️ Settings" Style="{StaticResource ActionButtonStyle}" Click="Settings_Click" Margin="0,0,10,0"/>
                     <CheckBox x:Name="OverlayModeCheckBox" Content="Overlay Mode" Foreground="#cccccc" VerticalAlignment="Center" Margin="0,0,10,0" Checked="OverlayMode_Checked" Unchecked="OverlayMode_Unchecked"/>
+                    <Button Content="🚀 PANIC START" Background="#28a745" Style="{StaticResource ActionButtonStyle}" Click="PanicStart_Click" Margin="0,0,5,0"/>
                     <Button Content="🚨 PANIC STOP" Background="#dc3545" Style="{StaticResource ActionButtonStyle}" Click="PanicStop_Click"/>
                 </StackPanel>
             </Grid>

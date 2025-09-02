@@ -1247,6 +1247,38 @@ public partial class ClientCard : UserControl
         }
     }
 
+    // Public methods for panic buttons
+    public void StartClient()
+    {
+        StartClient_Click(null, null);
+    }
+    
+    public void StopClient()
+    {
+        StopClient_Click(null, null);
+    }
+    
+    // Public methods for getting ComboBox values
+    public double GetBabeBotHpThreshold()
+    {
+        var selectedItem = BabeBotHpThreshold?.SelectedItem as System.Windows.Controls.ComboBoxItem;
+        if (selectedItem?.Content?.ToString() is string value && double.TryParse(value, out var threshold))
+        {
+            return threshold;
+        }
+        return 90.0; // Default
+    }
+    
+    public double GetBabeBotMpThreshold()
+    {
+        var selectedItem = BabeBotMpThreshold?.SelectedItem as System.Windows.Controls.ComboBoxItem;
+        if (selectedItem?.Content?.ToString() is string value && double.TryParse(value, out var threshold))
+        {
+            return threshold;
+        }
+        return 90.0; // Default
+    }
+    
     private void StartClient_Click(object sender, RoutedEventArgs e)
     {
         if (ViewModel.TargetHwnd == IntPtr.Zero)
@@ -1266,6 +1298,13 @@ public partial class ClientCard : UserControl
         StartPeriodicClicks();
         StartMonitoring();
         
+        // Auto-enable BabeBot HP/MP when starting client
+        ViewModel.BabeBotHp.Enabled = true;
+        ViewModel.BabeBotMp.Enabled = true;
+        StartBabeBotMonitoring();
+        
+        Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot HP/MP auto-enabled on start");
+        
         // Debug HP/MP settings
         Console.WriteLine($"[{ViewModel.ClientName}] START: HP Enabled={ViewModel.HpTrigger.Enabled}, Coords=({ViewModel.HpTrigger.X},{ViewModel.HpTrigger.Y}), Tolerance={ViewModel.HpProbe.Tolerance}");
         Console.WriteLine($"[{ViewModel.ClientName}] START: MP Enabled={ViewModel.MpTrigger.Enabled}, Coords=({ViewModel.MpTrigger.X},{ViewModel.MpTrigger.Y}), Tolerance={ViewModel.MpProbe.Tolerance}");
@@ -1282,6 +1321,13 @@ public partial class ClientCard : UserControl
         
         StopPeriodicClicks();
         StopMonitoring();
+        
+        // Auto-disable BabeBot HP/MP when stopping client
+        ViewModel.BabeBotHp.Enabled = false;
+        ViewModel.BabeBotMp.Enabled = false;
+        StopBabeBotMonitoring();
+        
+        Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot HP/MP auto-disabled on stop");
     }
 
     private void TestClient_Click(object sender, RoutedEventArgs e)
@@ -1452,6 +1498,43 @@ public partial class ClientCard : UserControl
         PythonMpPotionX.Text = ViewModel.PythonMpPotionClick.X.ToString();
         PythonMpPotionY.Text = ViewModel.PythonMpPotionClick.Y.ToString();
         PythonMpPotionCooldown.Text = ViewModel.PythonMpPotionClick.CooldownMs.ToString();
+        
+        // Update BabeBot UI elements
+        BabeBotHpStart.Text = ViewModel.BabeBotHp.StartX.ToString();
+        BabeBotHpEnd.Text = ViewModel.BabeBotHp.EndX.ToString();
+        BabeBotHpY.Text = ViewModel.BabeBotHp.Y.ToString();
+        
+        // Set HP threshold dropdown
+        var hpThresholdValue = ViewModel.BabeBotHp.ThresholdPercentage.ToString();
+        foreach (System.Windows.Controls.ComboBoxItem item in BabeBotHpThreshold.Items)
+        {
+            if (item.Content?.ToString() == hpThresholdValue)
+            {
+                BabeBotHpThreshold.SelectedItem = item;
+                break;
+            }
+        }
+        
+        BabeBotHpPotionX.Text = ViewModel.BabeBotHp.PotionX.ToString();
+        BabeBotHpPotionY.Text = ViewModel.BabeBotHp.PotionY.ToString();
+        
+        BabeBotMpStart.Text = ViewModel.BabeBotMp.StartX.ToString();
+        BabeBotMpEnd.Text = ViewModel.BabeBotMp.EndX.ToString();
+        BabeBotMpY.Text = ViewModel.BabeBotMp.Y.ToString();
+        
+        // Set MP threshold dropdown
+        var mpThresholdValue = ViewModel.BabeBotMp.ThresholdPercentage.ToString();
+        foreach (System.Windows.Controls.ComboBoxItem item in BabeBotMpThreshold.Items)
+        {
+            if (item.Content?.ToString() == mpThresholdValue)
+            {
+                BabeBotMpThreshold.SelectedItem = item;
+                break;
+            }
+        }
+        
+        BabeBotMpPotionX.Text = ViewModel.BabeBotMp.PotionX.ToString();
+        BabeBotMpPotionY.Text = ViewModel.BabeBotMp.PotionY.ToString();
         
         UpdatePercentageMonitorPosition();
     }
