@@ -30,6 +30,11 @@ public partial class ClientCard : UserControl
     private FastColorSampler? _fastSampler;
     private int _debugCounter = 0;
     
+    // Party Heal System
+    private DispatcherTimer? _multiHpTimer;
+    private bool _multiHpRunning = false;
+    private int _currentMultiHpIndex = 0; // Current HP client being checked
+    
     // HP/MP Shape management
     private System.Windows.Shapes.Ellipse? _hpShape;
     private System.Windows.Shapes.Ellipse? _mpShape;
@@ -49,6 +54,7 @@ public partial class ClientCard : UserControl
         AttachTextBoxHandlers();
         _fastSampler = new FastColorSampler();
         SetupBabeBotUI();
+        SetupMultiHpUI();
     }
     
     private void AttachTextBoxHandlers()
@@ -220,7 +226,7 @@ public partial class ClientCard : UserControl
         {
             ViewModel.TargetHwnd = hwnd;
             ViewModel.WindowTitle = WindowHelper.GetWindowTitle(hwnd);
-            WindowTitleText.Text = ViewModel.WindowTitle;
+            WindowTitleText.Text = $"{ViewModel.WindowTitle} - 0x{hwnd:X8}";
             StatusIndicator.Fill = new SolidColorBrush(Colors.LimeGreen);
             StatusIndicator.ToolTip = $"Connected: {ViewModel.WindowTitle} (0x{hwnd:X8})";
         }
@@ -3899,6 +3905,664 @@ public partial class ClientCard : UserControl
         catch { /* Ignore parsing errors */ }
     }
     
+    #endregion
+
+    #region Party Heal System
+
+    private void SetupMultiHpUI()
+    {
+        // Animation delay handler
+        AnimationDelay.TextChanged += (s, e) =>
+        {
+            if (int.TryParse(AnimationDelay.Text, out int delay))
+                ViewModel.AnimationDelay = delay;
+        };
+
+        // Check interval handler
+        MultiHpCheckInterval.TextChanged += (s, e) =>
+        {
+            if (int.TryParse(MultiHpCheckInterval.Text, out int interval))
+                ViewModel.MultiHpCheckInterval = interval;
+        };
+
+        // Enable/disable handler
+        MultiHpEnabled.Checked += (s, e) =>
+        {
+            ViewModel.MultiHpEnabled = true;
+            Console.WriteLine($"[{ViewModel.ClientName}] 🎭 Party Heal monitoring ENABLED");
+        };
+
+        MultiHpEnabled.Unchecked += (s, e) =>
+        {
+            ViewModel.MultiHpEnabled = false;
+            Console.WriteLine($"[{ViewModel.ClientName}] 🎭 Party Heal monitoring DISABLED");
+        };
+
+        // Setup event handlers for all 8 clients
+        SetupMultiHpClientHandlers();
+    }
+
+    private void SetupMultiHpClientHandlers()
+    {
+        // HP Client 1
+        MultiHp1StartX.TextChanged += (s, e) => UpdateMultiHpClient(0, "StartX", MultiHp1StartX.Text);
+        MultiHp1EndX.TextChanged += (s, e) => UpdateMultiHpClient(0, "EndX", MultiHp1EndX.Text);
+        MultiHp1Y.TextChanged += (s, e) => UpdateMultiHpClient(0, "Y", MultiHp1Y.Text);
+        MultiHp1ClickX.TextChanged += (s, e) => UpdateMultiHpClient(0, "ClickX", MultiHp1ClickX.Text);
+        MultiHp1ClickY.TextChanged += (s, e) => UpdateMultiHpClient(0, "ClickY", MultiHp1ClickY.Text);
+        MultiHp1Threshold.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(0, "Threshold", MultiHp1Threshold);
+        MultiHp1Key.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(0, "Key", MultiHp1Key);
+        MultiHp1Enabled.Checked += (s, e) => ViewModel.MultiHpClients[0].Enabled = true;
+        MultiHp1Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[0].Enabled = false;
+
+        // HP Client 2
+        MultiHp2StartX.TextChanged += (s, e) => UpdateMultiHpClient(1, "StartX", MultiHp2StartX.Text);
+        MultiHp2EndX.TextChanged += (s, e) => UpdateMultiHpClient(1, "EndX", MultiHp2EndX.Text);
+        MultiHp2Y.TextChanged += (s, e) => UpdateMultiHpClient(1, "Y", MultiHp2Y.Text);
+        MultiHp2ClickX.TextChanged += (s, e) => UpdateMultiHpClient(1, "ClickX", MultiHp2ClickX.Text);
+        MultiHp2ClickY.TextChanged += (s, e) => UpdateMultiHpClient(1, "ClickY", MultiHp2ClickY.Text);
+        MultiHp2Threshold.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(1, "Threshold", MultiHp2Threshold);
+        MultiHp2Key.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(1, "Key", MultiHp2Key);
+        MultiHp2Enabled.Checked += (s, e) => ViewModel.MultiHpClients[1].Enabled = true;
+        MultiHp2Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[1].Enabled = false;
+
+        // HP Client 3
+        MultiHp3StartX.TextChanged += (s, e) => UpdateMultiHpClient(2, "StartX", MultiHp3StartX.Text);
+        MultiHp3EndX.TextChanged += (s, e) => UpdateMultiHpClient(2, "EndX", MultiHp3EndX.Text);
+        MultiHp3Y.TextChanged += (s, e) => UpdateMultiHpClient(2, "Y", MultiHp3Y.Text);
+        MultiHp3ClickX.TextChanged += (s, e) => UpdateMultiHpClient(2, "ClickX", MultiHp3ClickX.Text);
+        MultiHp3ClickY.TextChanged += (s, e) => UpdateMultiHpClient(2, "ClickY", MultiHp3ClickY.Text);
+        MultiHp3Threshold.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(2, "Threshold", MultiHp3Threshold);
+        MultiHp3Key.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(2, "Key", MultiHp3Key);
+        MultiHp3Enabled.Checked += (s, e) => ViewModel.MultiHpClients[2].Enabled = true;
+        MultiHp3Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[2].Enabled = false;
+
+        // HP Client 4
+        MultiHp4StartX.TextChanged += (s, e) => UpdateMultiHpClient(3, "StartX", MultiHp4StartX.Text);
+        MultiHp4EndX.TextChanged += (s, e) => UpdateMultiHpClient(3, "EndX", MultiHp4EndX.Text);
+        MultiHp4Y.TextChanged += (s, e) => UpdateMultiHpClient(3, "Y", MultiHp4Y.Text);
+        MultiHp4ClickX.TextChanged += (s, e) => UpdateMultiHpClient(3, "ClickX", MultiHp4ClickX.Text);
+        MultiHp4ClickY.TextChanged += (s, e) => UpdateMultiHpClient(3, "ClickY", MultiHp4ClickY.Text);
+        MultiHp4Threshold.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(3, "Threshold", MultiHp4Threshold);
+        MultiHp4Key.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(3, "Key", MultiHp4Key);
+        MultiHp4Enabled.Checked += (s, e) => ViewModel.MultiHpClients[3].Enabled = true;
+        MultiHp4Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[3].Enabled = false;
+
+        // HP Client 5
+        MultiHp5StartX.TextChanged += (s, e) => UpdateMultiHpClient(4, "StartX", MultiHp5StartX.Text);
+        MultiHp5EndX.TextChanged += (s, e) => UpdateMultiHpClient(4, "EndX", MultiHp5EndX.Text);
+        MultiHp5Y.TextChanged += (s, e) => UpdateMultiHpClient(4, "Y", MultiHp5Y.Text);
+        MultiHp5ClickX.TextChanged += (s, e) => UpdateMultiHpClient(4, "ClickX", MultiHp5ClickX.Text);
+        MultiHp5ClickY.TextChanged += (s, e) => UpdateMultiHpClient(4, "ClickY", MultiHp5ClickY.Text);
+        MultiHp5Threshold.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(4, "Threshold", MultiHp5Threshold);
+        MultiHp5Key.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(4, "Key", MultiHp5Key);
+        MultiHp5Enabled.Checked += (s, e) => ViewModel.MultiHpClients[4].Enabled = true;
+        MultiHp5Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[4].Enabled = false;
+
+        // HP Client 6
+        MultiHp6StartX.TextChanged += (s, e) => UpdateMultiHpClient(5, "StartX", MultiHp6StartX.Text);
+        MultiHp6EndX.TextChanged += (s, e) => UpdateMultiHpClient(5, "EndX", MultiHp6EndX.Text);
+        MultiHp6Y.TextChanged += (s, e) => UpdateMultiHpClient(5, "Y", MultiHp6Y.Text);
+        MultiHp6ClickX.TextChanged += (s, e) => UpdateMultiHpClient(5, "ClickX", MultiHp6ClickX.Text);
+        MultiHp6ClickY.TextChanged += (s, e) => UpdateMultiHpClient(5, "ClickY", MultiHp6ClickY.Text);
+        MultiHp6Threshold.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(5, "Threshold", MultiHp6Threshold);
+        MultiHp6Key.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(5, "Key", MultiHp6Key);
+        MultiHp6Enabled.Checked += (s, e) => ViewModel.MultiHpClients[5].Enabled = true;
+        MultiHp6Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[5].Enabled = false;
+
+        // HP Client 7
+        MultiHp7StartX.TextChanged += (s, e) => UpdateMultiHpClient(6, "StartX", MultiHp7StartX.Text);
+        MultiHp7EndX.TextChanged += (s, e) => UpdateMultiHpClient(6, "EndX", MultiHp7EndX.Text);
+        MultiHp7Y.TextChanged += (s, e) => UpdateMultiHpClient(6, "Y", MultiHp7Y.Text);
+        MultiHp7ClickX.TextChanged += (s, e) => UpdateMultiHpClient(6, "ClickX", MultiHp7ClickX.Text);
+        MultiHp7ClickY.TextChanged += (s, e) => UpdateMultiHpClient(6, "ClickY", MultiHp7ClickY.Text);
+        MultiHp7Threshold.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(6, "Threshold", MultiHp7Threshold);
+        MultiHp7Key.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(6, "Key", MultiHp7Key);
+        MultiHp7Enabled.Checked += (s, e) => ViewModel.MultiHpClients[6].Enabled = true;
+        MultiHp7Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[6].Enabled = false;
+
+        // HP Client 8
+        MultiHp8StartX.TextChanged += (s, e) => UpdateMultiHpClient(7, "StartX", MultiHp8StartX.Text);
+        MultiHp8EndX.TextChanged += (s, e) => UpdateMultiHpClient(7, "EndX", MultiHp8EndX.Text);
+        MultiHp8Y.TextChanged += (s, e) => UpdateMultiHpClient(7, "Y", MultiHp8Y.Text);
+        MultiHp8ClickX.TextChanged += (s, e) => UpdateMultiHpClient(7, "ClickX", MultiHp8ClickX.Text);
+        MultiHp8ClickY.TextChanged += (s, e) => UpdateMultiHpClient(7, "ClickY", MultiHp8ClickY.Text);
+        MultiHp8Threshold.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(7, "Threshold", MultiHp8Threshold);
+        MultiHp8Key.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(7, "Key", MultiHp8Key);
+        MultiHp8Enabled.Checked += (s, e) => ViewModel.MultiHpClients[7].Enabled = true;
+        MultiHp8Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[7].Enabled = false;
+    }
+
+    private void UpdateMultiHpClient(int clientIndex, string property, string value)
+    {
+        try
+        {
+            if (clientIndex < 0 || clientIndex >= ViewModel.MultiHpClients.Count) return;
+
+            var client = ViewModel.MultiHpClients[clientIndex];
+            
+            switch (property)
+            {
+                case "StartX":
+                    if (int.TryParse(value, out int startX)) client.StartX = startX;
+                    break;
+                case "EndX":
+                    if (int.TryParse(value, out int endX)) client.EndX = endX;
+                    break;
+                case "Y":
+                    if (int.TryParse(value, out int y)) client.Y = y;
+                    break;
+                case "ClickX":
+                    if (int.TryParse(value, out int clickX)) client.ClickX = clickX;
+                    break;
+                case "ClickY":
+                    if (int.TryParse(value, out int clickY)) client.ClickY = clickY;
+                    break;
+            }
+        }
+        catch { /* Ignore parsing errors */ }
+    }
+
+    private void UpdateMultiHpClientCombo(int clientIndex, string property, ComboBox combo)
+    {
+        try
+        {
+            if (clientIndex < 0 || clientIndex >= ViewModel.MultiHpClients.Count) return;
+            if (combo.SelectedItem is not ComboBoxItem item) return;
+
+            var client = ViewModel.MultiHpClients[clientIndex];
+            
+            switch (property)
+            {
+                case "Threshold":
+                    if (int.TryParse(item.Content.ToString(), out int threshold))
+                        client.ThresholdPercentage = threshold;
+                    break;
+                case "Key":
+                    client.Key = item.Content.ToString() ?? "1";
+                    break;
+            }
+        }
+        catch { /* Ignore parsing errors */ }
+    }
+
+    private void StartMultiHpSystem()
+    {
+        if (_multiHpRunning)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] 🎭 Party Heal system already running");
+            return;
+        }
+
+        if (ViewModel.TargetHwnd == IntPtr.Zero)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] ⚔️ No window selected for Party Heal monitoring");
+            return;
+        }
+
+        _multiHpRunning = true;
+        _currentMultiHpIndex = 0;
+
+        _multiHpTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(ViewModel.MultiHpCheckInterval)
+        };
+        _multiHpTimer.Tick += MultiHpTimer_Tick;
+        _multiHpTimer.Start();
+
+        StartMultiHpButton.IsEnabled = false;
+        StopMultiHpButton.IsEnabled = true;
+        
+        Console.WriteLine($"[{ViewModel.ClientName}] 🎭 Party Heal system STARTED with {ViewModel.MultiHpCheckInterval}ms interval");
+    }
+
+    private void StopMultiHpSystem()
+    {
+        _multiHpRunning = false;
+        _multiHpTimer?.Stop();
+        _multiHpTimer = null;
+
+        StartMultiHpButton.IsEnabled = true;
+        StopMultiHpButton.IsEnabled = false;
+
+        // Reset all client statuses
+        foreach (var client in ViewModel.MultiHpClients)
+        {
+            client.Status = "Waiting...";
+            client.IsWaitingForAnimation = false;
+        }
+
+        UpdateMultiHpStatusDisplay();
+
+        Console.WriteLine($"[{ViewModel.ClientName}] 🎭 Party Heal system STOPPED");
+    }
+
+    private void MultiHpTimer_Tick(object? sender, EventArgs e)
+    {
+        if (!_multiHpRunning || !ViewModel.MultiHpEnabled || ViewModel.TargetHwnd == IntPtr.Zero)
+            return;
+
+        ProcessMultiHpClients();
+    }
+
+    private void ProcessMultiHpClients()
+    {
+        try
+        {
+            // Find all enabled clients that need checking (not waiting for animation)
+            var enabledClients = ViewModel.MultiHpClients
+                .Select((client, index) => new { Client = client, Index = index })
+                .Where(x => x.Client.Enabled && !x.Client.IsWaitingForAnimation)
+                .ToList();
+
+            if (!enabledClients.Any()) return;
+
+            // Round-robin through enabled clients
+            var currentClientInfo = enabledClients.Skip(_currentMultiHpIndex % enabledClients.Count).FirstOrDefault();
+            if (currentClientInfo == null) return;
+
+            var client = currentClientInfo.Client;
+            var clientIndex = currentClientInfo.Index;
+
+            // Update the index for next time
+            _currentMultiHpIndex = (_currentMultiHpIndex + 1) % enabledClients.Count;
+
+            // Check HP for this client
+            bool hpLow = CheckClientHp(client, clientIndex);
+            
+            if (hpLow)
+            {
+                // HP is low, execute action
+                ExecuteMultiHpAction(client, clientIndex);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] ⚔️ Error in Party Heal processing: {ex.Message}");
+        }
+    }
+
+    private bool CheckClientHp(MultiHpClientViewModel client, int clientIndex)
+    {
+        try
+        {
+            if (!client.ReferenceColors.Any())
+            {
+                client.Status = "Need Calibration";
+                UpdateClientStatusDisplay(clientIndex);
+                return false;
+            }
+
+            // Capture the target window first
+            _fastSampler?.CaptureWindow(ViewModel.TargetHwnd);
+            
+            // Get current color at monitor position
+            var monitorX = client.MonitorX;
+            var currentColor = _fastSampler?.GetColorAt(monitorX, client.Y);
+            
+            if (currentColor == null)
+            {
+                client.Status = "Read Error";
+                UpdateClientStatusDisplay(clientIndex);
+                return false;
+            }
+
+            client.CurrentColor = currentColor.Value;
+
+            // Calculate HP percentage using BabeBot method
+            var percentage = CalculateHpPercentage(client, currentColor.Value);
+            client.Percentage = percentage;
+            
+            // Update status
+            client.Status = $"{percentage:F0}%";
+            UpdateClientStatusDisplay(clientIndex);
+
+            // Check if HP is below threshold
+            bool isLow = percentage <= client.ThresholdPercentage;
+            
+            if (isLow && !client.IsTriggered)
+            {
+                client.IsTriggered = true;
+                client.Status = "HP LOW!";
+                UpdateClientStatusDisplay(clientIndex);
+                return true;
+            }
+            else if (percentage > client.ThresholdPercentage + 10) // Add hysteresis
+            {
+                client.IsTriggered = false;
+            }
+
+            return false;
+        }
+        catch (Exception ex)
+        {
+            client.Status = $"Error: {ex.Message}";
+            UpdateClientStatusDisplay(clientIndex);
+            return false;
+        }
+    }
+
+    private double CalculateHpPercentage(MultiHpClientViewModel client, System.Drawing.Color currentColor)
+    {
+        // Use BabeBot's percentage calculation method
+        // Find the closest reference color match
+        double bestPercentage = 100.0;
+        double bestDistance = double.MaxValue;
+
+        foreach (var reference in client.ReferenceColors)
+        {
+            var distance = Math.Sqrt(
+                Math.Pow(currentColor.R - reference.Value.R, 2) +
+                Math.Pow(currentColor.G - reference.Value.G, 2) +
+                Math.Pow(currentColor.B - reference.Value.B, 2));
+
+            if (distance < bestDistance)
+            {
+                bestDistance = distance;
+                bestPercentage = reference.Key;
+            }
+        }
+
+        return bestPercentage;
+    }
+
+    private async void ExecuteMultiHpAction(MultiHpClientViewModel client, int clientIndex)
+    {
+        try
+        {
+            // Check cooldown
+            var now = DateTime.Now;
+            if ((now - client.LastExecution).TotalMilliseconds < ViewModel.AnimationDelay)
+            {
+                client.Status = "Cooling down...";
+                UpdateClientStatusDisplay(clientIndex);
+                return;
+            }
+
+            client.Status = "Healing...";
+            client.IsWaitingForAnimation = true;
+            UpdateClientStatusDisplay(clientIndex);
+
+            // Click the coordinate
+            await Task.Run(() =>
+            {
+                try
+                {
+                    // Send click
+                    User32.SetCursorPos(client.ClickX, client.ClickY);
+                    User32.mouse_event(User32.MOUSEEVENTF.MOUSEEVENTF_LEFTDOWN, client.ClickX, client.ClickY, 0, IntPtr.Zero);
+                    User32.mouse_event(User32.MOUSEEVENTF.MOUSEEVENTF_LEFTUP, client.ClickX, client.ClickY, 0, IntPtr.Zero);
+                    Thread.Sleep(50);
+
+                    // Send key press
+                    SendKeyPress(client.Key);
+                    
+                    Console.WriteLine($"[{ViewModel.ClientName}] ⚔️ Party Member {client.ClientIndex}: Clicked ({client.ClickX},{client.ClickY}) + Key '{client.Key}'");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[{ViewModel.ClientName}] ⚔️ Click/Key error for Party Member {client.ClientIndex}: {ex.Message}");
+                }
+            });
+
+            client.LastExecution = now;
+            client.ExecutionCount++;
+
+            // Wait for animation delay
+            await Task.Delay(ViewModel.AnimationDelay);
+
+            client.IsWaitingForAnimation = false;
+            client.Status = "Ready";
+            UpdateClientStatusDisplay(clientIndex);
+
+            Console.WriteLine($"[{ViewModel.ClientName}] ⚔️ Party Member {client.ClientIndex} action completed, resuming monitoring");
+        }
+        catch (Exception ex)
+        {
+            client.Status = "Action Error";
+            client.IsWaitingForAnimation = false;
+            UpdateClientStatusDisplay(clientIndex);
+            Console.WriteLine($"[{ViewModel.ClientName}] ⚔️ Error executing action for Party Member {client.ClientIndex}: {ex.Message}");
+        }
+    }
+
+    private void SendKeyPress(string key)
+    {
+        // Convert key to virtual key code
+        byte vkCode = key switch
+        {
+            "0" => 0x30, "1" => 0x31, "2" => 0x32, "3" => 0x33, "4" => 0x34,
+            "5" => 0x35, "6" => 0x36, "7" => 0x37, "8" => 0x38, "9" => 0x39,
+            _ => 0x31 // Default to '1'
+        };
+
+        // Send key down and up
+        User32.keybd_event(vkCode, 0, 0, IntPtr.Zero); // Key down
+        Thread.Sleep(50);
+        User32.keybd_event(vkCode, 0, User32.KEYEVENTF.KEYEVENTF_KEYUP, IntPtr.Zero); // Key up
+    }
+
+    private void CalibrateMultiHpClient(int clientIndex)
+    {
+        if (clientIndex < 0 || clientIndex >= ViewModel.MultiHpClients.Count) return;
+        
+        var client = ViewModel.MultiHpClients[clientIndex];
+        
+        if (ViewModel.TargetHwnd == IntPtr.Zero)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] ⚔️ No window selected for Party Member {client.ClientIndex} calibration");
+            return;
+        }
+
+        try
+        {
+            client.ReferenceColors.Clear();
+            client.Status = "Calibrating...";
+            UpdateClientStatusDisplay(clientIndex);
+
+            // Capture the target window first
+            _fastSampler?.CaptureWindow(ViewModel.TargetHwnd);
+            
+            // Calibrate HP bar colors at different percentages (5% to 95%)
+            for (int percentage = 5; percentage <= 95; percentage += 5)
+            {
+                int x = client.CalculateXForPercentage(percentage);
+                var color = _fastSampler?.GetColorAt(x, client.Y);
+                
+                if (color.HasValue)
+                {
+                    client.ReferenceColors[percentage] = color.Value;
+                }
+            }
+
+            client.Status = $"Calibrated ({client.ReferenceColors.Count} points)";
+            UpdateClientStatusDisplay(clientIndex);
+            
+            Console.WriteLine($"[{ViewModel.ClientName}] ⚔️ Party Member {client.ClientIndex} calibrated with {client.ReferenceColors.Count} reference points");
+        }
+        catch (Exception ex)
+        {
+            client.Status = "Calibration Error";
+            UpdateClientStatusDisplay(clientIndex);
+            Console.WriteLine($"[{ViewModel.ClientName}] ⚔️ Calibration error for Party Member {client.ClientIndex}: {ex.Message}");
+        }
+    }
+
+    private void PickMultiHpClientClick(int clientIndex)
+    {
+        if (clientIndex < 0 || clientIndex >= ViewModel.MultiHpClients.Count) return;
+        
+        var client = ViewModel.MultiHpClients[clientIndex];
+        
+        _coordinatePicker = new CoordinatePicker(ViewModel.TargetHwnd, ViewModel.ClientName);
+        _coordinatePicker.CoordinatePicked += (x, y) =>
+        {
+            client.ClickX = x;
+            client.ClickY = y;
+            UpdateMultiHpClientTextBox(clientIndex, "ClickX", x.ToString());
+            UpdateMultiHpClientTextBox(clientIndex, "ClickY", y.ToString());
+            Console.WriteLine($"[{ViewModel.ClientName}] ⚔️ Party Member {client.ClientIndex} click position set to ({x}, {y})");
+        };
+        _coordinatePicker.Show();
+    }
+
+    private void UpdateMultiHpClientTextBox(int clientIndex, string property, string value)
+    {
+        switch (clientIndex)
+        {
+            case 0:
+                if (property == "ClickX") MultiHp1ClickX.Text = value;
+                else if (property == "ClickY") MultiHp1ClickY.Text = value;
+                break;
+            case 1:
+                if (property == "ClickX") MultiHp2ClickX.Text = value;
+                else if (property == "ClickY") MultiHp2ClickY.Text = value;
+                break;
+            case 2:
+                if (property == "ClickX") MultiHp3ClickX.Text = value;
+                else if (property == "ClickY") MultiHp3ClickY.Text = value;
+                break;
+            case 3:
+                if (property == "ClickX") MultiHp4ClickX.Text = value;
+                else if (property == "ClickY") MultiHp4ClickY.Text = value;
+                break;
+            case 4:
+                if (property == "ClickX") MultiHp5ClickX.Text = value;
+                else if (property == "ClickY") MultiHp5ClickY.Text = value;
+                break;
+            case 5:
+                if (property == "ClickX") MultiHp6ClickX.Text = value;
+                else if (property == "ClickY") MultiHp6ClickY.Text = value;
+                break;
+            case 6:
+                if (property == "ClickX") MultiHp7ClickX.Text = value;
+                else if (property == "ClickY") MultiHp7ClickY.Text = value;
+                break;
+            case 7:
+                if (property == "ClickX") MultiHp8ClickX.Text = value;
+                else if (property == "ClickY") MultiHp8ClickY.Text = value;
+                break;
+        }
+    }
+
+    private void UpdateClientStatusDisplay(int clientIndex)
+    {
+        Dispatcher.BeginInvoke(() =>
+        {
+            UpdateMultiHpStatusDisplay();
+        });
+    }
+
+    private void UpdateMultiHpStatusDisplay()
+    {
+        try
+        {
+            for (int i = 0; i < ViewModel.MultiHpClients.Count; i++)
+            {
+                var client = ViewModel.MultiHpClients[i];
+                UpdateSingleClientDisplay(i, client);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] ⚔️ Error updating Party Heal display: {ex.Message}");
+        }
+    }
+
+    private void UpdateSingleClientDisplay(int clientIndex, MultiHpClientViewModel client)
+    {
+        var statusText = GetStatusTextBlock(clientIndex);
+        var percentageText = GetPercentageTextBlock(clientIndex);
+        var colorBar = GetColorBarRectangle(clientIndex);
+
+        if (statusText != null)
+            statusText.Text = client.Status;
+
+        if (percentageText != null)
+            percentageText.Text = $"{client.Percentage:F0}%";
+
+        if (colorBar != null)
+        {
+            colorBar.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(
+                client.CurrentColor.R,
+                client.CurrentColor.G,
+                client.CurrentColor.B));
+        }
+    }
+
+    private TextBlock? GetStatusTextBlock(int clientIndex) => clientIndex switch
+    {
+        0 => MultiHp1Status,
+        1 => MultiHp2Status,
+        2 => MultiHp3Status,
+        3 => MultiHp4Status,
+        4 => MultiHp5Status,
+        5 => MultiHp6Status,
+        6 => MultiHp7Status,
+        7 => MultiHp8Status,
+        _ => null
+    };
+
+    private TextBlock? GetPercentageTextBlock(int clientIndex) => clientIndex switch
+    {
+        0 => MultiHp1Percentage,
+        1 => MultiHp2Percentage,
+        2 => MultiHp3Percentage,
+        3 => MultiHp4Percentage,
+        4 => MultiHp5Percentage,
+        5 => MultiHp6Percentage,
+        6 => MultiHp7Percentage,
+        7 => MultiHp8Percentage,
+        _ => null
+    };
+
+    private System.Windows.Shapes.Rectangle? GetColorBarRectangle(int clientIndex) => clientIndex switch
+    {
+        0 => MultiHp1ColorBar,
+        1 => MultiHp2ColorBar,
+        2 => MultiHp3ColorBar,
+        3 => MultiHp4ColorBar,
+        4 => MultiHp5ColorBar,
+        5 => MultiHp6ColorBar,
+        6 => MultiHp7ColorBar,
+        7 => MultiHp8ColorBar,
+        _ => null
+    };
+
+    #endregion
+
+    #region Party Heal Event Handlers
+
+    private void StartMultiHp_Click(object sender, RoutedEventArgs e)
+    {
+        StartMultiHpSystem();
+    }
+
+    private void StopMultiHp_Click(object sender, RoutedEventArgs e)
+    {
+        StopMultiHpSystem();
+    }
+
+    // Calibrate methods for each HP client
+    private void CalibrateMultiHp1_Click(object sender, RoutedEventArgs e) => CalibrateMultiHpClient(0);
+    private void CalibrateMultiHp2_Click(object sender, RoutedEventArgs e) => CalibrateMultiHpClient(1);
+    private void CalibrateMultiHp3_Click(object sender, RoutedEventArgs e) => CalibrateMultiHpClient(2);
+    private void CalibrateMultiHp4_Click(object sender, RoutedEventArgs e) => CalibrateMultiHpClient(3);
+    private void CalibrateMultiHp5_Click(object sender, RoutedEventArgs e) => CalibrateMultiHpClient(4);
+    private void CalibrateMultiHp6_Click(object sender, RoutedEventArgs e) => CalibrateMultiHpClient(5);
+    private void CalibrateMultiHp7_Click(object sender, RoutedEventArgs e) => CalibrateMultiHpClient(6);
+    private void CalibrateMultiHp8_Click(object sender, RoutedEventArgs e) => CalibrateMultiHpClient(7);
+
+    // Pick click position methods for each HP client
+    private void PickMultiHp1Click_Click(object sender, RoutedEventArgs e) => PickMultiHpClientClick(0);
+    private void PickMultiHp2Click_Click(object sender, RoutedEventArgs e) => PickMultiHpClientClick(1);
+    private void PickMultiHp3Click_Click(object sender, RoutedEventArgs e) => PickMultiHpClientClick(2);
+    private void PickMultiHp4Click_Click(object sender, RoutedEventArgs e) => PickMultiHpClientClick(3);
+    private void PickMultiHp5Click_Click(object sender, RoutedEventArgs e) => PickMultiHpClientClick(4);
+    private void PickMultiHp6Click_Click(object sender, RoutedEventArgs e) => PickMultiHpClientClick(5);
+    private void PickMultiHp7Click_Click(object sender, RoutedEventArgs e) => PickMultiHpClientClick(6);
+    private void PickMultiHp8Click_Click(object sender, RoutedEventArgs e) => PickMultiHpClientClick(7);
+
     #endregion
 
 

@@ -52,7 +52,28 @@
     </UserControl.Resources>
     
     <Border Background="#2d2d30" BorderBrush="#3f3f46" BorderThickness="1" CornerRadius="5" Margin="5" Padding="8">
-        <StackPanel>
+        <TabControl Background="Transparent" BorderThickness="0">
+            <TabControl.Resources>
+                <Style TargetType="TabItem">
+                    <Setter Property="Background" Value="#3c3c3c"/>
+                    <Setter Property="Foreground" Value="#ffffff"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Padding" Value="8,4"/>
+                    <Setter Property="Margin" Value="0,0,2,0"/>
+                    <Setter Property="FontSize" Value="10"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="#007acc"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#555555"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </TabControl.Resources>
+            
+            <TabItem Header="🎮 Main">
+                <StackPanel>
             <!-- Client Header -->
             <Grid Margin="0,0,0,8">
                 <Grid.ColumnDefinitions>
@@ -629,6 +650,599 @@
                 <Button Content="⏸️ Stop" x:Name="StopButton" Style="{StaticResource SmallButtonStyle}" Click="StopClient_Click" Width="40" Margin="0,0,3,0" IsEnabled="False"/>
                 <Button Content="🔄 Test" Style="{StaticResource SmallButtonStyle}" Click="TestClient_Click" Width="80"/>
             </StackPanel>
-        </StackPanel>
+                </StackPanel>
+            </TabItem>
+            
+            <TabItem Header="🎭 Party Heal">
+                <StackPanel>
+                    <!-- Multi HP Header -->
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0" Text="🎭 Party Heal System" Style="{StaticResource SectionHeaderStyle}" FontSize="12" Foreground="#FF6B6B"/>
+                        <CheckBox Grid.Column="1" x:Name="MultiHpEnabled" Content="Enable" IsChecked="False" Foreground="#cccccc" FontSize="9"/>
+                    </Grid>
+                    
+                    <!-- Global Settings -->
+                    <Border Background="#1a1a1a" CornerRadius="3" Padding="6" Margin="0,0,0,5">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Animation Delay" Style="{StaticResource LabelStyle}" FontSize="9"/>
+                                <TextBox x:Name="AnimationDelay" Style="{StaticResource CoordTextBoxStyle}" Text="1500" ToolTip="Skill animation wait time in ms"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                <TextBlock Text="Check Interval" Style="{StaticResource LabelStyle}" FontSize="9"/>
+                                <TextBox x:Name="MultiHpCheckInterval" Style="{StaticResource CoordTextBoxStyle}" Text="100" ToolTip="HP check interval in ms"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Column="2" Margin="10,0,0,0">
+                                <Button Content="🎯 Start Multi HP Monitor" x:Name="StartMultiHpButton" Style="{StaticResource SmallButtonStyle}" Click="StartMultiHp_Click" Height="22"/>
+                                <Button Content="⏸️ Stop Multi HP Monitor" x:Name="StopMultiHpButton" Style="{StaticResource SmallButtonStyle}" Click="StopMultiHp_Click" Height="22" Margin="0,2,0,0" IsEnabled="False"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- Multi HP Monitors -->
+                    <ScrollViewer Height="400" VerticalScrollBarVisibility="Auto">
+                        <StackPanel x:Name="MultiHpContainer">
+                            <!-- HP Monitor 1 -->
+                            <Border Background="#2d1b3d" CornerRadius="3" Padding="6" Margin="0,0,0,3">
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="15"/>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <CheckBox Grid.Column="0" x:Name="MultiHp1Enabled" IsChecked="False" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="🩸 Party Member 1" Style="{StaticResource SectionHeaderStyle}" FontSize="10" Foreground="#FF6B6B"/>
+                                        <TextBlock Grid.Column="2" x:Name="MultiHp1Status" Text="Waiting..." Style="{StaticResource ValueStyle}" FontSize="9" HorizontalAlignment="Right" Foreground="#90EE90"/>
+                                    </Grid>
+                                    
+                                    <Grid Margin="0,3,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="50"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <TextBox Grid.Column="0" x:Name="MultiHp1StartX" Style="{StaticResource CoordTextBoxStyle}" Text="1" ToolTip="HP Bar Start X" Width="35"/>
+                                        <TextBox Grid.Column="1" x:Name="MultiHp1EndX" Style="{StaticResource CoordTextBoxStyle}" Text="90" ToolTip="HP Bar End X" Width="35"/>
+                                        <TextBox Grid.Column="2" x:Name="MultiHp1Y" Style="{StaticResource CoordTextBoxStyle}" Text="5" ToolTip="HP Bar Y" Width="35"/>
+                                        <ComboBox Grid.Column="3" x:Name="MultiHp1Threshold" FontSize="8" Height="20" Width="35">
+                                            <ComboBoxItem Content="10"/>
+                                            <ComboBoxItem Content="20"/>
+                                            <ComboBoxItem Content="30" IsSelected="True"/>
+                                            <ComboBoxItem Content="40"/>
+                                            <ComboBoxItem Content="50"/>
+                                            <ComboBoxItem Content="60"/>
+                                            <ComboBoxItem Content="70"/>
+                                            <ComboBoxItem Content="80"/>
+                                            <ComboBoxItem Content="90"/>
+                                        </ComboBox>
+                                        <TextBox Grid.Column="4" x:Name="MultiHp1ClickX" Style="{StaticResource CoordTextBoxStyle}" Text="376" ToolTip="Click X" Width="35"/>
+                                        <TextBox Grid.Column="5" x:Name="MultiHp1ClickY" Style="{StaticResource CoordTextBoxStyle}" Text="236" ToolTip="Click Y" Width="35"/>
+                                        <ComboBox Grid.Column="6" x:Name="MultiHp1Key" FontSize="8" Height="20" Width="45">
+                                            <ComboBoxItem Content="0"/>
+                                            <ComboBoxItem Content="1" IsSelected="True"/>
+                                            <ComboBoxItem Content="2"/>
+                                            <ComboBoxItem Content="3"/>
+                                            <ComboBoxItem Content="4"/>
+                                            <ComboBoxItem Content="5"/>
+                                            <ComboBoxItem Content="6"/>
+                                            <ComboBoxItem Content="7"/>
+                                            <ComboBoxItem Content="8"/>
+                                            <ComboBoxItem Content="9"/>
+                                        </ComboBox>
+                                        <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
+                                            <Button Content="📊" Style="{StaticResource SmallButtonStyle}" Click="CalibrateMultiHp1_Click" Width="20" Margin="0,0,2,0" ToolTip="Calibrate"/>
+                                            <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickMultiHp1Click_Click" Width="20" ToolTip="Pick Click Position"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    
+                                    <!-- HP Status Bar -->
+                                    <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                        <Rectangle x:Name="MultiHp1ColorBar" Width="180" Height="12" Fill="#000000" Stroke="#555" StrokeThickness="1" Margin="0,0,5,0"/>
+                                        <TextBlock x:Name="MultiHp1Percentage" Text="100%" Style="{StaticResource ValueStyle}" FontSize="9" VerticalAlignment="Center" Foreground="#90EE90"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- HP Monitors 2-8 (Similar structure) -->
+                            <Border Background="#2d1b3d" CornerRadius="3" Padding="6" Margin="0,0,0,3">
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="15"/>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <CheckBox Grid.Column="0" x:Name="MultiHp2Enabled" IsChecked="False" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="🩸 Party Member 2" Style="{StaticResource SectionHeaderStyle}" FontSize="10" Foreground="#FF6B6B"/>
+                                        <TextBlock Grid.Column="2" x:Name="MultiHp2Status" Text="Waiting..." Style="{StaticResource ValueStyle}" FontSize="9" HorizontalAlignment="Right" Foreground="#90EE90"/>
+                                    </Grid>
+                                    
+                                    <Grid Margin="0,3,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="50"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <TextBox Grid.Column="0" x:Name="MultiHp2StartX" Style="{StaticResource CoordTextBoxStyle}" Text="1" Width="35"/>
+                                        <TextBox Grid.Column="1" x:Name="MultiHp2EndX" Style="{StaticResource CoordTextBoxStyle}" Text="90" Width="35"/>
+                                        <TextBox Grid.Column="2" x:Name="MultiHp2Y" Style="{StaticResource CoordTextBoxStyle}" Text="5" Width="35"/>
+                                        <ComboBox Grid.Column="3" x:Name="MultiHp2Threshold" FontSize="8" Height="20" Width="35">
+                                            <ComboBoxItem Content="10"/>
+                                            <ComboBoxItem Content="20"/>
+                                            <ComboBoxItem Content="30" IsSelected="True"/>
+                                            <ComboBoxItem Content="40"/>
+                                            <ComboBoxItem Content="50"/>
+                                            <ComboBoxItem Content="60"/>
+                                            <ComboBoxItem Content="70"/>
+                                            <ComboBoxItem Content="80"/>
+                                            <ComboBoxItem Content="90"/>
+                                        </ComboBox>
+                                        <TextBox Grid.Column="4" x:Name="MultiHp2ClickX" Style="{StaticResource CoordTextBoxStyle}" Text="376" Width="35"/>
+                                        <TextBox Grid.Column="5" x:Name="MultiHp2ClickY" Style="{StaticResource CoordTextBoxStyle}" Text="236" Width="35"/>
+                                        <ComboBox Grid.Column="6" x:Name="MultiHp2Key" FontSize="8" Height="20" Width="45">
+                                            <ComboBoxItem Content="0"/>
+                                            <ComboBoxItem Content="1"/>
+                                            <ComboBoxItem Content="2" IsSelected="True"/>
+                                            <ComboBoxItem Content="3"/>
+                                            <ComboBoxItem Content="4"/>
+                                            <ComboBoxItem Content="5"/>
+                                            <ComboBoxItem Content="6"/>
+                                            <ComboBoxItem Content="7"/>
+                                            <ComboBoxItem Content="8"/>
+                                            <ComboBoxItem Content="9"/>
+                                        </ComboBox>
+                                        <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
+                                            <Button Content="📊" Style="{StaticResource SmallButtonStyle}" Click="CalibrateMultiHp2_Click" Width="20" Margin="0,0,2,0"/>
+                                            <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickMultiHp2Click_Click" Width="20"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    
+                                    <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                        <Rectangle x:Name="MultiHp2ColorBar" Width="180" Height="12" Fill="#000000" Stroke="#555" StrokeThickness="1" Margin="0,0,5,0"/>
+                                        <TextBlock x:Name="MultiHp2Percentage" Text="100%" Style="{StaticResource ValueStyle}" FontSize="9" VerticalAlignment="Center" Foreground="#90EE90"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- HP Monitor 3 -->
+                            <Border Background="#2d1b3d" CornerRadius="3" Padding="6" Margin="0,0,0,3">
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="15"/>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <CheckBox Grid.Column="0" x:Name="MultiHp3Enabled" IsChecked="False" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="🩸 Party Member 3" Style="{StaticResource SectionHeaderStyle}" FontSize="10" Foreground="#FF6B6B"/>
+                                        <TextBlock Grid.Column="2" x:Name="MultiHp3Status" Text="Waiting..." Style="{StaticResource ValueStyle}" FontSize="9" HorizontalAlignment="Right" Foreground="#90EE90"/>
+                                    </Grid>
+                                    
+                                    <Grid Margin="0,3,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="50"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <TextBox Grid.Column="0" x:Name="MultiHp3StartX" Style="{StaticResource CoordTextBoxStyle}" Text="1" Width="35"/>
+                                        <TextBox Grid.Column="1" x:Name="MultiHp3EndX" Style="{StaticResource CoordTextBoxStyle}" Text="90" Width="35"/>
+                                        <TextBox Grid.Column="2" x:Name="MultiHp3Y" Style="{StaticResource CoordTextBoxStyle}" Text="5" Width="35"/>
+                                        <ComboBox Grid.Column="3" x:Name="MultiHp3Threshold" FontSize="8" Height="20" Width="35">
+                                            <ComboBoxItem Content="10"/>
+                                            <ComboBoxItem Content="20"/>
+                                            <ComboBoxItem Content="30" IsSelected="True"/>
+                                            <ComboBoxItem Content="40"/>
+                                            <ComboBoxItem Content="50"/>
+                                            <ComboBoxItem Content="60"/>
+                                            <ComboBoxItem Content="70"/>
+                                            <ComboBoxItem Content="80"/>
+                                            <ComboBoxItem Content="90"/>
+                                        </ComboBox>
+                                        <TextBox Grid.Column="4" x:Name="MultiHp3ClickX" Style="{StaticResource CoordTextBoxStyle}" Text="376" Width="35"/>
+                                        <TextBox Grid.Column="5" x:Name="MultiHp3ClickY" Style="{StaticResource CoordTextBoxStyle}" Text="236" Width="35"/>
+                                        <ComboBox Grid.Column="6" x:Name="MultiHp3Key" FontSize="8" Height="20" Width="45">
+                                            <ComboBoxItem Content="0"/>
+                                            <ComboBoxItem Content="1"/>
+                                            <ComboBoxItem Content="2"/>
+                                            <ComboBoxItem Content="3" IsSelected="True"/>
+                                            <ComboBoxItem Content="4"/>
+                                            <ComboBoxItem Content="5"/>
+                                            <ComboBoxItem Content="6"/>
+                                            <ComboBoxItem Content="7"/>
+                                            <ComboBoxItem Content="8"/>
+                                            <ComboBoxItem Content="9"/>
+                                        </ComboBox>
+                                        <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
+                                            <Button Content="📊" Style="{StaticResource SmallButtonStyle}" Click="CalibrateMultiHp3_Click" Width="20" Margin="0,0,2,0"/>
+                                            <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickMultiHp3Click_Click" Width="20"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    
+                                    <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                        <Rectangle x:Name="MultiHp3ColorBar" Width="180" Height="12" Fill="#000000" Stroke="#555" StrokeThickness="1" Margin="0,0,5,0"/>
+                                        <TextBlock x:Name="MultiHp3Percentage" Text="100%" Style="{StaticResource ValueStyle}" FontSize="9" VerticalAlignment="Center" Foreground="#90EE90"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- HP Monitor 4 -->
+                            <Border Background="#2d1b3d" CornerRadius="3" Padding="6" Margin="0,0,0,3">
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="15"/>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <CheckBox Grid.Column="0" x:Name="MultiHp4Enabled" IsChecked="False" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="🩸 Party Member 4" Style="{StaticResource SectionHeaderStyle}" FontSize="10" Foreground="#FF6B6B"/>
+                                        <TextBlock Grid.Column="2" x:Name="MultiHp4Status" Text="Waiting..." Style="{StaticResource ValueStyle}" FontSize="9" HorizontalAlignment="Right" Foreground="#90EE90"/>
+                                    </Grid>
+                                    
+                                    <Grid Margin="0,3,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="50"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <TextBox Grid.Column="0" x:Name="MultiHp4StartX" Style="{StaticResource CoordTextBoxStyle}" Text="1" Width="35"/>
+                                        <TextBox Grid.Column="1" x:Name="MultiHp4EndX" Style="{StaticResource CoordTextBoxStyle}" Text="90" Width="35"/>
+                                        <TextBox Grid.Column="2" x:Name="MultiHp4Y" Style="{StaticResource CoordTextBoxStyle}" Text="5" Width="35"/>
+                                        <ComboBox Grid.Column="3" x:Name="MultiHp4Threshold" FontSize="8" Height="20" Width="35">
+                                            <ComboBoxItem Content="10"/>
+                                            <ComboBoxItem Content="20"/>
+                                            <ComboBoxItem Content="30" IsSelected="True"/>
+                                            <ComboBoxItem Content="40"/>
+                                            <ComboBoxItem Content="50"/>
+                                            <ComboBoxItem Content="60"/>
+                                            <ComboBoxItem Content="70"/>
+                                            <ComboBoxItem Content="80"/>
+                                            <ComboBoxItem Content="90"/>
+                                        </ComboBox>
+                                        <TextBox Grid.Column="4" x:Name="MultiHp4ClickX" Style="{StaticResource CoordTextBoxStyle}" Text="376" Width="35"/>
+                                        <TextBox Grid.Column="5" x:Name="MultiHp4ClickY" Style="{StaticResource CoordTextBoxStyle}" Text="236" Width="35"/>
+                                        <ComboBox Grid.Column="6" x:Name="MultiHp4Key" FontSize="8" Height="20" Width="45">
+                                            <ComboBoxItem Content="0"/>
+                                            <ComboBoxItem Content="1"/>
+                                            <ComboBoxItem Content="2"/>
+                                            <ComboBoxItem Content="3"/>
+                                            <ComboBoxItem Content="4" IsSelected="True"/>
+                                            <ComboBoxItem Content="5"/>
+                                            <ComboBoxItem Content="6"/>
+                                            <ComboBoxItem Content="7"/>
+                                            <ComboBoxItem Content="8"/>
+                                            <ComboBoxItem Content="9"/>
+                                        </ComboBox>
+                                        <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
+                                            <Button Content="📊" Style="{StaticResource SmallButtonStyle}" Click="CalibrateMultiHp4_Click" Width="20" Margin="0,0,2,0"/>
+                                            <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickMultiHp4Click_Click" Width="20"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    
+                                    <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                        <Rectangle x:Name="MultiHp4ColorBar" Width="180" Height="12" Fill="#000000" Stroke="#555" StrokeThickness="1" Margin="0,0,5,0"/>
+                                        <TextBlock x:Name="MultiHp4Percentage" Text="100%" Style="{StaticResource ValueStyle}" FontSize="9" VerticalAlignment="Center" Foreground="#90EE90"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- HP Monitor 5 -->
+                            <Border Background="#2d1b3d" CornerRadius="3" Padding="6" Margin="0,0,0,3">
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="15"/>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <CheckBox Grid.Column="0" x:Name="MultiHp5Enabled" IsChecked="False" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="🩸 Party Member 5" Style="{StaticResource SectionHeaderStyle}" FontSize="10" Foreground="#FF6B6B"/>
+                                        <TextBlock Grid.Column="2" x:Name="MultiHp5Status" Text="Waiting..." Style="{StaticResource ValueStyle}" FontSize="9" HorizontalAlignment="Right" Foreground="#90EE90"/>
+                                    </Grid>
+                                    
+                                    <Grid Margin="0,3,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="50"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <TextBox Grid.Column="0" x:Name="MultiHp5StartX" Style="{StaticResource CoordTextBoxStyle}" Text="1" Width="35"/>
+                                        <TextBox Grid.Column="1" x:Name="MultiHp5EndX" Style="{StaticResource CoordTextBoxStyle}" Text="90" Width="35"/>
+                                        <TextBox Grid.Column="2" x:Name="MultiHp5Y" Style="{StaticResource CoordTextBoxStyle}" Text="5" Width="35"/>
+                                        <ComboBox Grid.Column="3" x:Name="MultiHp5Threshold" FontSize="8" Height="20" Width="35">
+                                            <ComboBoxItem Content="10"/>
+                                            <ComboBoxItem Content="20"/>
+                                            <ComboBoxItem Content="30" IsSelected="True"/>
+                                            <ComboBoxItem Content="40"/>
+                                            <ComboBoxItem Content="50"/>
+                                            <ComboBoxItem Content="60"/>
+                                            <ComboBoxItem Content="70"/>
+                                            <ComboBoxItem Content="80"/>
+                                            <ComboBoxItem Content="90"/>
+                                        </ComboBox>
+                                        <TextBox Grid.Column="4" x:Name="MultiHp5ClickX" Style="{StaticResource CoordTextBoxStyle}" Text="376" Width="35"/>
+                                        <TextBox Grid.Column="5" x:Name="MultiHp5ClickY" Style="{StaticResource CoordTextBoxStyle}" Text="236" Width="35"/>
+                                        <ComboBox Grid.Column="6" x:Name="MultiHp5Key" FontSize="8" Height="20" Width="45">
+                                            <ComboBoxItem Content="0"/>
+                                            <ComboBoxItem Content="1"/>
+                                            <ComboBoxItem Content="2"/>
+                                            <ComboBoxItem Content="3"/>
+                                            <ComboBoxItem Content="4"/>
+                                            <ComboBoxItem Content="5" IsSelected="True"/>
+                                            <ComboBoxItem Content="6"/>
+                                            <ComboBoxItem Content="7"/>
+                                            <ComboBoxItem Content="8"/>
+                                            <ComboBoxItem Content="9"/>
+                                        </ComboBox>
+                                        <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
+                                            <Button Content="📊" Style="{StaticResource SmallButtonStyle}" Click="CalibrateMultiHp5_Click" Width="20" Margin="0,0,2,0"/>
+                                            <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickMultiHp5Click_Click" Width="20"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    
+                                    <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                        <Rectangle x:Name="MultiHp5ColorBar" Width="180" Height="12" Fill="#000000" Stroke="#555" StrokeThickness="1" Margin="0,0,5,0"/>
+                                        <TextBlock x:Name="MultiHp5Percentage" Text="100%" Style="{StaticResource ValueStyle}" FontSize="9" VerticalAlignment="Center" Foreground="#90EE90"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- HP Monitor 6 -->
+                            <Border Background="#2d1b3d" CornerRadius="3" Padding="6" Margin="0,0,0,3">
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="15"/>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <CheckBox Grid.Column="0" x:Name="MultiHp6Enabled" IsChecked="False" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="🩸 Party Member 6" Style="{StaticResource SectionHeaderStyle}" FontSize="10" Foreground="#FF6B6B"/>
+                                        <TextBlock Grid.Column="2" x:Name="MultiHp6Status" Text="Waiting..." Style="{StaticResource ValueStyle}" FontSize="9" HorizontalAlignment="Right" Foreground="#90EE90"/>
+                                    </Grid>
+                                    
+                                    <Grid Margin="0,3,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="50"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <TextBox Grid.Column="0" x:Name="MultiHp6StartX" Style="{StaticResource CoordTextBoxStyle}" Text="1" Width="35"/>
+                                        <TextBox Grid.Column="1" x:Name="MultiHp6EndX" Style="{StaticResource CoordTextBoxStyle}" Text="90" Width="35"/>
+                                        <TextBox Grid.Column="2" x:Name="MultiHp6Y" Style="{StaticResource CoordTextBoxStyle}" Text="5" Width="35"/>
+                                        <ComboBox Grid.Column="3" x:Name="MultiHp6Threshold" FontSize="8" Height="20" Width="35">
+                                            <ComboBoxItem Content="10"/>
+                                            <ComboBoxItem Content="20"/>
+                                            <ComboBoxItem Content="30" IsSelected="True"/>
+                                            <ComboBoxItem Content="40"/>
+                                            <ComboBoxItem Content="50"/>
+                                            <ComboBoxItem Content="60"/>
+                                            <ComboBoxItem Content="70"/>
+                                            <ComboBoxItem Content="80"/>
+                                            <ComboBoxItem Content="90"/>
+                                        </ComboBox>
+                                        <TextBox Grid.Column="4" x:Name="MultiHp6ClickX" Style="{StaticResource CoordTextBoxStyle}" Text="376" Width="35"/>
+                                        <TextBox Grid.Column="5" x:Name="MultiHp6ClickY" Style="{StaticResource CoordTextBoxStyle}" Text="236" Width="35"/>
+                                        <ComboBox Grid.Column="6" x:Name="MultiHp6Key" FontSize="8" Height="20" Width="45">
+                                            <ComboBoxItem Content="0"/>
+                                            <ComboBoxItem Content="1"/>
+                                            <ComboBoxItem Content="2"/>
+                                            <ComboBoxItem Content="3"/>
+                                            <ComboBoxItem Content="4"/>
+                                            <ComboBoxItem Content="5"/>
+                                            <ComboBoxItem Content="6" IsSelected="True"/>
+                                            <ComboBoxItem Content="7"/>
+                                            <ComboBoxItem Content="8"/>
+                                            <ComboBoxItem Content="9"/>
+                                        </ComboBox>
+                                        <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
+                                            <Button Content="📊" Style="{StaticResource SmallButtonStyle}" Click="CalibrateMultiHp6_Click" Width="20" Margin="0,0,2,0"/>
+                                            <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickMultiHp6Click_Click" Width="20"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    
+                                    <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                        <Rectangle x:Name="MultiHp6ColorBar" Width="180" Height="12" Fill="#000000" Stroke="#555" StrokeThickness="1" Margin="0,0,5,0"/>
+                                        <TextBlock x:Name="MultiHp6Percentage" Text="100%" Style="{StaticResource ValueStyle}" FontSize="9" VerticalAlignment="Center" Foreground="#90EE90"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- HP Monitor 7 -->
+                            <Border Background="#2d1b3d" CornerRadius="3" Padding="6" Margin="0,0,0,3">
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="15"/>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <CheckBox Grid.Column="0" x:Name="MultiHp7Enabled" IsChecked="False" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="🩸 Party Member 7" Style="{StaticResource SectionHeaderStyle}" FontSize="10" Foreground="#FF6B6B"/>
+                                        <TextBlock Grid.Column="2" x:Name="MultiHp7Status" Text="Waiting..." Style="{StaticResource ValueStyle}" FontSize="9" HorizontalAlignment="Right" Foreground="#90EE90"/>
+                                    </Grid>
+                                    
+                                    <Grid Margin="0,3,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="50"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <TextBox Grid.Column="0" x:Name="MultiHp7StartX" Style="{StaticResource CoordTextBoxStyle}" Text="1" Width="35"/>
+                                        <TextBox Grid.Column="1" x:Name="MultiHp7EndX" Style="{StaticResource CoordTextBoxStyle}" Text="90" Width="35"/>
+                                        <TextBox Grid.Column="2" x:Name="MultiHp7Y" Style="{StaticResource CoordTextBoxStyle}" Text="5" Width="35"/>
+                                        <ComboBox Grid.Column="3" x:Name="MultiHp7Threshold" FontSize="8" Height="20" Width="35">
+                                            <ComboBoxItem Content="10"/>
+                                            <ComboBoxItem Content="20"/>
+                                            <ComboBoxItem Content="30" IsSelected="True"/>
+                                            <ComboBoxItem Content="40"/>
+                                            <ComboBoxItem Content="50"/>
+                                            <ComboBoxItem Content="60"/>
+                                            <ComboBoxItem Content="70"/>
+                                            <ComboBoxItem Content="80"/>
+                                            <ComboBoxItem Content="90"/>
+                                        </ComboBox>
+                                        <TextBox Grid.Column="4" x:Name="MultiHp7ClickX" Style="{StaticResource CoordTextBoxStyle}" Text="376" Width="35"/>
+                                        <TextBox Grid.Column="5" x:Name="MultiHp7ClickY" Style="{StaticResource CoordTextBoxStyle}" Text="236" Width="35"/>
+                                        <ComboBox Grid.Column="6" x:Name="MultiHp7Key" FontSize="8" Height="20" Width="45">
+                                            <ComboBoxItem Content="0"/>
+                                            <ComboBoxItem Content="1"/>
+                                            <ComboBoxItem Content="2"/>
+                                            <ComboBoxItem Content="3"/>
+                                            <ComboBoxItem Content="4"/>
+                                            <ComboBoxItem Content="5"/>
+                                            <ComboBoxItem Content="6"/>
+                                            <ComboBoxItem Content="7" IsSelected="True"/>
+                                            <ComboBoxItem Content="8"/>
+                                            <ComboBoxItem Content="9"/>
+                                        </ComboBox>
+                                        <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
+                                            <Button Content="📊" Style="{StaticResource SmallButtonStyle}" Click="CalibrateMultiHp7_Click" Width="20" Margin="0,0,2,0"/>
+                                            <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickMultiHp7Click_Click" Width="20"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    
+                                    <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                        <Rectangle x:Name="MultiHp7ColorBar" Width="180" Height="12" Fill="#000000" Stroke="#555" StrokeThickness="1" Margin="0,0,5,0"/>
+                                        <TextBlock x:Name="MultiHp7Percentage" Text="100%" Style="{StaticResource ValueStyle}" FontSize="9" VerticalAlignment="Center" Foreground="#90EE90"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- HP Monitor 8 -->
+                            <Border Background="#2d1b3d" CornerRadius="3" Padding="6" Margin="0,0,0,3">
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="15"/>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <CheckBox Grid.Column="0" x:Name="MultiHp8Enabled" IsChecked="False" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="🩸 Party Member 8" Style="{StaticResource SectionHeaderStyle}" FontSize="10" Foreground="#FF6B6B"/>
+                                        <TextBlock Grid.Column="2" x:Name="MultiHp8Status" Text="Waiting..." Style="{StaticResource ValueStyle}" FontSize="9" HorizontalAlignment="Right" Foreground="#90EE90"/>
+                                    </Grid>
+                                    
+                                    <Grid Margin="0,3,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="50"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <TextBox Grid.Column="0" x:Name="MultiHp8StartX" Style="{StaticResource CoordTextBoxStyle}" Text="1" Width="35"/>
+                                        <TextBox Grid.Column="1" x:Name="MultiHp8EndX" Style="{StaticResource CoordTextBoxStyle}" Text="90" Width="35"/>
+                                        <TextBox Grid.Column="2" x:Name="MultiHp8Y" Style="{StaticResource CoordTextBoxStyle}" Text="5" Width="35"/>
+                                        <ComboBox Grid.Column="3" x:Name="MultiHp8Threshold" FontSize="8" Height="20" Width="35">
+                                            <ComboBoxItem Content="10"/>
+                                            <ComboBoxItem Content="20"/>
+                                            <ComboBoxItem Content="30" IsSelected="True"/>
+                                            <ComboBoxItem Content="40"/>
+                                            <ComboBoxItem Content="50"/>
+                                            <ComboBoxItem Content="60"/>
+                                            <ComboBoxItem Content="70"/>
+                                            <ComboBoxItem Content="80"/>
+                                            <ComboBoxItem Content="90"/>
+                                        </ComboBox>
+                                        <TextBox Grid.Column="4" x:Name="MultiHp8ClickX" Style="{StaticResource CoordTextBoxStyle}" Text="376" Width="35"/>
+                                        <TextBox Grid.Column="5" x:Name="MultiHp8ClickY" Style="{StaticResource CoordTextBoxStyle}" Text="236" Width="35"/>
+                                        <ComboBox Grid.Column="6" x:Name="MultiHp8Key" FontSize="8" Height="20" Width="45">
+                                            <ComboBoxItem Content="0"/>
+                                            <ComboBoxItem Content="1"/>
+                                            <ComboBoxItem Content="2"/>
+                                            <ComboBoxItem Content="3"/>
+                                            <ComboBoxItem Content="4"/>
+                                            <ComboBoxItem Content="5"/>
+                                            <ComboBoxItem Content="6"/>
+                                            <ComboBoxItem Content="7"/>
+                                            <ComboBoxItem Content="8" IsSelected="True"/>
+                                            <ComboBoxItem Content="9"/>
+                                        </ComboBox>
+                                        <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
+                                            <Button Content="📊" Style="{StaticResource SmallButtonStyle}" Click="CalibrateMultiHp8_Click" Width="20" Margin="0,0,2,0"/>
+                                            <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickMultiHp8Click_Click" Width="20"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    
+                                    <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                        <Rectangle x:Name="MultiHp8ColorBar" Width="180" Height="12" Fill="#000000" Stroke="#555" StrokeThickness="1" Margin="0,0,5,0"/>
+                                        <TextBlock x:Name="MultiHp8Percentage" Text="100%" Style="{StaticResource ValueStyle}" FontSize="9" VerticalAlignment="Center" Foreground="#90EE90"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
     </Border>
 </UserControl>

@@ -40,7 +40,15 @@ public partial class MainWindow : Window
         InitializeClientCards();
         InitializeComboBoxes();
         LoadProfiles();
-        AutoAssignMuMuWindows(); // Auto-assign MuMu prest windows
+        
+        // Auto-assign MuMu windows after UI is fully loaded
+        Loaded += MainWindow_Loaded;
+    }
+
+    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        // UI fully loaded, now auto-assign MuMu windows
+        AutoAssignMuMuWindows();
     }
 
     private void InitializeClientCards()
@@ -748,7 +756,7 @@ public partial class MainWindow : Window
                             
                             if (windowTitleText != null)
                             {
-                                windowTitleText.Text = title;
+                                windowTitleText.Text = $"{title} - 0x{hwnd:X8}";
                                 Console.WriteLine($"[AUTO-ASSIGN] Updated window title for Client {kvp.Key}: {title}");
                             }
                             else

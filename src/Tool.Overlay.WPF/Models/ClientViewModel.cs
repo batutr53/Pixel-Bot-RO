@@ -138,6 +138,40 @@ public partial class ClientViewModel : ObservableObject
         PotionY = 200,
         Enabled = false
     };
+    
+    // Multi HP System - 8 clients
+    public List<MultiHpClientViewModel> MultiHpClients { get; set; } = new();
+    
+    [ObservableProperty]
+    private bool multiHpEnabled = false;
+    
+    [ObservableProperty]
+    private int animationDelay = 1500; // Skill animation delay in ms
+    
+    [ObservableProperty]
+    private int multiHpCheckInterval = 100; // Check interval in ms
+    
+    public ClientViewModel()
+    {
+        // Initialize 8 Multi HP clients
+        for (int i = 1; i <= 8; i++)
+        {
+            MultiHpClients.Add(new MultiHpClientViewModel
+            {
+                ClientIndex = i,
+                StartX = 1,
+                EndX = 90,
+                Y = 5,
+                ThresholdPercentage = 30,
+                ClickX = 376,
+                ClickY = 236,
+                Key = i.ToString(),
+                Enabled = false,
+                Status = "Waiting...",
+                Percentage = 100
+            });
+        }
+    }
 }
 
 public partial class ProbeViewModel : ObservableObject
@@ -402,4 +436,72 @@ public partial class BabeBotMpViewModel : ObservableObject
     
     [ObservableProperty]
     private long executionCount = 0;
+}
+
+// Multi HP Client ViewModel for 8-client system
+public partial class MultiHpClientViewModel : ObservableObject
+{
+    [ObservableProperty]
+    private int clientIndex = 1;
+    
+    [ObservableProperty]
+    private int startX = 1;
+    
+    [ObservableProperty]
+    private int endX = 90;
+    
+    [ObservableProperty]
+    private int y = 5;
+    
+    [ObservableProperty]
+    private int thresholdPercentage = 30;
+    
+    [ObservableProperty]
+    private int clickX = 376;
+    
+    [ObservableProperty]
+    private int clickY = 236;
+    
+    [ObservableProperty]
+    private string key = "1";
+    
+    [ObservableProperty]
+    private bool enabled = false;
+    
+    [ObservableProperty]
+    private string status = "Waiting...";
+    
+    [ObservableProperty]
+    private double percentage = 100.0;
+    
+    [ObservableProperty]
+    private System.Drawing.Color currentColor = System.Drawing.Color.Black;
+    
+    [ObservableProperty]
+    private System.Drawing.Color referenceColor = System.Drawing.Color.Red;
+    
+    [ObservableProperty]
+    private bool isTriggered = false;
+    
+    [ObservableProperty]
+    private DateTime lastExecution = DateTime.MinValue;
+    
+    [ObservableProperty]
+    private long executionCount = 0;
+    
+    [ObservableProperty]
+    private bool isWaitingForAnimation = false;
+    
+    // BabeBot calibration storage for this client
+    public Dictionary<int, System.Drawing.Color> ReferenceColors { get; set; } = new();
+    
+    // Calculate the X coordinate based on percentage (same as BabeBot formula)
+    public int CalculateXForPercentage(double percentage)
+    {
+        double percentX = percentage / 100.0;
+        return (int)Math.Round(((EndX - StartX) * percentX + StartX), 0);
+    }
+    
+    // Get the monitoring X coordinate based on threshold
+    public int MonitorX => CalculateXForPercentage(ThresholdPercentage);
 }

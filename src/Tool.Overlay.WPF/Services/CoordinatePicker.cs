@@ -74,7 +74,23 @@ public class CoordinatePicker : Window
     
     private void SetMultiMonitorBounds()
     {
-        // Calculate total bounds across all monitors
+        if (_targetHwnd != IntPtr.Zero)
+        {
+            // Get target window bounds
+            if (User32.GetWindowRect(_targetHwnd, out var rect))
+            {
+                // Set overlay to cover only the target window
+                Left = rect.left;
+                Top = rect.top;
+                Width = rect.right - rect.left;
+                Height = rect.bottom - rect.top;
+                
+                Console.WriteLine($"[CoordinatePicker] Bounded to target window: ({rect.left},{rect.top}) Size: {Width}x{Height}");
+                return;
+            }
+        }
+        
+        // Fallback: Calculate total bounds across all monitors
         var leftmost = System.Windows.Forms.Screen.AllScreens.Min(s => s.Bounds.Left);
         var topmost = System.Windows.Forms.Screen.AllScreens.Min(s => s.Bounds.Top);
         var rightmost = System.Windows.Forms.Screen.AllScreens.Max(s => s.Bounds.Right);
@@ -86,7 +102,7 @@ public class CoordinatePicker : Window
         Width = rightmost - leftmost;
         Height = bottommost - topmost;
         
-        // Multi-monitor bounds set
+        Console.WriteLine($"[CoordinatePicker] Fallback to full screen bounds");
     }
 
     private void OnMouseMove(object sender, MouseEventArgs e)
