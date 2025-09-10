@@ -150,6 +150,8 @@
                     <Grid Margin="0,3,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="40"/>
+                            <ColumnDefinition Width="35"/>
+                            <ColumnDefinition Width="35"/>
                             <ColumnDefinition Width="45"/>
                             <ColumnDefinition Width="45"/>
                             <ColumnDefinition Width="45"/>
@@ -157,10 +159,15 @@
                         </Grid.ColumnDefinitions>
                         
                         <TextBlock Grid.Column="0" Text="Pota:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
-                        <TextBox Grid.Column="1" x:Name="HpTriggerX" Style="{StaticResource CoordTextBoxStyle}" Text="0" ToolTip="HP Potion Click X"/>
-                        <TextBox Grid.Column="2" x:Name="HpTriggerY" Style="{StaticResource CoordTextBoxStyle}" Text="0" ToolTip="HP Potion Click Y"/>
-                        <TextBox Grid.Column="3" x:Name="HpTriggerCooldown" Style="{StaticResource CoordTextBoxStyle}" Text="120" ToolTip="Cooldown ms"/>
-                        <Button Grid.Column="4" Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickHpTrigger_Click" HorizontalAlignment="Left" Width="25" Margin="5,0,0,0"/>
+                        <CheckBox Grid.Column="1" x:Name="HpUseCoordinate" Content="Pos" IsChecked="False" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                        <CheckBox Grid.Column="2" x:Name="HpUseKeyPress" Content="Key" IsChecked="True" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                        <TextBox Grid.Column="3" x:Name="HpTriggerX" Style="{StaticResource CoordTextBoxStyle}" Text="0" ToolTip="HP Potion Click X" IsEnabled="{Binding ElementName=HpUseCoordinate, Path=IsChecked}" Width="40"/>
+                        <TextBox Grid.Column="4" x:Name="HpTriggerY" Style="{StaticResource CoordTextBoxStyle}" Text="0" ToolTip="HP Potion Click Y" IsEnabled="{Binding ElementName=HpUseCoordinate, Path=IsChecked}" Width="40"/>
+                        <TextBox Grid.Column="5" x:Name="HpTriggerCooldown" Style="{StaticResource CoordTextBoxStyle}" Text="120" ToolTip="Cooldown ms"/>
+                        <StackPanel Grid.Column="6" Orientation="Horizontal" Margin="5,0,0,0">
+                            <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickHpTrigger_Click" Width="20" Margin="0,0,2,0" IsEnabled="{Binding ElementName=HpUseCoordinate, Path=IsChecked}"/>
+                            <TextBox x:Name="HpKeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="Q" Width="25" IsEnabled="{Binding ElementName=HpUseKeyPress, Path=IsChecked}"/>
+                        </StackPanel>
                     </Grid>
                 </StackPanel>
             </Border>
@@ -221,6 +228,8 @@
                     <Grid Margin="0,3,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="40"/>
+                            <ColumnDefinition Width="35"/>
+                            <ColumnDefinition Width="35"/>
                             <ColumnDefinition Width="45"/>
                             <ColumnDefinition Width="45"/>
                             <ColumnDefinition Width="45"/>
@@ -228,10 +237,15 @@
                         </Grid.ColumnDefinitions>
                         
                         <TextBlock Grid.Column="0" Text="Pota:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
-                        <TextBox Grid.Column="1" x:Name="MpTriggerX" Style="{StaticResource CoordTextBoxStyle}" Text="0" ToolTip="MP Potion Click X"/>
-                        <TextBox Grid.Column="2" x:Name="MpTriggerY" Style="{StaticResource CoordTextBoxStyle}" Text="0" ToolTip="MP Potion Click Y"/>
-                        <TextBox Grid.Column="3" x:Name="MpTriggerCooldown" Style="{StaticResource CoordTextBoxStyle}" Text="120" ToolTip="Cooldown ms"/>
-                        <Button Grid.Column="4" Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickMpTrigger_Click" HorizontalAlignment="Left" Width="25" Margin="5,0,0,0"/>
+                        <CheckBox Grid.Column="1" x:Name="MpUseCoordinate" Content="Pos" IsChecked="False" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                        <CheckBox Grid.Column="2" x:Name="MpUseKeyPress" Content="Key" IsChecked="True" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                        <TextBox Grid.Column="3" x:Name="MpTriggerX" Style="{StaticResource CoordTextBoxStyle}" Text="0" ToolTip="MP Potion Click X" IsEnabled="{Binding ElementName=MpUseCoordinate, Path=IsChecked}" Width="40"/>
+                        <TextBox Grid.Column="4" x:Name="MpTriggerY" Style="{StaticResource CoordTextBoxStyle}" Text="0" ToolTip="MP Potion Click Y" IsEnabled="{Binding ElementName=MpUseCoordinate, Path=IsChecked}" Width="40"/>
+                        <TextBox Grid.Column="5" x:Name="MpTriggerCooldown" Style="{StaticResource CoordTextBoxStyle}" Text="120" ToolTip="Cooldown ms"/>
+                        <StackPanel Grid.Column="6" Orientation="Horizontal" Margin="5,0,0,0">
+                            <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickMpTrigger_Click" Width="20" Margin="0,0,2,0" IsEnabled="{Binding ElementName=MpUseCoordinate, Path=IsChecked}"/>
+                            <TextBox x:Name="MpKeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="W" Width="25" IsEnabled="{Binding ElementName=MpUseKeyPress, Path=IsChecked}"/>
+                        </StackPanel>
                     </Grid>
                 </StackPanel>
             </Border>
@@ -300,6 +314,8 @@
                     <Grid Margin="0,5,0,3">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="35"/>
+                            <ColumnDefinition Width="35"/>
                             <ColumnDefinition Width="45"/>
                             <ColumnDefinition Width="45"/>
                             <ColumnDefinition Width="50"/>
@@ -307,15 +323,22 @@
                         </Grid.ColumnDefinitions>
                         
                         <TextBlock Grid.Column="0" Text="🧪HP:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#FF6B6B"/>
-                        <TextBox Grid.Column="1" x:Name="PythonHpPotionX" Style="{StaticResource CoordTextBoxStyle}" Text="400" ToolTip="HP Potion Click X"/>
-                        <TextBox Grid.Column="2" x:Name="PythonHpPotionY" Style="{StaticResource CoordTextBoxStyle}" Text="300" ToolTip="HP Potion Click Y"/>
-                        <TextBox Grid.Column="3" x:Name="PythonHpPotionCooldown" Style="{StaticResource CoordTextBoxStyle}" Text="500" ToolTip="Cooldown ms"/>
-                        <Button Grid.Column="4" Content="📍 Pick HP Potion" Style="{StaticResource SmallButtonStyle}" Click="PickPythonHpPotion_Click" HorizontalAlignment="Left" Width="90" Margin="5,0,0,0"/>
+                        <CheckBox Grid.Column="1" x:Name="PythonHpUseCoordinate" Content="Pos" IsChecked="False" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                        <CheckBox Grid.Column="2" x:Name="PythonHpUseKeyPress" Content="Key" IsChecked="True" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                        <TextBox Grid.Column="3" x:Name="PythonHpPotionX" Style="{StaticResource CoordTextBoxStyle}" Text="400" ToolTip="HP Potion Click X" IsEnabled="{Binding ElementName=PythonHpUseCoordinate, Path=IsChecked}" Width="40"/>
+                        <TextBox Grid.Column="4" x:Name="PythonHpPotionY" Style="{StaticResource CoordTextBoxStyle}" Text="300" ToolTip="HP Potion Click Y" IsEnabled="{Binding ElementName=PythonHpUseCoordinate, Path=IsChecked}" Width="40"/>
+                        <TextBox Grid.Column="5" x:Name="PythonHpPotionCooldown" Style="{StaticResource CoordTextBoxStyle}" Text="500" ToolTip="Cooldown ms"/>
+                        <StackPanel Grid.Column="6" Orientation="Horizontal" Margin="5,0,0,0">
+                            <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickPythonHpPotion_Click" Width="20" Margin="0,0,2,0" IsEnabled="{Binding ElementName=PythonHpUseCoordinate, Path=IsChecked}"/>
+                            <TextBox x:Name="PythonHpKeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="Q" Width="25" IsEnabled="{Binding ElementName=PythonHpUseKeyPress, Path=IsChecked}"/>
+                        </StackPanel>
                     </Grid>
                     
                     <Grid Margin="0,0,0,3">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="35"/>
+                            <ColumnDefinition Width="35"/>
                             <ColumnDefinition Width="45"/>
                             <ColumnDefinition Width="45"/>
                             <ColumnDefinition Width="50"/>
@@ -323,10 +346,15 @@
                         </Grid.ColumnDefinitions>
                         
                         <TextBlock Grid.Column="0" Text="💉MP:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#4FC3F7"/>
-                        <TextBox Grid.Column="1" x:Name="PythonMpPotionX" Style="{StaticResource CoordTextBoxStyle}" Text="450" ToolTip="MP Potion Click X"/>
-                        <TextBox Grid.Column="2" x:Name="PythonMpPotionY" Style="{StaticResource CoordTextBoxStyle}" Text="350" ToolTip="MP Potion Click Y"/>
-                        <TextBox Grid.Column="3" x:Name="PythonMpPotionCooldown" Style="{StaticResource CoordTextBoxStyle}" Text="500" ToolTip="Cooldown ms"/>
-                        <Button Grid.Column="4" Content="📍 Pick MP Potion" Style="{StaticResource SmallButtonStyle}" Click="PickPythonMpPotion_Click" HorizontalAlignment="Left" Width="90" Margin="5,0,0,0"/>
+                        <CheckBox Grid.Column="1" x:Name="PythonMpUseCoordinate" Content="Pos" IsChecked="False" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                        <CheckBox Grid.Column="2" x:Name="PythonMpUseKeyPress" Content="Key" IsChecked="True" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                        <TextBox Grid.Column="3" x:Name="PythonMpPotionX" Style="{StaticResource CoordTextBoxStyle}" Text="450" ToolTip="MP Potion Click X" IsEnabled="{Binding ElementName=PythonMpUseCoordinate, Path=IsChecked}" Width="40"/>
+                        <TextBox Grid.Column="4" x:Name="PythonMpPotionY" Style="{StaticResource CoordTextBoxStyle}" Text="350" ToolTip="MP Potion Click Y" IsEnabled="{Binding ElementName=PythonMpUseCoordinate, Path=IsChecked}" Width="40"/>
+                        <TextBox Grid.Column="5" x:Name="PythonMpPotionCooldown" Style="{StaticResource CoordTextBoxStyle}" Text="500" ToolTip="Cooldown ms"/>
+                        <StackPanel Grid.Column="6" Orientation="Horizontal" Margin="5,0,0,0">
+                            <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickPythonMpPotion_Click" Width="20" Margin="0,0,2,0" IsEnabled="{Binding ElementName=PythonMpUseCoordinate, Path=IsChecked}"/>
+                            <TextBox x:Name="PythonMpKeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="W" Width="25" IsEnabled="{Binding ElementName=PythonMpUseKeyPress, Path=IsChecked}"/>
+                        </StackPanel>
                     </Grid>
                     
                     <!-- Current Status Display -->
@@ -402,34 +430,20 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="30"/>
                                     <ColumnDefinition Width="40"/>
-                                    <ColumnDefinition Width="35"/>
-                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="25"/>
+                                    <ColumnDefinition Width="25"/>
+                                    <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 
                                 <TextBlock Grid.Column="0" Text="%:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="8"/>
-                                <ComboBox Grid.Column="1" x:Name="BabeBotHpThreshold" FontSize="8" Height="20">
-                                    <ComboBoxItem Content="5" />
-                                    <ComboBoxItem Content="10" />
-                                    <ComboBoxItem Content="15" />
-                                    <ComboBoxItem Content="20" />
-                                    <ComboBoxItem Content="25" />
-                                    <ComboBoxItem Content="30" />
-                                    <ComboBoxItem Content="35" />
-                                    <ComboBoxItem Content="40" />
-                                    <ComboBoxItem Content="45" />
-                                    <ComboBoxItem Content="50" />
-                                    <ComboBoxItem Content="55" />
-                                    <ComboBoxItem Content="60" />
-                                    <ComboBoxItem Content="65" />
-                                    <ComboBoxItem Content="70" />
-                                    <ComboBoxItem Content="75" />
-                                    <ComboBoxItem Content="80" />
-                                    <ComboBoxItem Content="85" />
-                                    <ComboBoxItem Content="90" IsSelected="True"/>
-                                    <ComboBoxItem Content="95" />
-                                </ComboBox>
-                                <TextBox Grid.Column="2" x:Name="BabeBotHpPotionX" Style="{StaticResource CoordTextBoxStyle}" Text="376" ToolTip="HP Potion X" Width="25"/>
-                                <TextBox Grid.Column="3" x:Name="BabeBotHpPotionY" Style="{StaticResource CoordTextBoxStyle}" Text="236" ToolTip="HP Potion Y" Width="25"/>
+                                <TextBox Grid.Column="1" x:Name="BabeBotHpThreshold" FontSize="8" Height="20" Text="90" TextAlignment="Center" Background="#383838" Foreground="#ffffff" BorderBrush="#555555" BorderThickness="1"/>
+                                <CheckBox Grid.Column="2" x:Name="BabeBotHpUseCoordinate" Content="Pos" IsChecked="False" VerticalAlignment="Center" FontSize="7" Foreground="#cccccc"/>
+                                <CheckBox Grid.Column="3" x:Name="BabeBotHpUseKeyPress" Content="Key" IsChecked="True" VerticalAlignment="Center" FontSize="7" Foreground="#cccccc"/>
+                                <StackPanel Grid.Column="4" Orientation="Horizontal">
+                                    <TextBox x:Name="BabeBotHpPotionX" Style="{StaticResource CoordTextBoxStyle}" Text="376" ToolTip="HP Potion X" Width="20" IsEnabled="{Binding ElementName=BabeBotHpUseCoordinate, Path=IsChecked}" Margin="0,0,1,0"/>
+                                    <TextBox x:Name="BabeBotHpPotionY" Style="{StaticResource CoordTextBoxStyle}" Text="236" ToolTip="HP Potion Y" Width="20" IsEnabled="{Binding ElementName=BabeBotHpUseCoordinate, Path=IsChecked}" Margin="0,0,2,0"/>
+                                    <TextBox x:Name="BabeBotHpKeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="Q" Width="15" IsEnabled="{Binding ElementName=BabeBotHpUseKeyPress, Path=IsChecked}"/>
+                                </StackPanel>
                             </Grid>
                             
                             <!-- HP Controls -->
@@ -443,7 +457,7 @@
                                 
                                 <CheckBox Grid.Column="0" x:Name="BabeBotHpEnabled" IsChecked="False" VerticalAlignment="Center" Visibility="Collapsed"/>
                                 <Button Grid.Column="1" x:Name="BabeBotHpCalibrate" Content="📊 Cal" Style="{StaticResource SmallButtonStyle}" Click="BabeBotHpCalibrate_Click" FontSize="8" Height="20" Grid.ColumnSpan="2" Margin="15,0,0,0"/>
-                                <Button Grid.Column="3" Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickBabeBotHpPotion_Click" Width="25" HorizontalAlignment="Left" Margin="3,0,0,0"/>
+                                <Button Grid.Column="3" Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickBabeBotHpPotion_Click" Width="25" HorizontalAlignment="Left" Margin="3,0,0,0" IsEnabled="{Binding ElementName=BabeBotHpUseCoordinate, Path=IsChecked}"/>
                             </Grid>
                             
                             <!-- HP Status -->
@@ -480,34 +494,20 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="30"/>
                                     <ColumnDefinition Width="40"/>
-                                    <ColumnDefinition Width="35"/>
-                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="25"/>
+                                    <ColumnDefinition Width="25"/>
+                                    <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 
                                 <TextBlock Grid.Column="0" Text="%:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="8"/>
-                                <ComboBox Grid.Column="1" x:Name="BabeBotMpThreshold" FontSize="8" Height="20">
-                                    <ComboBoxItem Content="5" />
-                                    <ComboBoxItem Content="10" />
-                                    <ComboBoxItem Content="15" />
-                                    <ComboBoxItem Content="20" />
-                                    <ComboBoxItem Content="25" />
-                                    <ComboBoxItem Content="30" />
-                                    <ComboBoxItem Content="35" />
-                                    <ComboBoxItem Content="40" />
-                                    <ComboBoxItem Content="45" />
-                                    <ComboBoxItem Content="50" />
-                                    <ComboBoxItem Content="55" />
-                                    <ComboBoxItem Content="60" />
-                                    <ComboBoxItem Content="65" />
-                                    <ComboBoxItem Content="70" />
-                                    <ComboBoxItem Content="75" />
-                                    <ComboBoxItem Content="80" />
-                                    <ComboBoxItem Content="85" />
-                                    <ComboBoxItem Content="90" IsSelected="True"/>
-                                    <ComboBoxItem Content="95" />
-                                </ComboBox>
-                                <TextBox Grid.Column="2" x:Name="BabeBotMpPotionX" Style="{StaticResource CoordTextBoxStyle}" Text="376" ToolTip="MP Potion X" Width="25"/>
-                                <TextBox Grid.Column="3" x:Name="BabeBotMpPotionY" Style="{StaticResource CoordTextBoxStyle}" Text="200" ToolTip="MP Potion Y" Width="25"/>
+                                <TextBox Grid.Column="1" x:Name="BabeBotMpThreshold" FontSize="8" Height="20" Text="90" TextAlignment="Center" Background="#383838" Foreground="#ffffff" BorderBrush="#555555" BorderThickness="1"/>
+                                <CheckBox Grid.Column="2" x:Name="BabeBotMpUseCoordinate" Content="Pos" IsChecked="False" VerticalAlignment="Center" FontSize="7" Foreground="#cccccc"/>
+                                <CheckBox Grid.Column="3" x:Name="BabeBotMpUseKeyPress" Content="Key" IsChecked="True" VerticalAlignment="Center" FontSize="7" Foreground="#cccccc"/>
+                                <StackPanel Grid.Column="4" Orientation="Horizontal">
+                                    <TextBox x:Name="BabeBotMpPotionX" Style="{StaticResource CoordTextBoxStyle}" Text="376" ToolTip="MP Potion X" Width="20" IsEnabled="{Binding ElementName=BabeBotMpUseCoordinate, Path=IsChecked}" Margin="0,0,1,0"/>
+                                    <TextBox x:Name="BabeBotMpPotionY" Style="{StaticResource CoordTextBoxStyle}" Text="200" ToolTip="MP Potion Y" Width="20" IsEnabled="{Binding ElementName=BabeBotMpUseCoordinate, Path=IsChecked}" Margin="0,0,2,0"/>
+                                    <TextBox x:Name="BabeBotMpKeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="W" Width="15" IsEnabled="{Binding ElementName=BabeBotMpUseKeyPress, Path=IsChecked}"/>
+                                </StackPanel>
                             </Grid>
                             
                             <!-- MP Controls -->
@@ -521,7 +521,7 @@
                                 
                                 <CheckBox Grid.Column="0" x:Name="BabeBotMpEnabled" IsChecked="False" VerticalAlignment="Center" Visibility="Collapsed"/>
                                 <Button Grid.Column="1" x:Name="BabeBotMpCalibrate" Content="📊 Cal" Style="{StaticResource SmallButtonStyle}" Click="BabeBotMpCalibrate_Click" FontSize="8" Height="20" Grid.ColumnSpan="2" Margin="15,0,0,0"/>
-                                <Button Grid.Column="3" Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickBabeBotMpPotion_Click" Width="25" HorizontalAlignment="Left" Margin="3,0,0,0"/>
+                                <Button Grid.Column="3" Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickBabeBotMpPotion_Click" Width="25" HorizontalAlignment="Left" Margin="3,0,0,0" IsEnabled="{Binding ElementName=BabeBotMpUseCoordinate, Path=IsChecked}"/>
                             </Grid>
                             
                             <!-- MP Status -->
@@ -547,6 +547,8 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="15"/>
                             <ColumnDefinition Width="25"/>
+                            <ColumnDefinition Width="35"/>
+                            <ColumnDefinition Width="35"/>
                             <ColumnDefinition Width="45"/>
                             <ColumnDefinition Width="45"/>
                             <ColumnDefinition Width="50"/>
@@ -555,10 +557,15 @@
                         
                         <CheckBox Grid.Column="0" x:Name="YClickEnabled" IsChecked="True" VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="1" Text="Y:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#FFD700"/>
-                        <TextBox Grid.Column="2" x:Name="YClickX" Style="{StaticResource CoordTextBoxStyle}" Text="540"/>
-                        <TextBox Grid.Column="3" x:Name="YClickY" Style="{StaticResource CoordTextBoxStyle}" Text="760"/>
-                        <TextBox Grid.Column="4" x:Name="YClickPeriod" Style="{StaticResource CoordTextBoxStyle}" Text="120" ToolTip="Period in ms"/>
-                        <Button Grid.Column="5" Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickYCoord_Click" HorizontalAlignment="Left" Width="25" Margin="5,0,0,0"/>
+                        <CheckBox Grid.Column="2" x:Name="YUseCoordinate" Content="Pos" IsChecked="False" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                        <CheckBox Grid.Column="3" x:Name="YUseKeyPress" Content="Key" IsChecked="True" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                        <TextBox Grid.Column="4" x:Name="YClickX" Style="{StaticResource CoordTextBoxStyle}" Text="540" IsEnabled="{Binding ElementName=YUseCoordinate, Path=IsChecked}" Width="40"/>
+                        <TextBox Grid.Column="5" x:Name="YClickY" Style="{StaticResource CoordTextBoxStyle}" Text="760" IsEnabled="{Binding ElementName=YUseCoordinate, Path=IsChecked}" Width="40"/>
+                        <TextBox Grid.Column="6" x:Name="YClickPeriod" Style="{StaticResource CoordTextBoxStyle}" Text="120" ToolTip="Period in ms"/>
+                        <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
+                            <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickYCoord_Click" Width="20" Margin="0,0,2,0" IsEnabled="{Binding ElementName=YUseCoordinate, Path=IsChecked}"/>
+                            <TextBox x:Name="YKeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="Y" Width="25" IsEnabled="{Binding ElementName=YUseKeyPress, Path=IsChecked}"/>
+                        </StackPanel>
                     </Grid>
                     
                     <!-- Extra Clicks -->
@@ -566,6 +573,8 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="15"/>
                             <ColumnDefinition Width="25"/>
+                            <ColumnDefinition Width="35"/>
+                            <ColumnDefinition Width="35"/>
                             <ColumnDefinition Width="45"/>
                             <ColumnDefinition Width="45"/>
                             <ColumnDefinition Width="50"/>
@@ -574,16 +583,23 @@
                         
                         <CheckBox Grid.Column="0" x:Name="Extra1Enabled" VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="1" Text="E1:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
-                        <TextBox Grid.Column="2" x:Name="Extra1X" Style="{StaticResource CoordTextBoxStyle}" Text="700"/>
-                        <TextBox Grid.Column="3" x:Name="Extra1Y" Style="{StaticResource CoordTextBoxStyle}" Text="820"/>
-                        <TextBox Grid.Column="4" x:Name="Extra1Period" Style="{StaticResource CoordTextBoxStyle}" Text="250"/>
-                        <Button Grid.Column="5" Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickExtra1Coord_Click" HorizontalAlignment="Left" Width="25" Margin="5,0,0,0"/>
+                        <CheckBox Grid.Column="2" x:Name="Extra1UseCoordinate" Content="Pos" IsChecked="False" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                        <CheckBox Grid.Column="3" x:Name="Extra1UseKeyPress" Content="Key" IsChecked="True" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                        <TextBox Grid.Column="4" x:Name="Extra1X" Style="{StaticResource CoordTextBoxStyle}" Text="700" IsEnabled="{Binding ElementName=Extra1UseCoordinate, Path=IsChecked}" Width="40"/>
+                        <TextBox Grid.Column="5" x:Name="Extra1Y" Style="{StaticResource CoordTextBoxStyle}" Text="820" IsEnabled="{Binding ElementName=Extra1UseCoordinate, Path=IsChecked}" Width="40"/>
+                        <TextBox Grid.Column="6" x:Name="Extra1Period" Style="{StaticResource CoordTextBoxStyle}" Text="250"/>
+                        <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
+                            <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickExtra1Coord_Click" Width="20" Margin="0,0,2,0" IsEnabled="{Binding ElementName=Extra1UseCoordinate, Path=IsChecked}"/>
+                            <TextBox x:Name="Extra1KeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="" Width="25" IsEnabled="{Binding ElementName=Extra1UseKeyPress, Path=IsChecked}"/>
+                        </StackPanel>
                     </Grid>
                     
                     <Grid Margin="0,0,0,2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="15"/>
                             <ColumnDefinition Width="25"/>
+                            <ColumnDefinition Width="35"/>
+                            <ColumnDefinition Width="35"/>
                             <ColumnDefinition Width="45"/>
                             <ColumnDefinition Width="45"/>
                             <ColumnDefinition Width="50"/>
@@ -592,16 +608,23 @@
                         
                         <CheckBox Grid.Column="0" x:Name="Extra2Enabled" VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="1" Text="E2:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
-                        <TextBox Grid.Column="2" x:Name="Extra2X" Style="{StaticResource CoordTextBoxStyle}" Text="720"/>
-                        <TextBox Grid.Column="3" x:Name="Extra2Y" Style="{StaticResource CoordTextBoxStyle}" Text="840"/>
-                        <TextBox Grid.Column="4" x:Name="Extra2Period" Style="{StaticResource CoordTextBoxStyle}" Text="500"/>
-                        <Button Grid.Column="5" Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickExtra2Coord_Click" HorizontalAlignment="Left" Width="25" Margin="5,0,0,0"/>
+                        <CheckBox Grid.Column="2" x:Name="Extra2UseCoordinate" Content="Pos" IsChecked="False" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                        <CheckBox Grid.Column="3" x:Name="Extra2UseKeyPress" Content="Key" IsChecked="True" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                        <TextBox Grid.Column="4" x:Name="Extra2X" Style="{StaticResource CoordTextBoxStyle}" Text="720" IsEnabled="{Binding ElementName=Extra2UseCoordinate, Path=IsChecked}" Width="40"/>
+                        <TextBox Grid.Column="5" x:Name="Extra2Y" Style="{StaticResource CoordTextBoxStyle}" Text="840" IsEnabled="{Binding ElementName=Extra2UseCoordinate, Path=IsChecked}" Width="40"/>
+                        <TextBox Grid.Column="6" x:Name="Extra2Period" Style="{StaticResource CoordTextBoxStyle}" Text="500"/>
+                        <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
+                            <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickExtra2Coord_Click" Width="20" Margin="0,0,2,0" IsEnabled="{Binding ElementName=Extra2UseCoordinate, Path=IsChecked}"/>
+                            <TextBox x:Name="Extra2KeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="" Width="25" IsEnabled="{Binding ElementName=Extra2UseKeyPress, Path=IsChecked}"/>
+                        </StackPanel>
                     </Grid>
                     
                     <Grid Margin="0,0,0,2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="15"/>
                             <ColumnDefinition Width="25"/>
+                            <ColumnDefinition Width="35"/>
+                            <ColumnDefinition Width="35"/>
                             <ColumnDefinition Width="45"/>
                             <ColumnDefinition Width="45"/>
                             <ColumnDefinition Width="50"/>
@@ -610,10 +633,15 @@
                         
                         <CheckBox Grid.Column="0" x:Name="Extra3Enabled" VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="1" Text="E3:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
-                        <TextBox Grid.Column="2" x:Name="Extra3X" Style="{StaticResource CoordTextBoxStyle}" Text="740"/>
-                        <TextBox Grid.Column="3" x:Name="Extra3Y" Style="{StaticResource CoordTextBoxStyle}" Text="860"/>
-                        <TextBox Grid.Column="4" x:Name="Extra3Period" Style="{StaticResource CoordTextBoxStyle}" Text="1000"/>
-                        <Button Grid.Column="5" Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickExtra3Coord_Click" HorizontalAlignment="Left" Width="25" Margin="5,0,0,0"/>
+                        <CheckBox Grid.Column="2" x:Name="Extra3UseCoordinate" Content="Pos" IsChecked="False" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                        <CheckBox Grid.Column="3" x:Name="Extra3UseKeyPress" Content="Key" IsChecked="True" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                        <TextBox Grid.Column="4" x:Name="Extra3X" Style="{StaticResource CoordTextBoxStyle}" Text="740" IsEnabled="{Binding ElementName=Extra3UseCoordinate, Path=IsChecked}" Width="40"/>
+                        <TextBox Grid.Column="5" x:Name="Extra3Y" Style="{StaticResource CoordTextBoxStyle}" Text="860" IsEnabled="{Binding ElementName=Extra3UseCoordinate, Path=IsChecked}" Width="40"/>
+                        <TextBox Grid.Column="6" x:Name="Extra3Period" Style="{StaticResource CoordTextBoxStyle}" Text="1000"/>
+                        <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
+                            <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickExtra3Coord_Click" Width="20" Margin="0,0,2,0" IsEnabled="{Binding ElementName=Extra3UseCoordinate, Path=IsChecked}"/>
+                            <TextBox x:Name="Extra3KeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="" Width="25" IsEnabled="{Binding ElementName=Extra3UseKeyPress, Path=IsChecked}"/>
+                        </StackPanel>
                     </Grid>
                 </StackPanel>
             </Border>
@@ -725,31 +753,10 @@
                                         <TextBox Grid.Column="0" x:Name="MultiHp1StartX" Style="{StaticResource CoordTextBoxStyle}" Text="1" ToolTip="HP Bar Start X" Width="35"/>
                                         <TextBox Grid.Column="1" x:Name="MultiHp1EndX" Style="{StaticResource CoordTextBoxStyle}" Text="90" ToolTip="HP Bar End X" Width="35"/>
                                         <TextBox Grid.Column="2" x:Name="MultiHp1Y" Style="{StaticResource CoordTextBoxStyle}" Text="5" ToolTip="HP Bar Y" Width="35"/>
-                                        <ComboBox Grid.Column="3" x:Name="MultiHp1Threshold" FontSize="8" Height="20" Width="35">
-                                            <ComboBoxItem Content="10"/>
-                                            <ComboBoxItem Content="20"/>
-                                            <ComboBoxItem Content="30" IsSelected="True"/>
-                                            <ComboBoxItem Content="40"/>
-                                            <ComboBoxItem Content="50"/>
-                                            <ComboBoxItem Content="60"/>
-                                            <ComboBoxItem Content="70"/>
-                                            <ComboBoxItem Content="80"/>
-                                            <ComboBoxItem Content="90"/>
-                                        </ComboBox>
+                                        <TextBox Grid.Column="3" x:Name="MultiHp1Threshold" FontSize="8" Height="20" Width="35" Text="30" TextAlignment="Center" Background="#383838" Foreground="#ffffff" BorderBrush="#555555" BorderThickness="1"/>
                                         <TextBox Grid.Column="4" x:Name="MultiHp1ClickX" Style="{StaticResource CoordTextBoxStyle}" Text="376" ToolTip="Click X" Width="35"/>
                                         <TextBox Grid.Column="5" x:Name="MultiHp1ClickY" Style="{StaticResource CoordTextBoxStyle}" Text="236" ToolTip="Click Y" Width="35"/>
-                                        <ComboBox Grid.Column="6" x:Name="MultiHp1Key" FontSize="8" Height="20" Width="45">
-                                            <ComboBoxItem Content="0"/>
-                                            <ComboBoxItem Content="1" IsSelected="True"/>
-                                            <ComboBoxItem Content="2"/>
-                                            <ComboBoxItem Content="3"/>
-                                            <ComboBoxItem Content="4"/>
-                                            <ComboBoxItem Content="5"/>
-                                            <ComboBoxItem Content="6"/>
-                                            <ComboBoxItem Content="7"/>
-                                            <ComboBoxItem Content="8"/>
-                                            <ComboBoxItem Content="9"/>
-                                        </ComboBox>
+                                        <TextBox Grid.Column="6" x:Name="MultiHp1Key" FontSize="8" Height="20" Width="45" Text="1" TextAlignment="Center" Background="#383838" Foreground="#ffffff" BorderBrush="#555555" BorderThickness="1"/>
                                         <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
                                             <Button Content="📊" Style="{StaticResource SmallButtonStyle}" Click="CalibrateMultiHp1_Click" Width="20" Margin="0,0,2,0" ToolTip="Calibrate"/>
                                             <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickMultiHp1Click_Click" Width="20" ToolTip="Pick Click Position"/>
@@ -794,31 +801,10 @@
                                         <TextBox Grid.Column="0" x:Name="MultiHp2StartX" Style="{StaticResource CoordTextBoxStyle}" Text="1" Width="35"/>
                                         <TextBox Grid.Column="1" x:Name="MultiHp2EndX" Style="{StaticResource CoordTextBoxStyle}" Text="90" Width="35"/>
                                         <TextBox Grid.Column="2" x:Name="MultiHp2Y" Style="{StaticResource CoordTextBoxStyle}" Text="5" Width="35"/>
-                                        <ComboBox Grid.Column="3" x:Name="MultiHp2Threshold" FontSize="8" Height="20" Width="35">
-                                            <ComboBoxItem Content="10"/>
-                                            <ComboBoxItem Content="20"/>
-                                            <ComboBoxItem Content="30" IsSelected="True"/>
-                                            <ComboBoxItem Content="40"/>
-                                            <ComboBoxItem Content="50"/>
-                                            <ComboBoxItem Content="60"/>
-                                            <ComboBoxItem Content="70"/>
-                                            <ComboBoxItem Content="80"/>
-                                            <ComboBoxItem Content="90"/>
-                                        </ComboBox>
+                                        <TextBox Grid.Column="3" x:Name="MultiHp2Threshold" FontSize="8" Height="20" Width="35" Text="30" TextAlignment="Center" Background="#383838" Foreground="#ffffff" BorderBrush="#555555" BorderThickness="1"/>
                                         <TextBox Grid.Column="4" x:Name="MultiHp2ClickX" Style="{StaticResource CoordTextBoxStyle}" Text="376" Width="35"/>
                                         <TextBox Grid.Column="5" x:Name="MultiHp2ClickY" Style="{StaticResource CoordTextBoxStyle}" Text="236" Width="35"/>
-                                        <ComboBox Grid.Column="6" x:Name="MultiHp2Key" FontSize="8" Height="20" Width="45">
-                                            <ComboBoxItem Content="0"/>
-                                            <ComboBoxItem Content="1"/>
-                                            <ComboBoxItem Content="2" IsSelected="True"/>
-                                            <ComboBoxItem Content="3"/>
-                                            <ComboBoxItem Content="4"/>
-                                            <ComboBoxItem Content="5"/>
-                                            <ComboBoxItem Content="6"/>
-                                            <ComboBoxItem Content="7"/>
-                                            <ComboBoxItem Content="8"/>
-                                            <ComboBoxItem Content="9"/>
-                                        </ComboBox>
+                                        <TextBox Grid.Column="6" x:Name="MultiHp2Key" FontSize="8" Height="20" Width="45" Text="2" TextAlignment="Center" Background="#383838" Foreground="#ffffff" BorderBrush="#555555" BorderThickness="1"/>
                                         <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
                                             <Button Content="📊" Style="{StaticResource SmallButtonStyle}" Click="CalibrateMultiHp2_Click" Width="20" Margin="0,0,2,0"/>
                                             <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickMultiHp2Click_Click" Width="20"/>
@@ -862,31 +848,10 @@
                                         <TextBox Grid.Column="0" x:Name="MultiHp3StartX" Style="{StaticResource CoordTextBoxStyle}" Text="1" Width="35"/>
                                         <TextBox Grid.Column="1" x:Name="MultiHp3EndX" Style="{StaticResource CoordTextBoxStyle}" Text="90" Width="35"/>
                                         <TextBox Grid.Column="2" x:Name="MultiHp3Y" Style="{StaticResource CoordTextBoxStyle}" Text="5" Width="35"/>
-                                        <ComboBox Grid.Column="3" x:Name="MultiHp3Threshold" FontSize="8" Height="20" Width="35">
-                                            <ComboBoxItem Content="10"/>
-                                            <ComboBoxItem Content="20"/>
-                                            <ComboBoxItem Content="30" IsSelected="True"/>
-                                            <ComboBoxItem Content="40"/>
-                                            <ComboBoxItem Content="50"/>
-                                            <ComboBoxItem Content="60"/>
-                                            <ComboBoxItem Content="70"/>
-                                            <ComboBoxItem Content="80"/>
-                                            <ComboBoxItem Content="90"/>
-                                        </ComboBox>
+                                        <TextBox Grid.Column="3" x:Name="MultiHp3Threshold" FontSize="8" Height="20" Width="35" Text="30" TextAlignment="Center" Background="#383838" Foreground="#ffffff" BorderBrush="#555555" BorderThickness="1"/>
                                         <TextBox Grid.Column="4" x:Name="MultiHp3ClickX" Style="{StaticResource CoordTextBoxStyle}" Text="376" Width="35"/>
                                         <TextBox Grid.Column="5" x:Name="MultiHp3ClickY" Style="{StaticResource CoordTextBoxStyle}" Text="236" Width="35"/>
-                                        <ComboBox Grid.Column="6" x:Name="MultiHp3Key" FontSize="8" Height="20" Width="45">
-                                            <ComboBoxItem Content="0"/>
-                                            <ComboBoxItem Content="1"/>
-                                            <ComboBoxItem Content="2"/>
-                                            <ComboBoxItem Content="3" IsSelected="True"/>
-                                            <ComboBoxItem Content="4"/>
-                                            <ComboBoxItem Content="5"/>
-                                            <ComboBoxItem Content="6"/>
-                                            <ComboBoxItem Content="7"/>
-                                            <ComboBoxItem Content="8"/>
-                                            <ComboBoxItem Content="9"/>
-                                        </ComboBox>
+                                        <TextBox Grid.Column="6" x:Name="MultiHp3Key" FontSize="8" Height="20" Width="45" Text="3" TextAlignment="Center" Background="#383838" Foreground="#ffffff" BorderBrush="#555555" BorderThickness="1"/>
                                         <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
                                             <Button Content="📊" Style="{StaticResource SmallButtonStyle}" Click="CalibrateMultiHp3_Click" Width="20" Margin="0,0,2,0"/>
                                             <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickMultiHp3Click_Click" Width="20"/>
@@ -930,31 +895,10 @@
                                         <TextBox Grid.Column="0" x:Name="MultiHp4StartX" Style="{StaticResource CoordTextBoxStyle}" Text="1" Width="35"/>
                                         <TextBox Grid.Column="1" x:Name="MultiHp4EndX" Style="{StaticResource CoordTextBoxStyle}" Text="90" Width="35"/>
                                         <TextBox Grid.Column="2" x:Name="MultiHp4Y" Style="{StaticResource CoordTextBoxStyle}" Text="5" Width="35"/>
-                                        <ComboBox Grid.Column="3" x:Name="MultiHp4Threshold" FontSize="8" Height="20" Width="35">
-                                            <ComboBoxItem Content="10"/>
-                                            <ComboBoxItem Content="20"/>
-                                            <ComboBoxItem Content="30" IsSelected="True"/>
-                                            <ComboBoxItem Content="40"/>
-                                            <ComboBoxItem Content="50"/>
-                                            <ComboBoxItem Content="60"/>
-                                            <ComboBoxItem Content="70"/>
-                                            <ComboBoxItem Content="80"/>
-                                            <ComboBoxItem Content="90"/>
-                                        </ComboBox>
+                                        <TextBox Grid.Column="3" x:Name="MultiHp4Threshold" FontSize="8" Height="20" Width="35" Text="30" TextAlignment="Center" Background="#383838" Foreground="#ffffff" BorderBrush="#555555" BorderThickness="1"/>
                                         <TextBox Grid.Column="4" x:Name="MultiHp4ClickX" Style="{StaticResource CoordTextBoxStyle}" Text="376" Width="35"/>
                                         <TextBox Grid.Column="5" x:Name="MultiHp4ClickY" Style="{StaticResource CoordTextBoxStyle}" Text="236" Width="35"/>
-                                        <ComboBox Grid.Column="6" x:Name="MultiHp4Key" FontSize="8" Height="20" Width="45">
-                                            <ComboBoxItem Content="0"/>
-                                            <ComboBoxItem Content="1"/>
-                                            <ComboBoxItem Content="2"/>
-                                            <ComboBoxItem Content="3"/>
-                                            <ComboBoxItem Content="4" IsSelected="True"/>
-                                            <ComboBoxItem Content="5"/>
-                                            <ComboBoxItem Content="6"/>
-                                            <ComboBoxItem Content="7"/>
-                                            <ComboBoxItem Content="8"/>
-                                            <ComboBoxItem Content="9"/>
-                                        </ComboBox>
+                                        <TextBox Grid.Column="6" x:Name="MultiHp4Key" FontSize="8" Height="20" Width="45" Text="4" TextAlignment="Center" Background="#383838" Foreground="#ffffff" BorderBrush="#555555" BorderThickness="1"/>
                                         <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
                                             <Button Content="📊" Style="{StaticResource SmallButtonStyle}" Click="CalibrateMultiHp4_Click" Width="20" Margin="0,0,2,0"/>
                                             <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickMultiHp4Click_Click" Width="20"/>
@@ -998,31 +942,10 @@
                                         <TextBox Grid.Column="0" x:Name="MultiHp5StartX" Style="{StaticResource CoordTextBoxStyle}" Text="1" Width="35"/>
                                         <TextBox Grid.Column="1" x:Name="MultiHp5EndX" Style="{StaticResource CoordTextBoxStyle}" Text="90" Width="35"/>
                                         <TextBox Grid.Column="2" x:Name="MultiHp5Y" Style="{StaticResource CoordTextBoxStyle}" Text="5" Width="35"/>
-                                        <ComboBox Grid.Column="3" x:Name="MultiHp5Threshold" FontSize="8" Height="20" Width="35">
-                                            <ComboBoxItem Content="10"/>
-                                            <ComboBoxItem Content="20"/>
-                                            <ComboBoxItem Content="30" IsSelected="True"/>
-                                            <ComboBoxItem Content="40"/>
-                                            <ComboBoxItem Content="50"/>
-                                            <ComboBoxItem Content="60"/>
-                                            <ComboBoxItem Content="70"/>
-                                            <ComboBoxItem Content="80"/>
-                                            <ComboBoxItem Content="90"/>
-                                        </ComboBox>
+                                        <TextBox Grid.Column="3" x:Name="MultiHp5Threshold" FontSize="8" Height="20" Width="35" Text="30" TextAlignment="Center" Background="#383838" Foreground="#ffffff" BorderBrush="#555555" BorderThickness="1"/>
                                         <TextBox Grid.Column="4" x:Name="MultiHp5ClickX" Style="{StaticResource CoordTextBoxStyle}" Text="376" Width="35"/>
                                         <TextBox Grid.Column="5" x:Name="MultiHp5ClickY" Style="{StaticResource CoordTextBoxStyle}" Text="236" Width="35"/>
-                                        <ComboBox Grid.Column="6" x:Name="MultiHp5Key" FontSize="8" Height="20" Width="45">
-                                            <ComboBoxItem Content="0"/>
-                                            <ComboBoxItem Content="1"/>
-                                            <ComboBoxItem Content="2"/>
-                                            <ComboBoxItem Content="3"/>
-                                            <ComboBoxItem Content="4"/>
-                                            <ComboBoxItem Content="5" IsSelected="True"/>
-                                            <ComboBoxItem Content="6"/>
-                                            <ComboBoxItem Content="7"/>
-                                            <ComboBoxItem Content="8"/>
-                                            <ComboBoxItem Content="9"/>
-                                        </ComboBox>
+                                        <TextBox Grid.Column="6" x:Name="MultiHp5Key" FontSize="8" Height="20" Width="45" Text="5" TextAlignment="Center" Background="#383838" Foreground="#ffffff" BorderBrush="#555555" BorderThickness="1"/>
                                         <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
                                             <Button Content="📊" Style="{StaticResource SmallButtonStyle}" Click="CalibrateMultiHp5_Click" Width="20" Margin="0,0,2,0"/>
                                             <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickMultiHp5Click_Click" Width="20"/>
@@ -1066,31 +989,10 @@
                                         <TextBox Grid.Column="0" x:Name="MultiHp6StartX" Style="{StaticResource CoordTextBoxStyle}" Text="1" Width="35"/>
                                         <TextBox Grid.Column="1" x:Name="MultiHp6EndX" Style="{StaticResource CoordTextBoxStyle}" Text="90" Width="35"/>
                                         <TextBox Grid.Column="2" x:Name="MultiHp6Y" Style="{StaticResource CoordTextBoxStyle}" Text="5" Width="35"/>
-                                        <ComboBox Grid.Column="3" x:Name="MultiHp6Threshold" FontSize="8" Height="20" Width="35">
-                                            <ComboBoxItem Content="10"/>
-                                            <ComboBoxItem Content="20"/>
-                                            <ComboBoxItem Content="30" IsSelected="True"/>
-                                            <ComboBoxItem Content="40"/>
-                                            <ComboBoxItem Content="50"/>
-                                            <ComboBoxItem Content="60"/>
-                                            <ComboBoxItem Content="70"/>
-                                            <ComboBoxItem Content="80"/>
-                                            <ComboBoxItem Content="90"/>
-                                        </ComboBox>
+                                        <TextBox Grid.Column="3" x:Name="MultiHp6Threshold" FontSize="8" Height="20" Width="35" Text="30" TextAlignment="Center" Background="#383838" Foreground="#ffffff" BorderBrush="#555555" BorderThickness="1"/>
                                         <TextBox Grid.Column="4" x:Name="MultiHp6ClickX" Style="{StaticResource CoordTextBoxStyle}" Text="376" Width="35"/>
                                         <TextBox Grid.Column="5" x:Name="MultiHp6ClickY" Style="{StaticResource CoordTextBoxStyle}" Text="236" Width="35"/>
-                                        <ComboBox Grid.Column="6" x:Name="MultiHp6Key" FontSize="8" Height="20" Width="45">
-                                            <ComboBoxItem Content="0"/>
-                                            <ComboBoxItem Content="1"/>
-                                            <ComboBoxItem Content="2"/>
-                                            <ComboBoxItem Content="3"/>
-                                            <ComboBoxItem Content="4"/>
-                                            <ComboBoxItem Content="5"/>
-                                            <ComboBoxItem Content="6" IsSelected="True"/>
-                                            <ComboBoxItem Content="7"/>
-                                            <ComboBoxItem Content="8"/>
-                                            <ComboBoxItem Content="9"/>
-                                        </ComboBox>
+                                        <TextBox Grid.Column="6" x:Name="MultiHp6Key" FontSize="8" Height="20" Width="45" Text="6" TextAlignment="Center" Background="#383838" Foreground="#ffffff" BorderBrush="#555555" BorderThickness="1"/>
                                         <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
                                             <Button Content="📊" Style="{StaticResource SmallButtonStyle}" Click="CalibrateMultiHp6_Click" Width="20" Margin="0,0,2,0"/>
                                             <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickMultiHp6Click_Click" Width="20"/>
@@ -1134,31 +1036,10 @@
                                         <TextBox Grid.Column="0" x:Name="MultiHp7StartX" Style="{StaticResource CoordTextBoxStyle}" Text="1" Width="35"/>
                                         <TextBox Grid.Column="1" x:Name="MultiHp7EndX" Style="{StaticResource CoordTextBoxStyle}" Text="90" Width="35"/>
                                         <TextBox Grid.Column="2" x:Name="MultiHp7Y" Style="{StaticResource CoordTextBoxStyle}" Text="5" Width="35"/>
-                                        <ComboBox Grid.Column="3" x:Name="MultiHp7Threshold" FontSize="8" Height="20" Width="35">
-                                            <ComboBoxItem Content="10"/>
-                                            <ComboBoxItem Content="20"/>
-                                            <ComboBoxItem Content="30" IsSelected="True"/>
-                                            <ComboBoxItem Content="40"/>
-                                            <ComboBoxItem Content="50"/>
-                                            <ComboBoxItem Content="60"/>
-                                            <ComboBoxItem Content="70"/>
-                                            <ComboBoxItem Content="80"/>
-                                            <ComboBoxItem Content="90"/>
-                                        </ComboBox>
+                                        <TextBox Grid.Column="3" x:Name="MultiHp7Threshold" FontSize="8" Height="20" Width="35" Text="30" TextAlignment="Center" Background="#383838" Foreground="#ffffff" BorderBrush="#555555" BorderThickness="1"/>
                                         <TextBox Grid.Column="4" x:Name="MultiHp7ClickX" Style="{StaticResource CoordTextBoxStyle}" Text="376" Width="35"/>
                                         <TextBox Grid.Column="5" x:Name="MultiHp7ClickY" Style="{StaticResource CoordTextBoxStyle}" Text="236" Width="35"/>
-                                        <ComboBox Grid.Column="6" x:Name="MultiHp7Key" FontSize="8" Height="20" Width="45">
-                                            <ComboBoxItem Content="0"/>
-                                            <ComboBoxItem Content="1"/>
-                                            <ComboBoxItem Content="2"/>
-                                            <ComboBoxItem Content="3"/>
-                                            <ComboBoxItem Content="4"/>
-                                            <ComboBoxItem Content="5"/>
-                                            <ComboBoxItem Content="6"/>
-                                            <ComboBoxItem Content="7" IsSelected="True"/>
-                                            <ComboBoxItem Content="8"/>
-                                            <ComboBoxItem Content="9"/>
-                                        </ComboBox>
+                                        <TextBox Grid.Column="6" x:Name="MultiHp7Key" FontSize="8" Height="20" Width="45" Text="7" TextAlignment="Center" Background="#383838" Foreground="#ffffff" BorderBrush="#555555" BorderThickness="1"/>
                                         <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
                                             <Button Content="📊" Style="{StaticResource SmallButtonStyle}" Click="CalibrateMultiHp7_Click" Width="20" Margin="0,0,2,0"/>
                                             <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickMultiHp7Click_Click" Width="20"/>
@@ -1202,31 +1083,10 @@
                                         <TextBox Grid.Column="0" x:Name="MultiHp8StartX" Style="{StaticResource CoordTextBoxStyle}" Text="1" Width="35"/>
                                         <TextBox Grid.Column="1" x:Name="MultiHp8EndX" Style="{StaticResource CoordTextBoxStyle}" Text="90" Width="35"/>
                                         <TextBox Grid.Column="2" x:Name="MultiHp8Y" Style="{StaticResource CoordTextBoxStyle}" Text="5" Width="35"/>
-                                        <ComboBox Grid.Column="3" x:Name="MultiHp8Threshold" FontSize="8" Height="20" Width="35">
-                                            <ComboBoxItem Content="10"/>
-                                            <ComboBoxItem Content="20"/>
-                                            <ComboBoxItem Content="30" IsSelected="True"/>
-                                            <ComboBoxItem Content="40"/>
-                                            <ComboBoxItem Content="50"/>
-                                            <ComboBoxItem Content="60"/>
-                                            <ComboBoxItem Content="70"/>
-                                            <ComboBoxItem Content="80"/>
-                                            <ComboBoxItem Content="90"/>
-                                        </ComboBox>
+                                        <TextBox Grid.Column="3" x:Name="MultiHp8Threshold" FontSize="8" Height="20" Width="35" Text="30" TextAlignment="Center" Background="#383838" Foreground="#ffffff" BorderBrush="#555555" BorderThickness="1"/>
                                         <TextBox Grid.Column="4" x:Name="MultiHp8ClickX" Style="{StaticResource CoordTextBoxStyle}" Text="376" Width="35"/>
                                         <TextBox Grid.Column="5" x:Name="MultiHp8ClickY" Style="{StaticResource CoordTextBoxStyle}" Text="236" Width="35"/>
-                                        <ComboBox Grid.Column="6" x:Name="MultiHp8Key" FontSize="8" Height="20" Width="45">
-                                            <ComboBoxItem Content="0"/>
-                                            <ComboBoxItem Content="1"/>
-                                            <ComboBoxItem Content="2"/>
-                                            <ComboBoxItem Content="3"/>
-                                            <ComboBoxItem Content="4"/>
-                                            <ComboBoxItem Content="5"/>
-                                            <ComboBoxItem Content="6"/>
-                                            <ComboBoxItem Content="7"/>
-                                            <ComboBoxItem Content="8" IsSelected="True"/>
-                                            <ComboBoxItem Content="9"/>
-                                        </ComboBox>
+                                        <TextBox Grid.Column="6" x:Name="MultiHp8Key" FontSize="8" Height="20" Width="45" Text="8" TextAlignment="Center" Background="#383838" Foreground="#ffffff" BorderBrush="#555555" BorderThickness="1"/>
                                         <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
                                             <Button Content="📊" Style="{StaticResource SmallButtonStyle}" Click="CalibrateMultiHp8_Click" Width="20" Margin="0,0,2,0"/>
                                             <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickMultiHp8Click_Click" Width="20"/>

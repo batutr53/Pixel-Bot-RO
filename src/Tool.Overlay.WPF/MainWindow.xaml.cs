@@ -38,7 +38,7 @@ public partial class MainWindow : Window
         _updateTimer.Start();
         
         InitializeClientCards();
-        InitializeComboBoxes();
+        InitializeTextBoxes();
         LoadProfiles();
         
         // Auto-assign MuMu windows after UI is fully loaded
@@ -62,11 +62,11 @@ public partial class MainWindow : Window
         }
     }
     
-    private void InitializeComboBoxes()
+    private void InitializeTextBoxes()
     {
-        // Set default values for dropdown
-        CaptureModeComboBox.SelectedIndex = 0; // WGC
-        ClickModeComboBox.SelectedIndex = 0; // message
+        // Set default values for TextBoxes
+        CaptureModeTextBox.Text = "WGC";
+        ClickModeTextBox.Text = "message";
     }
 
     private void LoadProfiles()
@@ -76,10 +76,9 @@ public partial class MainWindow : Window
             var config = _configManager.LoadConfiguration("config.json");
             if (config?.Profiles != null)
             {
-                ProfileComboBox.ItemsSource = config.Profiles.Keys;
                 if (config.Profiles.Any())
                 {
-                    ProfileComboBox.SelectedIndex = 0;
+                    ProfileTextBox.Text = config.Profiles.Keys.First();
                     LoadSelectedProfile();
                 }
             }
@@ -92,7 +91,8 @@ public partial class MainWindow : Window
 
     private void LoadSelectedProfile()
     {
-        if (ProfileComboBox.SelectedItem is string profileName)
+        var profileName = ProfileTextBox.Text;
+        if (!string.IsNullOrEmpty(profileName))
         {
             try
             {
@@ -100,8 +100,8 @@ public partial class MainWindow : Window
                 if (config?.Profiles.TryGetValue(profileName, out var profile) == true)
                 {
                     _viewModel.ActiveProfile = profileName;
-                    SetComboBoxSelectedValue(CaptureModeComboBox, profile.Global.CaptureMode);
-                    SetComboBoxSelectedValue(ClickModeComboBox, profile.Global.ClickMode);
+                    CaptureModeTextBox.Text = profile.Global.CaptureMode ?? "WGC";
+                    ClickModeTextBox.Text = profile.Global.ClickMode ?? "message";
                     
                     // Load window configurations to client cards
                     for (int i = 0; i < Math.Min(profile.Windows.Count, _clientCards.Count); i++)
@@ -158,6 +158,9 @@ public partial class MainWindow : Window
             card.ViewModel.HpTrigger.Y = hpEvent.Click.Y;
             card.ViewModel.HpTrigger.CooldownMs = hpEvent.CooldownMs ?? 120;
             card.ViewModel.HpTrigger.Enabled = true;
+            card.ViewModel.HpTrigger.UseCoordinate = hpEvent.Click.UseCoordinate;
+            card.ViewModel.HpTrigger.UseKeyPress = hpEvent.Click.UseKeyPress;
+            card.ViewModel.HpTrigger.KeyToPress = hpEvent.Click.KeyToPress ?? "F1";
         }
 
         var mpEvent = windowConfig.Events.FirstOrDefault(e => e.When.Contains("B") || e.When.Contains("MP"));
@@ -167,6 +170,9 @@ public partial class MainWindow : Window
             card.ViewModel.MpTrigger.Y = mpEvent.Click.Y;
             card.ViewModel.MpTrigger.CooldownMs = mpEvent.CooldownMs ?? 120;
             card.ViewModel.MpTrigger.Enabled = true;
+            card.ViewModel.MpTrigger.UseCoordinate = mpEvent.Click.UseCoordinate;
+            card.ViewModel.MpTrigger.UseKeyPress = mpEvent.Click.UseKeyPress;
+            card.ViewModel.MpTrigger.KeyToPress = mpEvent.Click.KeyToPress ?? "F2";
         }
 
         // Load periodic clicks
@@ -177,6 +183,9 @@ public partial class MainWindow : Window
             card.ViewModel.YClick.Y = yClick.Y;
             card.ViewModel.YClick.PeriodMs = yClick.PeriodMs ?? (int)(yClick.PeriodSec * 1000 ?? 1000);
             card.ViewModel.YClick.Enabled = yClick.Enabled;
+            card.ViewModel.YClick.UseCoordinate = yClick.UseCoordinate;
+            card.ViewModel.YClick.UseKeyPress = yClick.UseKeyPress;
+            card.ViewModel.YClick.KeyToPress = yClick.KeyToPress ?? "Y";
         }
 
         var extra1Click = windowConfig.PeriodicClicks.FirstOrDefault(p => p.Name == "Extra1");
@@ -186,6 +195,9 @@ public partial class MainWindow : Window
             card.ViewModel.Extra1Click.Y = extra1Click.Y;
             card.ViewModel.Extra1Click.PeriodMs = extra1Click.PeriodMs ?? (int)(extra1Click.PeriodSec * 1000 ?? 1000);
             card.ViewModel.Extra1Click.Enabled = extra1Click.Enabled;
+            card.ViewModel.Extra1Click.UseCoordinate = extra1Click.UseCoordinate;
+            card.ViewModel.Extra1Click.UseKeyPress = extra1Click.UseKeyPress;
+            card.ViewModel.Extra1Click.KeyToPress = extra1Click.KeyToPress ?? "F3";
         }
 
         var extra2Click = windowConfig.PeriodicClicks.FirstOrDefault(p => p.Name == "Extra2");
@@ -195,6 +207,9 @@ public partial class MainWindow : Window
             card.ViewModel.Extra2Click.Y = extra2Click.Y;
             card.ViewModel.Extra2Click.PeriodMs = extra2Click.PeriodMs ?? (int)(extra2Click.PeriodSec * 1000 ?? 1000);
             card.ViewModel.Extra2Click.Enabled = extra2Click.Enabled;
+            card.ViewModel.Extra2Click.UseCoordinate = extra2Click.UseCoordinate;
+            card.ViewModel.Extra2Click.UseKeyPress = extra2Click.UseKeyPress;
+            card.ViewModel.Extra2Click.KeyToPress = extra2Click.KeyToPress ?? "F4";
         }
 
         var extra3Click = windowConfig.PeriodicClicks.FirstOrDefault(p => p.Name == "Extra3");
@@ -204,6 +219,9 @@ public partial class MainWindow : Window
             card.ViewModel.Extra3Click.Y = extra3Click.Y;
             card.ViewModel.Extra3Click.PeriodMs = extra3Click.PeriodMs ?? (int)(extra3Click.PeriodSec * 1000 ?? 1000);
             card.ViewModel.Extra3Click.Enabled = extra3Click.Enabled;
+            card.ViewModel.Extra3Click.UseCoordinate = extra3Click.UseCoordinate;
+            card.ViewModel.Extra3Click.UseKeyPress = extra3Click.UseKeyPress;
+            card.ViewModel.Extra3Click.KeyToPress = extra3Click.KeyToPress ?? "F5";
         }
 
         // Load BabeBot percentage probes
@@ -234,6 +252,47 @@ public partial class MainWindow : Window
                 card.ViewModel.BabeBotMp.ReferenceColor = color;
             }
         }
+        
+        // Load Python-style percentage probes
+        var pythonHp = windowConfig.PercentageProbes.FirstOrDefault(p => p.Name.Contains("PythonHP"));
+        if (pythonHp != null)
+        {
+            card.ViewModel.HpPercentageProbe.StartX = pythonHp.StartX;
+            card.ViewModel.HpPercentageProbe.EndX = pythonHp.EndX;
+            card.ViewModel.HpPercentageProbe.Y = pythonHp.Y;
+            card.ViewModel.HpPercentageProbe.MonitorPercentage = pythonHp.MonitorPercentage;
+            card.ViewModel.HpPercentageProbe.Tolerance = pythonHp.Tolerance;
+            if (pythonHp.ExpectedColor.Length >= 3)
+            {
+                var color = System.Drawing.Color.FromArgb(pythonHp.ExpectedColor[0], pythonHp.ExpectedColor[1], pythonHp.ExpectedColor[2]);
+                card.ViewModel.HpPercentageProbe.ExpectedColor = color;
+            }
+            if (pythonHp.EmptyColor?.Length >= 3)
+            {
+                var emptyColor = System.Drawing.Color.FromArgb(pythonHp.EmptyColor[0], pythonHp.EmptyColor[1], pythonHp.EmptyColor[2]);
+                card.ViewModel.HpPercentageProbe.EmptyColor = emptyColor;
+            }
+        }
+
+        var pythonMp = windowConfig.PercentageProbes.FirstOrDefault(p => p.Name.Contains("PythonMP"));
+        if (pythonMp != null)
+        {
+            card.ViewModel.MpPercentageProbe.StartX = pythonMp.StartX;
+            card.ViewModel.MpPercentageProbe.EndX = pythonMp.EndX;
+            card.ViewModel.MpPercentageProbe.Y = pythonMp.Y;
+            card.ViewModel.MpPercentageProbe.MonitorPercentage = pythonMp.MonitorPercentage;
+            card.ViewModel.MpPercentageProbe.Tolerance = pythonMp.Tolerance;
+            if (pythonMp.ExpectedColor.Length >= 3)
+            {
+                var color = System.Drawing.Color.FromArgb(pythonMp.ExpectedColor[0], pythonMp.ExpectedColor[1], pythonMp.ExpectedColor[2]);
+                card.ViewModel.MpPercentageProbe.ExpectedColor = color;
+            }
+            if (pythonMp.EmptyColor?.Length >= 3)
+            {
+                var emptyColor = System.Drawing.Color.FromArgb(pythonMp.EmptyColor[0], pythonMp.EmptyColor[1], pythonMp.EmptyColor[2]);
+                card.ViewModel.MpPercentageProbe.EmptyColor = emptyColor;
+            }
+        }
 
         // Load BabeBot potion clicks
         var babeBotHpClick = windowConfig.PeriodicClicks.FirstOrDefault(p => p.Name == "BabeBotHP");
@@ -241,6 +300,9 @@ public partial class MainWindow : Window
         {
             card.ViewModel.BabeBotHp.PotionX = babeBotHpClick.X;
             card.ViewModel.BabeBotHp.PotionY = babeBotHpClick.Y;
+            card.ViewModel.BabeBotHp.UseCoordinate = babeBotHpClick.UseCoordinate;
+            card.ViewModel.BabeBotHp.UseKeyPress = babeBotHpClick.UseKeyPress;
+            card.ViewModel.BabeBotHp.KeyToPress = babeBotHpClick.KeyToPress ?? "F6";
         }
 
         var babeBotMpClick = windowConfig.PeriodicClicks.FirstOrDefault(p => p.Name == "BabeBotMP");
@@ -248,6 +310,40 @@ public partial class MainWindow : Window
         {
             card.ViewModel.BabeBotMp.PotionX = babeBotMpClick.X;
             card.ViewModel.BabeBotMp.PotionY = babeBotMpClick.Y;
+            card.ViewModel.BabeBotMp.UseCoordinate = babeBotMpClick.UseCoordinate;
+            card.ViewModel.BabeBotMp.UseKeyPress = babeBotMpClick.UseKeyPress;
+            card.ViewModel.BabeBotMp.KeyToPress = babeBotMpClick.KeyToPress ?? "F7";
+        }
+        
+        // Load Python-style potion clicks
+        var pythonHpClick = windowConfig.PeriodicClicks.FirstOrDefault(p => p.Name == "PythonHpPotion");
+        if (pythonHpClick != null)
+        {
+            card.ViewModel.PythonHpPotionClick.X = pythonHpClick.X;
+            card.ViewModel.PythonHpPotionClick.Y = pythonHpClick.Y;
+            card.ViewModel.PythonHpPotionClick.CooldownMs = pythonHpClick.PeriodMs ?? 500;
+            card.ViewModel.PythonHpPotionClick.Enabled = pythonHpClick.Enabled;
+            card.ViewModel.PythonHpPotionClick.UseCoordinate = pythonHpClick.UseCoordinate;
+            card.ViewModel.PythonHpPotionClick.UseKeyPress = pythonHpClick.UseKeyPress;
+            card.ViewModel.PythonHpPotionClick.KeyToPress = pythonHpClick.KeyToPress ?? "Q";
+        }
+
+        var pythonMpClick = windowConfig.PeriodicClicks.FirstOrDefault(p => p.Name == "PythonMpPotion");
+        if (pythonMpClick != null)
+        {
+            card.ViewModel.PythonMpPotionClick.X = pythonMpClick.X;
+            card.ViewModel.PythonMpPotionClick.Y = pythonMpClick.Y;
+            card.ViewModel.PythonMpPotionClick.CooldownMs = pythonMpClick.PeriodMs ?? 500;
+            card.ViewModel.PythonMpPotionClick.Enabled = pythonMpClick.Enabled;
+            card.ViewModel.PythonMpPotionClick.UseCoordinate = pythonMpClick.UseCoordinate;
+            card.ViewModel.PythonMpPotionClick.UseKeyPress = pythonMpClick.UseKeyPress;
+            card.ViewModel.PythonMpPotionClick.KeyToPress = pythonMpClick.KeyToPress ?? "W";
+        }
+        
+        // Load all UI settings from saved configuration
+        if (windowConfig.UISettings?.Values != null && windowConfig.UISettings.Values.Any())
+        {
+            card.SetAllUIValues(windowConfig.UISettings.Values);
         }
     }
 
@@ -319,8 +415,8 @@ public partial class MainWindow : Window
         {
             Global = new GlobalConfig
             {
-                CaptureMode = GetComboBoxSelectedValue(CaptureModeComboBox) ?? "WGC",
-                ClickMode = GetComboBoxSelectedValue(ClickModeComboBox) ?? "message",
+                CaptureMode = CaptureModeTextBox.Text ?? "WGC",
+                ClickMode = ClickModeTextBox.Text ?? "message",
                 DefaultHz = 80
             },
             Windows = new List<WindowTarget>()
@@ -368,14 +464,26 @@ public partial class MainWindow : Window
                     new EventConfig
                     {
                         When = $"HP{card.ClientId}:edge-down",
-                        Click = new ClickTarget { X = card.ViewModel.HpTrigger.X, Y = card.ViewModel.HpTrigger.Y },
+                        Click = new ClickTarget { 
+                            X = card.ViewModel.HpTrigger.X, 
+                            Y = card.ViewModel.HpTrigger.Y,
+                            UseCoordinate = card.ViewModel.HpTrigger.UseCoordinate,
+                            UseKeyPress = card.ViewModel.HpTrigger.UseKeyPress,
+                            KeyToPress = card.ViewModel.HpTrigger.KeyToPress
+                        },
                         CooldownMs = card.ViewModel.HpTrigger.CooldownMs,
                         Priority = 1
                     },
                     new EventConfig
                     {
                         When = $"MP{card.ClientId}:edge-down",
-                        Click = new ClickTarget { X = card.ViewModel.MpTrigger.X, Y = card.ViewModel.MpTrigger.Y },
+                        Click = new ClickTarget { 
+                            X = card.ViewModel.MpTrigger.X, 
+                            Y = card.ViewModel.MpTrigger.Y,
+                            UseCoordinate = card.ViewModel.MpTrigger.UseCoordinate,
+                            UseKeyPress = card.ViewModel.MpTrigger.UseKeyPress,
+                            KeyToPress = card.ViewModel.MpTrigger.KeyToPress
+                        },
                         CooldownMs = card.ViewModel.MpTrigger.CooldownMs,
                         Priority = 1
                     }
@@ -403,8 +511,32 @@ public partial class MainWindow : Window
                         MonitorPercentage = GetBabeBotThresholdValue(card, "MP"),
                         ExpectedColor = new[] { (int)card.ViewModel.BabeBotMp.ReferenceColor.R, (int)card.ViewModel.BabeBotMp.ReferenceColor.G, (int)card.ViewModel.BabeBotMp.ReferenceColor.B },
                         Tolerance = 30
+                    },
+                    new PercentageProbeConfig
+                    {
+                        Name = $"PythonHP{card.ClientId}",
+                        Type = "HP",
+                        StartX = card.ViewModel.HpPercentageProbe.StartX,
+                        EndX = card.ViewModel.HpPercentageProbe.EndX,
+                        Y = card.ViewModel.HpPercentageProbe.Y,
+                        MonitorPercentage = card.ViewModel.HpPercentageProbe.MonitorPercentage,
+                        ExpectedColor = new[] { (int)card.ViewModel.HpPercentageProbe.ExpectedColor.R, (int)card.ViewModel.HpPercentageProbe.ExpectedColor.G, (int)card.ViewModel.HpPercentageProbe.ExpectedColor.B },
+                        EmptyColor = card.ViewModel.HpPercentageProbe.EmptyColor.HasValue ? new[] { (int)card.ViewModel.HpPercentageProbe.EmptyColor.Value.R, (int)card.ViewModel.HpPercentageProbe.EmptyColor.Value.G, (int)card.ViewModel.HpPercentageProbe.EmptyColor.Value.B } : null,
+                        Tolerance = card.ViewModel.HpPercentageProbe.Tolerance
+                    },
+                    new PercentageProbeConfig
+                    {
+                        Name = $"PythonMP{card.ClientId}",
+                        Type = "MP",
+                        StartX = card.ViewModel.MpPercentageProbe.StartX,
+                        EndX = card.ViewModel.MpPercentageProbe.EndX,
+                        Y = card.ViewModel.MpPercentageProbe.Y,
+                        MonitorPercentage = card.ViewModel.MpPercentageProbe.MonitorPercentage,
+                        ExpectedColor = new[] { (int)card.ViewModel.MpPercentageProbe.ExpectedColor.R, (int)card.ViewModel.MpPercentageProbe.ExpectedColor.G, (int)card.ViewModel.MpPercentageProbe.ExpectedColor.B },
+                        EmptyColor = card.ViewModel.MpPercentageProbe.EmptyColor.HasValue ? new[] { (int)card.ViewModel.MpPercentageProbe.EmptyColor.Value.R, (int)card.ViewModel.MpPercentageProbe.EmptyColor.Value.G, (int)card.ViewModel.MpPercentageProbe.EmptyColor.Value.B } : null,
+                        Tolerance = card.ViewModel.MpPercentageProbe.Tolerance
                     }
-                },
+                }.Where(p => p != null).ToList(),
                 PeriodicClicks = new List<PeriodicClickConfig>
                 {
                     new PeriodicClickConfig
@@ -413,7 +545,10 @@ public partial class MainWindow : Window
                         X = card.ViewModel.BabeBotHp.PotionX,
                         Y = card.ViewModel.BabeBotHp.PotionY,
                         PeriodMs = 500, // Default cooldown
-                        Enabled = card.ViewModel.BabeBotHp.Enabled
+                        Enabled = card.ViewModel.BabeBotHp.Enabled,
+                        UseCoordinate = card.ViewModel.BabeBotHp.UseCoordinate,
+                        UseKeyPress = card.ViewModel.BabeBotHp.UseKeyPress,
+                        KeyToPress = card.ViewModel.BabeBotHp.KeyToPress
                     },
                     new PeriodicClickConfig
                     {
@@ -421,7 +556,10 @@ public partial class MainWindow : Window
                         X = card.ViewModel.BabeBotMp.PotionX,
                         Y = card.ViewModel.BabeBotMp.PotionY,
                         PeriodMs = 500, // Default cooldown
-                        Enabled = card.ViewModel.BabeBotMp.Enabled
+                        Enabled = card.ViewModel.BabeBotMp.Enabled,
+                        UseCoordinate = card.ViewModel.BabeBotMp.UseCoordinate,
+                        UseKeyPress = card.ViewModel.BabeBotMp.UseKeyPress,
+                        KeyToPress = card.ViewModel.BabeBotMp.KeyToPress
                     },
                     new PeriodicClickConfig
                     {
@@ -429,7 +567,10 @@ public partial class MainWindow : Window
                         X = card.ViewModel.YClick.X,
                         Y = card.ViewModel.YClick.Y,
                         PeriodMs = card.ViewModel.YClick.PeriodMs,
-                        Enabled = card.ViewModel.YClick.Enabled
+                        Enabled = card.ViewModel.YClick.Enabled,
+                        UseCoordinate = card.ViewModel.YClick.UseCoordinate,
+                        UseKeyPress = card.ViewModel.YClick.UseKeyPress,
+                        KeyToPress = card.ViewModel.YClick.KeyToPress
                     },
                     new PeriodicClickConfig
                     {
@@ -437,7 +578,10 @@ public partial class MainWindow : Window
                         X = card.ViewModel.Extra1Click.X,
                         Y = card.ViewModel.Extra1Click.Y,
                         PeriodMs = card.ViewModel.Extra1Click.PeriodMs,
-                        Enabled = card.ViewModel.Extra1Click.Enabled
+                        Enabled = card.ViewModel.Extra1Click.Enabled,
+                        UseCoordinate = card.ViewModel.Extra1Click.UseCoordinate,
+                        UseKeyPress = card.ViewModel.Extra1Click.UseKeyPress,
+                        KeyToPress = card.ViewModel.Extra1Click.KeyToPress
                     },
                     new PeriodicClickConfig
                     {
@@ -445,7 +589,10 @@ public partial class MainWindow : Window
                         X = card.ViewModel.Extra2Click.X,
                         Y = card.ViewModel.Extra2Click.Y,
                         PeriodMs = card.ViewModel.Extra2Click.PeriodMs,
-                        Enabled = card.ViewModel.Extra2Click.Enabled
+                        Enabled = card.ViewModel.Extra2Click.Enabled,
+                        UseCoordinate = card.ViewModel.Extra2Click.UseCoordinate,
+                        UseKeyPress = card.ViewModel.Extra2Click.UseKeyPress,
+                        KeyToPress = card.ViewModel.Extra2Click.KeyToPress
                     },
                     new PeriodicClickConfig
                     {
@@ -453,9 +600,37 @@ public partial class MainWindow : Window
                         X = card.ViewModel.Extra3Click.X,
                         Y = card.ViewModel.Extra3Click.Y,
                         PeriodMs = card.ViewModel.Extra3Click.PeriodMs,
-                        Enabled = card.ViewModel.Extra3Click.Enabled
+                        Enabled = card.ViewModel.Extra3Click.Enabled,
+                        UseCoordinate = card.ViewModel.Extra3Click.UseCoordinate,
+                        UseKeyPress = card.ViewModel.Extra3Click.UseKeyPress,
+                        KeyToPress = card.ViewModel.Extra3Click.KeyToPress
+                    },
+                    new PeriodicClickConfig
+                    {
+                        Name = "PythonHpPotion",
+                        X = card.ViewModel.PythonHpPotionClick.X,
+                        Y = card.ViewModel.PythonHpPotionClick.Y,
+                        PeriodMs = card.ViewModel.PythonHpPotionClick.CooldownMs,
+                        Enabled = card.ViewModel.PythonHpPotionClick.Enabled,
+                        UseCoordinate = card.ViewModel.PythonHpPotionClick.UseCoordinate,
+                        UseKeyPress = card.ViewModel.PythonHpPotionClick.UseKeyPress,
+                        KeyToPress = card.ViewModel.PythonHpPotionClick.KeyToPress
+                    },
+                    new PeriodicClickConfig
+                    {
+                        Name = "PythonMpPotion",
+                        X = card.ViewModel.PythonMpPotionClick.X,
+                        Y = card.ViewModel.PythonMpPotionClick.Y,
+                        PeriodMs = card.ViewModel.PythonMpPotionClick.CooldownMs,
+                        Enabled = card.ViewModel.PythonMpPotionClick.Enabled,
+                        UseCoordinate = card.ViewModel.PythonMpPotionClick.UseCoordinate,
+                        UseKeyPress = card.ViewModel.PythonMpPotionClick.UseKeyPress,
+                        KeyToPress = card.ViewModel.PythonMpPotionClick.KeyToPress
                     }
-                }
+                }.Where(p => p != null).ToList(),
+                
+                // Save all UI settings from ClientCard
+                UISettings = new UISettings { Values = card.GetAllUIValues() }
             };
             
             profile.Windows.Add(window);
@@ -499,19 +674,31 @@ public partial class MainWindow : Window
 
     private void PreviousProfile_Click(object sender, RoutedEventArgs e)
     {
-        if (ProfileComboBox.SelectedIndex > 0)
+        var config = _configManager.LoadConfiguration("config.json");
+        if (config?.Profiles != null)
         {
-            ProfileComboBox.SelectedIndex--;
-            LoadSelectedProfile();
+            var profiles = config.Profiles.Keys.ToList();
+            var currentIndex = profiles.IndexOf(ProfileTextBox.Text);
+            if (currentIndex > 0)
+            {
+                ProfileTextBox.Text = profiles[currentIndex - 1];
+                LoadSelectedProfile();
+            }
         }
     }
 
     private void NextProfile_Click(object sender, RoutedEventArgs e)
     {
-        if (ProfileComboBox.SelectedIndex < ProfileComboBox.Items.Count - 1)
+        var config = _configManager.LoadConfiguration("config.json");
+        if (config?.Profiles != null)
         {
-            ProfileComboBox.SelectedIndex++;
-            LoadSelectedProfile();
+            var profiles = config.Profiles.Keys.ToList();
+            var currentIndex = profiles.IndexOf(ProfileTextBox.Text);
+            if (currentIndex < profiles.Count - 1)
+            {
+                ProfileTextBox.Text = profiles[currentIndex + 1];
+                LoadSelectedProfile();
+            }
         }
     }
 
@@ -613,37 +800,11 @@ public partial class MainWindow : Window
         StatusText.Text = $"MP color synced to all clients: RGB({color.R},{color.G},{color.B})";
     }
     
-    private string? GetComboBoxSelectedValue(System.Windows.Controls.ComboBox comboBox)
+    // TextBox helper methods for global configuration
+    private void SetGlobalConfigFromTextBoxes()
     {
-        if (comboBox.SelectedItem is System.Windows.Controls.ComboBoxItem item)
-        {
-            return item.Content?.ToString();
-        }
-        return comboBox.SelectedItem?.ToString();
-    }
-    
-    private void SetComboBoxSelectedValue(System.Windows.Controls.ComboBox comboBox, string? value)
-    {
-        if (string.IsNullOrEmpty(value)) return;
-        
-        foreach (System.Windows.Controls.ComboBoxItem item in comboBox.Items)
-        {
-            if (item.Content?.ToString()?.Equals(value, StringComparison.OrdinalIgnoreCase) == true)
-            {
-                comboBox.SelectedItem = item;
-                return;
-            }
-        }
-        
-        // Fallback: try to set by index if string match
-        for (int i = 0; i < comboBox.Items.Count; i++)
-        {
-            if (comboBox.Items[i].ToString()?.Equals(value, StringComparison.OrdinalIgnoreCase) == true)
-            {
-                comboBox.SelectedIndex = i;
-                return;
-            }
-        }
+        // Global configuration is automatically saved via TextBox.Text properties
+        // No additional logic needed since we directly read from TextBox.Text
     }
     
     private void SetMultiMonitorBounds()

@@ -27,6 +27,7 @@ public class WindowTarget
     public List<EventConfig> Events { get; set; } = new();
     public List<PeriodicClickConfig> PeriodicClicks { get; set; } = new();
     public RateLimitConfig? Limits { get; set; }
+    public UISettings UISettings { get; set; } = new();
 }
 
 public class ProbeConfig
@@ -58,6 +59,9 @@ public class ClickTarget
 {
     public int X { get; set; }
     public int Y { get; set; }
+    public bool UseCoordinate { get; set; } = false;
+    public bool UseKeyPress { get; set; } = true;
+    public string? KeyToPress { get; set; }
 }
 
 public class PeriodicClickConfig
@@ -68,6 +72,9 @@ public class PeriodicClickConfig
     public int? PeriodMs { get; set; }
     public double? PeriodSec { get; set; }
     public bool Enabled { get; set; }
+    public bool UseCoordinate { get; set; } = false;
+    public bool UseKeyPress { get; set; } = true;
+    public string? KeyToPress { get; set; }
 }
 
 public class PercentageProbeConfig
@@ -91,4 +98,9 @@ public class RateLimitConfig
 {
     public int MaxBurstPerSec { get; set; } = 30;
     public int GlobalCooldownMs { get; set; } = 20;
+}
+
+public class UISettings
+{
+    public Dictionary<string, object> Values { get; set; } = new();
 }

@@ -72,28 +72,13 @@
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                     <TextBlock Text="🎯 Pixel Automation Control Panel" Style="{StaticResource HeaderTextStyle}" FontSize="16" Margin="0,0,20,0"/>
                     <TextBlock Text="Profile:" Style="{StaticResource InfoTextStyle}" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                    <ComboBox x:Name="ProfileComboBox" Width="150" Height="25" Margin="0,0,15,0"/>
+                    <TextBox x:Name="ProfileTextBox" Width="150" Height="25" Margin="0,0,15,0" Text="Default" Style="{StaticResource CoordinateTextBoxStyle}"/>
                     <Button Content="⬅" Width="25" Height="25" Style="{StaticResource ActionButtonStyle}" Click="PreviousProfile_Click" Margin="0,0,2,0"/>
                     <Button Content="➡" Width="25" Height="25" Style="{StaticResource ActionButtonStyle}" Click="NextProfile_Click" Margin="0,0,15,0"/>
                     <TextBlock Text="Capture:" Style="{StaticResource InfoTextStyle}" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                    <ComboBox x:Name="CaptureModeComboBox" Width="80" Height="25" Margin="0,0,15,0">
-                        <ComboBoxItem>WGC</ComboBoxItem>
-                        <ComboBoxItem>PRINT</ComboBoxItem>
-                        <ComboBoxItem>GPIXEL</ComboBoxItem>
-                    </ComboBox>
+                    <TextBox x:Name="CaptureModeTextBox" Width="80" Height="25" Margin="0,0,15,0" Text="WGC" Style="{StaticResource CoordinateTextBoxStyle}"/>
                     <TextBlock Text="Click:" Style="{StaticResource InfoTextStyle}" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                    <ComboBox x:Name="ClickModeComboBox" Width="140" Height="25">
-                        <ComboBoxItem>message</ComboBoxItem>
-                        <ComboBoxItem>sendmessage</ComboBoxItem>
-                        <ComboBoxItem>postmessage</ComboBoxItem>
-                        <ComboBoxItem>cursor-jump</ComboBoxItem>
-                        <ComboBoxItem>cursor-return</ComboBoxItem>
-                        <ComboBoxItem>sendinput</ComboBoxItem>
-                        <ComboBoxItem>mouse-event</ComboBoxItem>
-                        <ComboBoxItem>child-window</ComboBoxItem>
-                        <ComboBoxItem>direct-input</ComboBoxItem>
-                        <ComboBoxItem>focus-click</ComboBoxItem>
-                    </ComboBox>
+                    <TextBox x:Name="ClickModeTextBox" Width="140" Height="25" Text="message" Style="{StaticResource CoordinateTextBoxStyle}"/>
                 </StackPanel>
                 
                 <StackPanel Grid.Column="1" Orientation="Horizontal">

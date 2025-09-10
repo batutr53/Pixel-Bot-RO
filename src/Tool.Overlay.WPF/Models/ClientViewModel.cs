@@ -41,8 +41,8 @@ public partial class ClientViewModel : ObservableObject
         Tolerance = 50  // 50% threshold
     };
 
-    public TriggerClickViewModel HpTrigger { get; set; } = new() { Name = "HP_Trigger", CooldownMs = 120, Enabled = true };
-    public TriggerClickViewModel MpTrigger { get; set; } = new() { Name = "MP_Trigger", CooldownMs = 120, Enabled = true };
+    public TriggerClickViewModel HpTrigger { get; set; } = new() { Name = "HP_Trigger", CooldownMs = 120, Enabled = true, UseKeyPress = true, UseCoordinate = false, KeyToPress = "Q" };
+    public TriggerClickViewModel MpTrigger { get; set; } = new() { Name = "MP_Trigger", CooldownMs = 120, Enabled = true, UseKeyPress = true, UseCoordinate = false, KeyToPress = "W" };
     
     // Percentage-based HP/MP monitoring (Python-style)
     public PercentageProbeViewModel HpPercentageProbe { get; set; } = new()
@@ -80,7 +80,10 @@ public partial class ClientViewModel : ObservableObject
         X = 400,
         Y = 300,
         CooldownMs = 500,
-        Enabled = true
+        Enabled = true,
+        UseKeyPress = true,
+        UseCoordinate = false,
+        KeyToPress = "Q"
     };
     
     public PythonStyleClickViewModel PythonMpPotionClick { get; set; } = new()
@@ -89,31 +92,43 @@ public partial class ClientViewModel : ObservableObject
         X = 450,
         Y = 350,
         CooldownMs = 500,
-        Enabled = true
+        Enabled = true,
+        UseKeyPress = true,
+        UseCoordinate = false,
+        KeyToPress = "W"
     };
     public PeriodicClickViewModel YClick { get; set; } = new() 
     { 
         Name = "Y_Periodic", 
         PeriodMs = 120, 
-        Enabled = true 
+        Enabled = true,
+        UseKeyPress = true,
+        UseCoordinate = false,
+        KeyToPress = "Y"
     };
     public PeriodicClickViewModel Extra1Click { get; set; } = new() 
     { 
         Name = "Extra1", 
         PeriodMs = 250, 
-        Enabled = false 
+        Enabled = false,
+        UseKeyPress = true,
+        UseCoordinate = false
     };
     public PeriodicClickViewModel Extra2Click { get; set; } = new() 
     { 
         Name = "Extra2", 
         PeriodMs = 500, 
-        Enabled = false 
+        Enabled = false,
+        UseKeyPress = true,
+        UseCoordinate = false
     };
     public PeriodicClickViewModel Extra3Click { get; set; } = new() 
     { 
         Name = "Extra3", 
         PeriodMs = 1000, 
-        Enabled = false 
+        Enabled = false,
+        UseKeyPress = true,
+        UseCoordinate = false
     };
     
     // BabeBot Style HP/MP monitoring
@@ -280,6 +295,15 @@ public partial class PythonStyleClickViewModel : ClickViewModel
     
     [ObservableProperty]
     private DateTime lastExecution = DateTime.MinValue;
+    
+    [ObservableProperty]
+    private bool useCoordinate = false;
+    
+    [ObservableProperty]
+    private bool useKeyPress = true;
+    
+    [ObservableProperty]
+    private string? keyToPress;
 }
 
 public partial class ClickViewModel : ObservableObject
@@ -307,6 +331,15 @@ public partial class PeriodicClickViewModel : ClickViewModel
     
     [ObservableProperty]
     private DateTime lastExecution = DateTime.MinValue;
+    
+    [ObservableProperty]
+    private bool useCoordinate = false;
+    
+    [ObservableProperty]
+    private bool useKeyPress = true;
+    
+    [ObservableProperty]
+    private string? keyToPress;
 }
 
 public partial class TriggerClickViewModel : ClickViewModel
@@ -325,6 +358,15 @@ public partial class TriggerClickViewModel : ClickViewModel
     
     [ObservableProperty]
     private bool keepClicking = false;
+    
+    [ObservableProperty]
+    private bool useCoordinate = false;
+    
+    [ObservableProperty]
+    private bool useKeyPress = true;
+    
+    [ObservableProperty]
+    private string? keyToPress;
 }
 
 // BabeBot Style HP/MP ViewModels
@@ -350,6 +392,15 @@ public partial class BabeBotHpViewModel : ObservableObject
     
     [ObservableProperty]
     private bool enabled = false;
+    
+    [ObservableProperty]
+    private bool useCoordinate = false;
+    
+    [ObservableProperty]
+    private bool useKeyPress = true;
+    
+    [ObservableProperty]
+    private string? keyToPress = "Q";
     
     [ObservableProperty]
     private System.Drawing.Color currentColor = System.Drawing.Color.Black;
@@ -405,6 +456,15 @@ public partial class BabeBotMpViewModel : ObservableObject
     
     [ObservableProperty]
     private bool enabled = false;
+    
+    [ObservableProperty]
+    private bool useCoordinate = false;
+    
+    [ObservableProperty]
+    private bool useKeyPress = true;
+    
+    [ObservableProperty]
+    private string? keyToPress = "W";
     
     [ObservableProperty]
     private System.Drawing.Color currentColor = System.Drawing.Color.Black;

@@ -88,10 +88,20 @@ public partial class ClientCard : UserControl
         PythonHpPotionX.TextChanged += (s, e) => { if (int.TryParse(PythonHpPotionX.Text, out var v)) ViewModel.PythonHpPotionClick.X = v; };
         PythonHpPotionY.TextChanged += (s, e) => { if (int.TryParse(PythonHpPotionY.Text, out var v)) ViewModel.PythonHpPotionClick.Y = v; };
         PythonHpPotionCooldown.TextChanged += (s, e) => { if (int.TryParse(PythonHpPotionCooldown.Text, out var v)) ViewModel.PythonHpPotionClick.CooldownMs = v; };
+        PythonHpUseCoordinate.Checked += (s, e) => ViewModel.PythonHpPotionClick.UseCoordinate = true;
+        PythonHpUseCoordinate.Unchecked += (s, e) => ViewModel.PythonHpPotionClick.UseCoordinate = false;
+        PythonHpUseKeyPress.Checked += (s, e) => ViewModel.PythonHpPotionClick.UseKeyPress = true;
+        PythonHpUseKeyPress.Unchecked += (s, e) => ViewModel.PythonHpPotionClick.UseKeyPress = false;
+        PythonHpKeyToPress.TextChanged += (s, e) => ViewModel.PythonHpPotionClick.KeyToPress = PythonHpKeyToPress.Text;
         
         PythonMpPotionX.TextChanged += (s, e) => { if (int.TryParse(PythonMpPotionX.Text, out var v)) ViewModel.PythonMpPotionClick.X = v; };
         PythonMpPotionY.TextChanged += (s, e) => { if (int.TryParse(PythonMpPotionY.Text, out var v)) ViewModel.PythonMpPotionClick.Y = v; };
         PythonMpPotionCooldown.TextChanged += (s, e) => { if (int.TryParse(PythonMpPotionCooldown.Text, out var v)) ViewModel.PythonMpPotionClick.CooldownMs = v; };
+        PythonMpUseCoordinate.Checked += (s, e) => ViewModel.PythonMpPotionClick.UseCoordinate = true;
+        PythonMpUseCoordinate.Unchecked += (s, e) => ViewModel.PythonMpPotionClick.UseCoordinate = false;
+        PythonMpUseKeyPress.Checked += (s, e) => ViewModel.PythonMpPotionClick.UseKeyPress = true;
+        PythonMpUseKeyPress.Unchecked += (s, e) => ViewModel.PythonMpPotionClick.UseKeyPress = false;
+        PythonMpKeyToPress.TextChanged += (s, e) => ViewModel.PythonMpPotionClick.KeyToPress = PythonMpKeyToPress.Text;
         
         // Trigger coordinate, cooldown and enable handlers
         HpTriggerX.TextChanged += (s, e) => { if (int.TryParse(HpTriggerX.Text, out var v)) ViewModel.HpTrigger.X = v; };
@@ -99,12 +109,22 @@ public partial class ClientCard : UserControl
         HpTriggerCooldown.TextChanged += (s, e) => { if (int.TryParse(HpTriggerCooldown.Text, out var v)) ViewModel.HpTrigger.CooldownMs = v; };
         HpTriggerEnabled.Checked += (s, e) => ViewModel.HpTrigger.Enabled = true;
         HpTriggerEnabled.Unchecked += (s, e) => ViewModel.HpTrigger.Enabled = false;
+        HpUseCoordinate.Checked += (s, e) => ViewModel.HpTrigger.UseCoordinate = true;
+        HpUseCoordinate.Unchecked += (s, e) => ViewModel.HpTrigger.UseCoordinate = false;
+        HpUseKeyPress.Checked += (s, e) => ViewModel.HpTrigger.UseKeyPress = true;
+        HpUseKeyPress.Unchecked += (s, e) => ViewModel.HpTrigger.UseKeyPress = false;
+        HpKeyToPress.TextChanged += (s, e) => ViewModel.HpTrigger.KeyToPress = HpKeyToPress.Text;
         
         MpTriggerX.TextChanged += (s, e) => { if (int.TryParse(MpTriggerX.Text, out var v)) ViewModel.MpTrigger.X = v; };
         MpTriggerY.TextChanged += (s, e) => { if (int.TryParse(MpTriggerY.Text, out var v)) ViewModel.MpTrigger.Y = v; };
         MpTriggerCooldown.TextChanged += (s, e) => { if (int.TryParse(MpTriggerCooldown.Text, out var v)) ViewModel.MpTrigger.CooldownMs = v; };
         MpTriggerEnabled.Checked += (s, e) => ViewModel.MpTrigger.Enabled = true;
         MpTriggerEnabled.Unchecked += (s, e) => ViewModel.MpTrigger.Enabled = false;
+        MpUseCoordinate.Checked += (s, e) => ViewModel.MpTrigger.UseCoordinate = true;
+        MpUseCoordinate.Unchecked += (s, e) => ViewModel.MpTrigger.UseCoordinate = false;
+        MpUseKeyPress.Checked += (s, e) => ViewModel.MpTrigger.UseKeyPress = true;
+        MpUseKeyPress.Unchecked += (s, e) => ViewModel.MpTrigger.UseKeyPress = false;
+        MpKeyToPress.TextChanged += (s, e) => ViewModel.MpTrigger.KeyToPress = MpKeyToPress.Text;
         
         // Periodic click handlers
         YClickX.TextChanged += (s, e) => { if (int.TryParse(YClickX.Text, out var v)) ViewModel.YClick.X = v; };
@@ -112,24 +132,44 @@ public partial class ClientCard : UserControl
         YClickPeriod.TextChanged += (s, e) => { if (int.TryParse(YClickPeriod.Text, out var v)) ViewModel.YClick.PeriodMs = v; };
         YClickEnabled.Checked += (s, e) => ViewModel.YClick.Enabled = true;
         YClickEnabled.Unchecked += (s, e) => ViewModel.YClick.Enabled = false;
+        YUseCoordinate.Checked += (s, e) => ViewModel.YClick.UseCoordinate = true;
+        YUseCoordinate.Unchecked += (s, e) => ViewModel.YClick.UseCoordinate = false;
+        YUseKeyPress.Checked += (s, e) => ViewModel.YClick.UseKeyPress = true;
+        YUseKeyPress.Unchecked += (s, e) => ViewModel.YClick.UseKeyPress = false;
+        YKeyToPress.TextChanged += (s, e) => ViewModel.YClick.KeyToPress = YKeyToPress.Text;
         
         Extra1X.TextChanged += (s, e) => { if (int.TryParse(Extra1X.Text, out var v)) ViewModel.Extra1Click.X = v; };
         Extra1Y.TextChanged += (s, e) => { if (int.TryParse(Extra1Y.Text, out var v)) ViewModel.Extra1Click.Y = v; };
         Extra1Period.TextChanged += (s, e) => { if (int.TryParse(Extra1Period.Text, out var v)) ViewModel.Extra1Click.PeriodMs = v; };
         Extra1Enabled.Checked += (s, e) => ViewModel.Extra1Click.Enabled = true;
         Extra1Enabled.Unchecked += (s, e) => ViewModel.Extra1Click.Enabled = false;
+        Extra1UseCoordinate.Checked += (s, e) => ViewModel.Extra1Click.UseCoordinate = true;
+        Extra1UseCoordinate.Unchecked += (s, e) => ViewModel.Extra1Click.UseCoordinate = false;
+        Extra1UseKeyPress.Checked += (s, e) => ViewModel.Extra1Click.UseKeyPress = true;
+        Extra1UseKeyPress.Unchecked += (s, e) => ViewModel.Extra1Click.UseKeyPress = false;
+        Extra1KeyToPress.TextChanged += (s, e) => ViewModel.Extra1Click.KeyToPress = Extra1KeyToPress.Text;
         
         Extra2X.TextChanged += (s, e) => { if (int.TryParse(Extra2X.Text, out var v)) ViewModel.Extra2Click.X = v; };
         Extra2Y.TextChanged += (s, e) => { if (int.TryParse(Extra2Y.Text, out var v)) ViewModel.Extra2Click.Y = v; };
         Extra2Period.TextChanged += (s, e) => { if (int.TryParse(Extra2Period.Text, out var v)) ViewModel.Extra2Click.PeriodMs = v; };
         Extra2Enabled.Checked += (s, e) => ViewModel.Extra2Click.Enabled = true;
         Extra2Enabled.Unchecked += (s, e) => ViewModel.Extra2Click.Enabled = false;
+        Extra2UseCoordinate.Checked += (s, e) => ViewModel.Extra2Click.UseCoordinate = true;
+        Extra2UseCoordinate.Unchecked += (s, e) => ViewModel.Extra2Click.UseCoordinate = false;
+        Extra2UseKeyPress.Checked += (s, e) => ViewModel.Extra2Click.UseKeyPress = true;
+        Extra2UseKeyPress.Unchecked += (s, e) => ViewModel.Extra2Click.UseKeyPress = false;
+        Extra2KeyToPress.TextChanged += (s, e) => ViewModel.Extra2Click.KeyToPress = Extra2KeyToPress.Text;
         
         Extra3X.TextChanged += (s, e) => { if (int.TryParse(Extra3X.Text, out var v)) ViewModel.Extra3Click.X = v; };
         Extra3Y.TextChanged += (s, e) => { if (int.TryParse(Extra3Y.Text, out var v)) ViewModel.Extra3Click.Y = v; };
         Extra3Period.TextChanged += (s, e) => { if (int.TryParse(Extra3Period.Text, out var v)) ViewModel.Extra3Click.PeriodMs = v; };
         Extra3Enabled.Checked += (s, e) => ViewModel.Extra3Click.Enabled = true;
         Extra3Enabled.Unchecked += (s, e) => ViewModel.Extra3Click.Enabled = false;
+        Extra3UseCoordinate.Checked += (s, e) => ViewModel.Extra3Click.UseCoordinate = true;
+        Extra3UseCoordinate.Unchecked += (s, e) => ViewModel.Extra3Click.UseCoordinate = false;
+        Extra3UseKeyPress.Checked += (s, e) => ViewModel.Extra3Click.UseKeyPress = true;
+        Extra3UseKeyPress.Unchecked += (s, e) => ViewModel.Extra3Click.UseKeyPress = false;
+        Extra3KeyToPress.TextChanged += (s, e) => ViewModel.Extra3Click.KeyToPress = Extra3KeyToPress.Text;
     }
 
     public void Initialize(int clientId, string clientName)
@@ -1267,8 +1307,7 @@ public partial class ClientCard : UserControl
     // Public methods for getting ComboBox values
     public double GetBabeBotHpThreshold()
     {
-        var selectedItem = BabeBotHpThreshold?.SelectedItem as System.Windows.Controls.ComboBoxItem;
-        if (selectedItem?.Content?.ToString() is string value && double.TryParse(value, out var threshold))
+        if (double.TryParse(BabeBotHpThreshold?.Text, out var threshold))
         {
             return threshold;
         }
@@ -1277,12 +1316,266 @@ public partial class ClientCard : UserControl
     
     public double GetBabeBotMpThreshold()
     {
-        var selectedItem = BabeBotMpThreshold?.SelectedItem as System.Windows.Controls.ComboBoxItem;
-        if (selectedItem?.Content?.ToString() is string value && double.TryParse(value, out var threshold))
+        if (double.TryParse(BabeBotMpThreshold?.Text, out var threshold))
         {
             return threshold;
         }
         return 90.0; // Default
+    }
+    
+    // Helper method to convert JsonElement or object to bool
+    private bool ConvertToBool(object value)
+    {
+        if (value is bool boolValue)
+            return boolValue;
+        if (value is System.Text.Json.JsonElement jsonElement)
+        {
+            if (jsonElement.ValueKind == System.Text.Json.JsonValueKind.True)
+                return true;
+            if (jsonElement.ValueKind == System.Text.Json.JsonValueKind.False)
+                return false;
+        }
+        if (bool.TryParse(value?.ToString(), out var parsed))
+            return parsed;
+        return false; // Default fallback
+    }
+
+    // Public method to collect all UI values for saving
+    public Dictionary<string, object> GetAllUIValues()
+    {
+        var values = new Dictionary<string, object>();
+        
+        try
+        {
+            // Basic HP/MP TextBoxes
+            values["HpProbeX"] = HpX.Text;
+            values["HpProbeY"] = HpY.Text;
+            values["MpProbeX"] = MpX.Text;
+            values["MpProbeY"] = MpY.Text;
+            
+            // HP/MP Trigger TextBoxes
+            values["HpTriggerX"] = HpTriggerX.Text;
+            values["HpTriggerY"] = HpTriggerY.Text;
+            values["MpTriggerX"] = MpTriggerX.Text;
+            values["MpTriggerY"] = MpTriggerY.Text;
+            values["HpCooldown"] = HpTriggerCooldown.Text;
+            values["MpCooldown"] = MpTriggerCooldown.Text;
+            
+            // HP/MP CheckBoxes
+            values["HpTriggerEnabled"] = HpTriggerEnabled.IsChecked ?? false;
+            values["MpTriggerEnabled"] = MpTriggerEnabled.IsChecked ?? false;
+            values["HpUseCoordinate"] = HpUseCoordinate.IsChecked ?? false;
+            values["HpUseKeyPress"] = HpUseKeyPress.IsChecked ?? true;
+            values["MpUseCoordinate"] = MpUseCoordinate.IsChecked ?? false;
+            values["MpUseKeyPress"] = MpUseKeyPress.IsChecked ?? true;
+            values["HpKeyToPress"] = HpKeyToPress.Text;
+            values["MpKeyToPress"] = MpKeyToPress.Text;
+            
+            // Periodic Clicks TextBoxes
+            values["YClickX"] = YClickX.Text;
+            values["YClickY"] = YClickY.Text;
+            values["YClickPeriod"] = YClickPeriod.Text;
+            values["Extra1X"] = Extra1X.Text;
+            values["Extra1Y"] = Extra1Y.Text;
+            values["Extra1Period"] = Extra1Period.Text;
+            values["Extra2X"] = Extra2X.Text;
+            values["Extra2Y"] = Extra2Y.Text;
+            values["Extra2Period"] = Extra2Period.Text;
+            values["Extra3X"] = Extra3X.Text;
+            values["Extra3Y"] = Extra3Y.Text;
+            values["Extra3Period"] = Extra3Period.Text;
+            
+            // Periodic Clicks CheckBoxes
+            values["YClickEnabled"] = YClickEnabled.IsChecked ?? false;
+            values["Extra1Enabled"] = Extra1Enabled.IsChecked ?? false;
+            values["Extra2Enabled"] = Extra2Enabled.IsChecked ?? false;
+            values["Extra3Enabled"] = Extra3Enabled.IsChecked ?? false;
+            values["YUseCoordinate"] = YUseCoordinate.IsChecked ?? false;
+            values["YUseKeyPress"] = YUseKeyPress.IsChecked ?? true;
+            values["Extra1UseCoordinate"] = Extra1UseCoordinate.IsChecked ?? false;
+            values["Extra1UseKeyPress"] = Extra1UseKeyPress.IsChecked ?? true;
+            values["Extra2UseCoordinate"] = Extra2UseCoordinate.IsChecked ?? false;
+            values["Extra2UseKeyPress"] = Extra2UseKeyPress.IsChecked ?? true;
+            values["Extra3UseCoordinate"] = Extra3UseCoordinate.IsChecked ?? false;
+            values["Extra3UseKeyPress"] = Extra3UseKeyPress.IsChecked ?? true;
+            values["YKeyToPress"] = YKeyToPress.Text;
+            values["Extra1KeyToPress"] = Extra1KeyToPress.Text;
+            values["Extra2KeyToPress"] = Extra2KeyToPress.Text;
+            values["Extra3KeyToPress"] = Extra3KeyToPress.Text;
+            
+            // BabeBot HP/MP
+            values["BabeBotHpStart"] = BabeBotHpStart.Text;
+            values["BabeBotHpEnd"] = BabeBotHpEnd.Text;
+            values["BabeBotHpY"] = BabeBotHpY.Text;
+            values["BabeBotHpThreshold"] = BabeBotHpThreshold.Text;
+            values["BabeBotHpPotionX"] = BabeBotHpPotionX.Text;
+            values["BabeBotHpPotionY"] = BabeBotHpPotionY.Text;
+            values["BabeBotHpEnabled"] = BabeBotHpEnabled.IsChecked ?? false;
+            values["BabeBotHpUseCoordinate"] = BabeBotHpUseCoordinate.IsChecked ?? false;
+            values["BabeBotHpUseKeyPress"] = BabeBotHpUseKeyPress.IsChecked ?? true;
+            values["BabeBotHpKeyToPress"] = BabeBotHpKeyToPress.Text;
+            
+            values["BabeBotMpStart"] = BabeBotMpStart.Text;
+            values["BabeBotMpEnd"] = BabeBotMpEnd.Text;
+            values["BabeBotMpY"] = BabeBotMpY.Text;
+            values["BabeBotMpThreshold"] = BabeBotMpThreshold.Text;
+            values["BabeBotMpPotionX"] = BabeBotMpPotionX.Text;
+            values["BabeBotMpPotionY"] = BabeBotMpPotionY.Text;
+            values["BabeBotMpEnabled"] = BabeBotMpEnabled.IsChecked ?? false;
+            values["BabeBotMpUseCoordinate"] = BabeBotMpUseCoordinate.IsChecked ?? false;
+            values["BabeBotMpUseKeyPress"] = BabeBotMpUseKeyPress.IsChecked ?? true;
+            values["BabeBotMpKeyToPress"] = BabeBotMpKeyToPress.Text;
+            
+            // MultiHp Values
+            for (int i = 1; i <= 8; i++)
+            {
+                var startXControl = this.FindName($"MultiHp{i}StartX") as TextBox;
+                var endXControl = this.FindName($"MultiHp{i}EndX") as TextBox;
+                var yControl = this.FindName($"MultiHp{i}Y") as TextBox;
+                var thresholdControl = this.FindName($"MultiHp{i}Threshold") as TextBox;
+                var clickXControl = this.FindName($"MultiHp{i}ClickX") as TextBox;
+                var clickYControl = this.FindName($"MultiHp{i}ClickY") as TextBox;
+                var keyControl = this.FindName($"MultiHp{i}Key") as TextBox;
+                var enabledControl = this.FindName($"MultiHp{i}Enabled") as CheckBox;
+                
+                if (startXControl != null) values[$"MultiHp{i}StartX"] = startXControl.Text;
+                if (endXControl != null) values[$"MultiHp{i}EndX"] = endXControl.Text;
+                if (yControl != null) values[$"MultiHp{i}Y"] = yControl.Text;
+                if (thresholdControl != null) values[$"MultiHp{i}Threshold"] = thresholdControl.Text;
+                if (clickXControl != null) values[$"MultiHp{i}ClickX"] = clickXControl.Text;
+                if (clickYControl != null) values[$"MultiHp{i}ClickY"] = clickYControl.Text;
+                if (keyControl != null) values[$"MultiHp{i}Key"] = keyControl.Text;
+                if (enabledControl != null) values[$"MultiHp{i}Enabled"] = enabledControl.IsChecked ?? false;
+            }
+            
+            // Multi HP System Settings
+            values["MultiHpEnabled"] = MultiHpEnabled.IsChecked ?? false;
+            values["AnimationDelay"] = AnimationDelay.Text;
+            values["MultiHpCheckInterval"] = MultiHpCheckInterval.Text;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error getting UI values: {ex.Message}");
+        }
+        
+        return values;
+    }
+    
+    // Public method to set all UI values from loaded data
+    public void SetAllUIValues(Dictionary<string, object> values)
+    {
+        try
+        {
+            // Basic HP/MP TextBoxes
+            if (values.TryGetValue("HpProbeX", out var hpX)) HpX.Text = hpX.ToString();
+            if (values.TryGetValue("HpProbeY", out var hpY)) HpY.Text = hpY.ToString();
+            if (values.TryGetValue("MpProbeX", out var mpX)) MpX.Text = mpX.ToString();
+            if (values.TryGetValue("MpProbeY", out var mpY)) MpY.Text = mpY.ToString();
+            
+            // HP/MP Trigger TextBoxes
+            if (values.TryGetValue("HpTriggerX", out var hpTriggerX)) HpTriggerX.Text = hpTriggerX.ToString();
+            if (values.TryGetValue("HpTriggerY", out var hpTriggerY)) HpTriggerY.Text = hpTriggerY.ToString();
+            if (values.TryGetValue("MpTriggerX", out var mpTriggerX)) MpTriggerX.Text = mpTriggerX.ToString();
+            if (values.TryGetValue("MpTriggerY", out var mpTriggerY)) MpTriggerY.Text = mpTriggerY.ToString();
+            if (values.TryGetValue("HpCooldown", out var hpCooldown)) HpTriggerCooldown.Text = hpCooldown.ToString();
+            if (values.TryGetValue("MpCooldown", out var mpCooldown)) MpTriggerCooldown.Text = mpCooldown.ToString();
+            
+            // HP/MP CheckBoxes
+            if (values.TryGetValue("HpTriggerEnabled", out var hpTriggerEnabled)) HpTriggerEnabled.IsChecked = ConvertToBool(hpTriggerEnabled);
+            if (values.TryGetValue("MpTriggerEnabled", out var mpTriggerEnabled)) MpTriggerEnabled.IsChecked = ConvertToBool(mpTriggerEnabled);
+            if (values.TryGetValue("HpUseCoordinate", out var hpUseCoordinate)) HpUseCoordinate.IsChecked = ConvertToBool(hpUseCoordinate);
+            if (values.TryGetValue("HpUseKeyPress", out var hpUseKeyPress)) HpUseKeyPress.IsChecked = ConvertToBool(hpUseKeyPress);
+            if (values.TryGetValue("MpUseCoordinate", out var mpUseCoordinate)) MpUseCoordinate.IsChecked = ConvertToBool(mpUseCoordinate);
+            if (values.TryGetValue("MpUseKeyPress", out var mpUseKeyPress)) MpUseKeyPress.IsChecked = ConvertToBool(mpUseKeyPress);
+            if (values.TryGetValue("HpKeyToPress", out var hpKey)) HpKeyToPress.Text = hpKey.ToString();
+            if (values.TryGetValue("MpKeyToPress", out var mpKey)) MpKeyToPress.Text = mpKey.ToString();
+            
+            // Periodic Clicks TextBoxes
+            if (values.TryGetValue("YClickX", out var yClickX)) YClickX.Text = yClickX.ToString();
+            if (values.TryGetValue("YClickY", out var yClickY)) YClickY.Text = yClickY.ToString();
+            if (values.TryGetValue("YClickPeriod", out var yClickPeriod)) YClickPeriod.Text = yClickPeriod.ToString();
+            if (values.TryGetValue("Extra1X", out var extra1X)) Extra1X.Text = extra1X.ToString();
+            if (values.TryGetValue("Extra1Y", out var extra1Y)) Extra1Y.Text = extra1Y.ToString();
+            if (values.TryGetValue("Extra1Period", out var extra1Period)) Extra1Period.Text = extra1Period.ToString();
+            if (values.TryGetValue("Extra2X", out var extra2X)) Extra2X.Text = extra2X.ToString();
+            if (values.TryGetValue("Extra2Y", out var extra2Y)) Extra2Y.Text = extra2Y.ToString();
+            if (values.TryGetValue("Extra2Period", out var extra2Period)) Extra2Period.Text = extra2Period.ToString();
+            if (values.TryGetValue("Extra3X", out var extra3X)) Extra3X.Text = extra3X.ToString();
+            if (values.TryGetValue("Extra3Y", out var extra3Y)) Extra3Y.Text = extra3Y.ToString();
+            if (values.TryGetValue("Extra3Period", out var extra3Period)) Extra3Period.Text = extra3Period.ToString();
+            
+            // Periodic Clicks CheckBoxes
+            if (values.TryGetValue("YClickEnabled", out var yClickEnabled)) YClickEnabled.IsChecked = ConvertToBool(yClickEnabled);
+            if (values.TryGetValue("Extra1Enabled", out var extra1Enabled)) Extra1Enabled.IsChecked = ConvertToBool(extra1Enabled);
+            if (values.TryGetValue("Extra2Enabled", out var extra2Enabled)) Extra2Enabled.IsChecked = ConvertToBool(extra2Enabled);
+            if (values.TryGetValue("Extra3Enabled", out var extra3Enabled)) Extra3Enabled.IsChecked = ConvertToBool(extra3Enabled);
+            if (values.TryGetValue("YUseCoordinate", out var yUseCoordinate)) YUseCoordinate.IsChecked = ConvertToBool(yUseCoordinate);
+            if (values.TryGetValue("YUseKeyPress", out var yUseKeyPress)) YUseKeyPress.IsChecked = ConvertToBool(yUseKeyPress);
+            if (values.TryGetValue("Extra1UseCoordinate", out var extra1UseCoordinate)) Extra1UseCoordinate.IsChecked = ConvertToBool(extra1UseCoordinate);
+            if (values.TryGetValue("Extra1UseKeyPress", out var extra1UseKeyPress)) Extra1UseKeyPress.IsChecked = ConvertToBool(extra1UseKeyPress);
+            if (values.TryGetValue("Extra2UseCoordinate", out var extra2UseCoordinate)) Extra2UseCoordinate.IsChecked = ConvertToBool(extra2UseCoordinate);
+            if (values.TryGetValue("Extra2UseKeyPress", out var extra2UseKeyPress)) Extra2UseKeyPress.IsChecked = ConvertToBool(extra2UseKeyPress);
+            if (values.TryGetValue("Extra3UseCoordinate", out var extra3UseCoordinate)) Extra3UseCoordinate.IsChecked = ConvertToBool(extra3UseCoordinate);
+            if (values.TryGetValue("Extra3UseKeyPress", out var extra3UseKeyPress)) Extra3UseKeyPress.IsChecked = ConvertToBool(extra3UseKeyPress);
+            if (values.TryGetValue("YKeyToPress", out var yKey)) YKeyToPress.Text = yKey.ToString();
+            if (values.TryGetValue("Extra1KeyToPress", out var extra1Key)) Extra1KeyToPress.Text = extra1Key.ToString();
+            if (values.TryGetValue("Extra2KeyToPress", out var extra2Key)) Extra2KeyToPress.Text = extra2Key.ToString();
+            if (values.TryGetValue("Extra3KeyToPress", out var extra3Key)) Extra3KeyToPress.Text = extra3Key.ToString();
+            
+            // BabeBot HP/MP
+            if (values.TryGetValue("BabeBotHpStart", out var babeBotHpStart)) BabeBotHpStart.Text = babeBotHpStart.ToString();
+            if (values.TryGetValue("BabeBotHpEnd", out var babeBotHpEnd)) BabeBotHpEnd.Text = babeBotHpEnd.ToString();
+            if (values.TryGetValue("BabeBotHpY", out var babeBotHpY)) BabeBotHpY.Text = babeBotHpY.ToString();
+            if (values.TryGetValue("BabeBotHpThreshold", out var babeBotHpThreshold)) BabeBotHpThreshold.Text = babeBotHpThreshold.ToString();
+            if (values.TryGetValue("BabeBotHpPotionX", out var babeBotHpPotionX)) BabeBotHpPotionX.Text = babeBotHpPotionX.ToString();
+            if (values.TryGetValue("BabeBotHpPotionY", out var babeBotHpPotionY)) BabeBotHpPotionY.Text = babeBotHpPotionY.ToString();
+            if (values.TryGetValue("BabeBotHpEnabled", out var babeBotHpEnabled)) BabeBotHpEnabled.IsChecked = ConvertToBool(babeBotHpEnabled);
+            if (values.TryGetValue("BabeBotHpUseCoordinate", out var babeBotHpUseCoordinate)) BabeBotHpUseCoordinate.IsChecked = ConvertToBool(babeBotHpUseCoordinate);
+            if (values.TryGetValue("BabeBotHpUseKeyPress", out var babeBotHpUseKeyPress)) BabeBotHpUseKeyPress.IsChecked = ConvertToBool(babeBotHpUseKeyPress);
+            if (values.TryGetValue("BabeBotHpKeyToPress", out var babeBotHpKey)) BabeBotHpKeyToPress.Text = babeBotHpKey.ToString();
+            
+            if (values.TryGetValue("BabeBotMpStart", out var babeBotMpStart)) BabeBotMpStart.Text = babeBotMpStart.ToString();
+            if (values.TryGetValue("BabeBotMpEnd", out var babeBotMpEnd)) BabeBotMpEnd.Text = babeBotMpEnd.ToString();
+            if (values.TryGetValue("BabeBotMpY", out var babeBotMpY)) BabeBotMpY.Text = babeBotMpY.ToString();
+            if (values.TryGetValue("BabeBotMpThreshold", out var babeBotMpThreshold)) BabeBotMpThreshold.Text = babeBotMpThreshold.ToString();
+            if (values.TryGetValue("BabeBotMpPotionX", out var babeBotMpPotionX)) BabeBotMpPotionX.Text = babeBotMpPotionX.ToString();
+            if (values.TryGetValue("BabeBotMpPotionY", out var babeBotMpPotionY)) BabeBotMpPotionY.Text = babeBotMpPotionY.ToString();
+            if (values.TryGetValue("BabeBotMpEnabled", out var babeBotMpEnabled)) BabeBotMpEnabled.IsChecked = ConvertToBool(babeBotMpEnabled);
+            if (values.TryGetValue("BabeBotMpUseCoordinate", out var babeBotMpUseCoordinate)) BabeBotMpUseCoordinate.IsChecked = ConvertToBool(babeBotMpUseCoordinate);
+            if (values.TryGetValue("BabeBotMpUseKeyPress", out var babeBotMpUseKeyPress)) BabeBotMpUseKeyPress.IsChecked = ConvertToBool(babeBotMpUseKeyPress);
+            if (values.TryGetValue("BabeBotMpKeyToPress", out var babeBotMpKey)) BabeBotMpKeyToPress.Text = babeBotMpKey.ToString();
+            
+            // MultiHp Values
+            for (int i = 1; i <= 8; i++)
+            {
+                var startXControl = this.FindName($"MultiHp{i}StartX") as TextBox;
+                var endXControl = this.FindName($"MultiHp{i}EndX") as TextBox;
+                var yControl = this.FindName($"MultiHp{i}Y") as TextBox;
+                var thresholdControl = this.FindName($"MultiHp{i}Threshold") as TextBox;
+                var clickXControl = this.FindName($"MultiHp{i}ClickX") as TextBox;
+                var clickYControl = this.FindName($"MultiHp{i}ClickY") as TextBox;
+                var keyControl = this.FindName($"MultiHp{i}Key") as TextBox;
+                var enabledControl = this.FindName($"MultiHp{i}Enabled") as CheckBox;
+                
+                if (values.TryGetValue($"MultiHp{i}StartX", out var startX) && startXControl != null) startXControl.Text = startX.ToString();
+                if (values.TryGetValue($"MultiHp{i}EndX", out var endX) && endXControl != null) endXControl.Text = endX.ToString();
+                if (values.TryGetValue($"MultiHp{i}Y", out var y) && yControl != null) yControl.Text = y.ToString();
+                if (values.TryGetValue($"MultiHp{i}Threshold", out var threshold) && thresholdControl != null) thresholdControl.Text = threshold.ToString();
+                if (values.TryGetValue($"MultiHp{i}ClickX", out var clickX) && clickXControl != null) clickXControl.Text = clickX.ToString();
+                if (values.TryGetValue($"MultiHp{i}ClickY", out var clickY) && clickYControl != null) clickYControl.Text = clickY.ToString();
+                if (values.TryGetValue($"MultiHp{i}Key", out var key) && keyControl != null) keyControl.Text = key.ToString();
+                if (values.TryGetValue($"MultiHp{i}Enabled", out var enabled) && enabledControl != null) enabledControl.IsChecked = ConvertToBool(enabled);
+            }
+            
+            // Multi HP System Settings
+            if (values.TryGetValue("MultiHpEnabled", out var multiHpEnabled)) MultiHpEnabled.IsChecked = ConvertToBool(multiHpEnabled);
+            if (values.TryGetValue("AnimationDelay", out var animationDelay)) AnimationDelay.Text = animationDelay.ToString();
+            if (values.TryGetValue("MultiHpCheckInterval", out var multiHpCheckInterval)) MultiHpCheckInterval.Text = multiHpCheckInterval.ToString();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error setting UI values: {ex.Message}");
+        }
     }
     
     private void StartClient_Click(object sender, RoutedEventArgs e)
@@ -1510,16 +1803,8 @@ public partial class ClientCard : UserControl
         BabeBotHpEnd.Text = ViewModel.BabeBotHp.EndX.ToString();
         BabeBotHpY.Text = ViewModel.BabeBotHp.Y.ToString();
         
-        // Set HP threshold dropdown
-        var hpThresholdValue = ViewModel.BabeBotHp.ThresholdPercentage.ToString();
-        foreach (System.Windows.Controls.ComboBoxItem item in BabeBotHpThreshold.Items)
-        {
-            if (item.Content?.ToString() == hpThresholdValue)
-            {
-                BabeBotHpThreshold.SelectedItem = item;
-                break;
-            }
-        }
+        // Set HP threshold TextBox
+        BabeBotHpThreshold.Text = ViewModel.BabeBotHp.ThresholdPercentage.ToString();
         
         BabeBotHpPotionX.Text = ViewModel.BabeBotHp.PotionX.ToString();
         BabeBotHpPotionY.Text = ViewModel.BabeBotHp.PotionY.ToString();
@@ -1528,16 +1813,8 @@ public partial class ClientCard : UserControl
         BabeBotMpEnd.Text = ViewModel.BabeBotMp.EndX.ToString();
         BabeBotMpY.Text = ViewModel.BabeBotMp.Y.ToString();
         
-        // Set MP threshold dropdown
-        var mpThresholdValue = ViewModel.BabeBotMp.ThresholdPercentage.ToString();
-        foreach (System.Windows.Controls.ComboBoxItem item in BabeBotMpThreshold.Items)
-        {
-            if (item.Content?.ToString() == mpThresholdValue)
-            {
-                BabeBotMpThreshold.SelectedItem = item;
-                break;
-            }
-        }
+        // Set MP threshold TextBox
+        BabeBotMpThreshold.Text = ViewModel.BabeBotMp.ThresholdPercentage.ToString();
         
         BabeBotMpPotionX.Text = ViewModel.BabeBotMp.PotionX.ToString();
         BabeBotMpPotionY.Text = ViewModel.BabeBotMp.PotionY.ToString();
@@ -1567,8 +1844,17 @@ public partial class ClientCard : UserControl
                 Interval = TimeSpan.FromMilliseconds(ViewModel.YClick.PeriodMs)
             };
             _yClickTimer.Tick += (s, e) => {
-                // Background click without mouse movement for simultaneous clients
-                PerformBackgroundClick(ViewModel.YClick.X, ViewModel.YClick.Y, "Y-PERIODIC");
+                // Check if using coordinate or key press
+                if (ViewModel.YClick.UseCoordinate)
+                {
+                    // Background click without mouse movement for simultaneous clients
+                    PerformBackgroundClick(ViewModel.YClick.X, ViewModel.YClick.Y, "Y-PERIODIC");
+                }
+                else if (ViewModel.YClick.UseKeyPress && !string.IsNullOrEmpty(ViewModel.YClick.KeyToPress))
+                {
+                    // Send key press
+                    PerformBackgroundKeyPress(ViewModel.YClick.KeyToPress, "Y-PERIODIC");
+                }
             };
             _yClickTimer.Start();
             Console.WriteLine($"[{ViewModel.ClientName}] Y periodic click STARTED: ({ViewModel.YClick.X},{ViewModel.YClick.Y}) every {ViewModel.YClick.PeriodMs}ms");
@@ -1585,7 +1871,16 @@ public partial class ClientCard : UserControl
             {
                 Interval = TimeSpan.FromMilliseconds(ViewModel.Extra1Click.PeriodMs)
             };
-            _extra1Timer.Tick += (s, e) => PerformBackgroundClick(ViewModel.Extra1Click.X, ViewModel.Extra1Click.Y, "Extra1");
+            _extra1Timer.Tick += (s, e) => {
+                if (ViewModel.Extra1Click.UseCoordinate)
+                {
+                    PerformBackgroundClick(ViewModel.Extra1Click.X, ViewModel.Extra1Click.Y, "Extra1");
+                }
+                else if (ViewModel.Extra1Click.UseKeyPress && !string.IsNullOrEmpty(ViewModel.Extra1Click.KeyToPress))
+                {
+                    PerformBackgroundKeyPress(ViewModel.Extra1Click.KeyToPress, "Extra1");
+                }
+            };
             _extra1Timer.Start();
             Console.WriteLine($"[{ViewModel.ClientName}] Extra1 periodic click STARTED: ({ViewModel.Extra1Click.X},{ViewModel.Extra1Click.Y}) every {ViewModel.Extra1Click.PeriodMs}ms");
         }
@@ -1601,7 +1896,16 @@ public partial class ClientCard : UserControl
             {
                 Interval = TimeSpan.FromMilliseconds(ViewModel.Extra2Click.PeriodMs)
             };
-            _extra2Timer.Tick += (s, e) => PerformBackgroundClick(ViewModel.Extra2Click.X, ViewModel.Extra2Click.Y, "Extra2");
+            _extra2Timer.Tick += (s, e) => {
+                if (ViewModel.Extra2Click.UseCoordinate)
+                {
+                    PerformBackgroundClick(ViewModel.Extra2Click.X, ViewModel.Extra2Click.Y, "Extra2");
+                }
+                else if (ViewModel.Extra2Click.UseKeyPress && !string.IsNullOrEmpty(ViewModel.Extra2Click.KeyToPress))
+                {
+                    PerformBackgroundKeyPress(ViewModel.Extra2Click.KeyToPress, "Extra2");
+                }
+            };
             _extra2Timer.Start();
             Console.WriteLine($"[{ViewModel.ClientName}] Extra2 periodic click STARTED: ({ViewModel.Extra2Click.X},{ViewModel.Extra2Click.Y}) every {ViewModel.Extra2Click.PeriodMs}ms");
         }
@@ -1617,7 +1921,16 @@ public partial class ClientCard : UserControl
             {
                 Interval = TimeSpan.FromMilliseconds(ViewModel.Extra3Click.PeriodMs)
             };
-            _extra3Timer.Tick += (s, e) => PerformBackgroundClick(ViewModel.Extra3Click.X, ViewModel.Extra3Click.Y, "Extra3");
+            _extra3Timer.Tick += (s, e) => {
+                if (ViewModel.Extra3Click.UseCoordinate)
+                {
+                    PerformBackgroundClick(ViewModel.Extra3Click.X, ViewModel.Extra3Click.Y, "Extra3");
+                }
+                else if (ViewModel.Extra3Click.UseKeyPress && !string.IsNullOrEmpty(ViewModel.Extra3Click.KeyToPress))
+                {
+                    PerformBackgroundKeyPress(ViewModel.Extra3Click.KeyToPress, "Extra3");
+                }
+            };
             _extra3Timer.Start();
             Console.WriteLine($"[{ViewModel.ClientName}] Extra3 periodic click STARTED: ({ViewModel.Extra3Click.X},{ViewModel.Extra3Click.Y}) every {ViewModel.Extra3Click.PeriodMs}ms");
         }
@@ -1871,8 +2184,16 @@ public partial class ClientCard : UserControl
             
             if (ViewModel.HpTrigger.KeepClicking)
             {
-                Console.WriteLine($"[{ViewModel.ClientName}] HP TRIGGER CLICK at ({ViewModel.HpTrigger.X},{ViewModel.HpTrigger.Y})");
-                PerformBackgroundClick(ViewModel.HpTrigger.X, ViewModel.HpTrigger.Y, "HP_TRIGGER");
+                if (ViewModel.HpTrigger.UseCoordinate)
+                {
+                    Console.WriteLine($"[{ViewModel.ClientName}] HP TRIGGER CLICK at ({ViewModel.HpTrigger.X},{ViewModel.HpTrigger.Y})");
+                    PerformBackgroundClick(ViewModel.HpTrigger.X, ViewModel.HpTrigger.Y, "HP_TRIGGER");
+                }
+                else if (ViewModel.HpTrigger.UseKeyPress && !string.IsNullOrEmpty(ViewModel.HpTrigger.KeyToPress))
+                {
+                    Console.WriteLine($"[{ViewModel.ClientName}] HP TRIGGER KEY PRESS '{ViewModel.HpTrigger.KeyToPress}'");
+                    PerformBackgroundKeyPress(ViewModel.HpTrigger.KeyToPress, "HP_TRIGGER");
+                }
                 ViewModel.HpTrigger.ExecutionCount++;
                 ViewModel.TriggerCount++;
             }
@@ -1905,8 +2226,16 @@ public partial class ClientCard : UserControl
             
             if (ViewModel.MpTrigger.KeepClicking)
             {
-                Console.WriteLine($"[{ViewModel.ClientName}] MP TRIGGER CLICK at ({ViewModel.MpTrigger.X},{ViewModel.MpTrigger.Y})");
-                PerformBackgroundClick(ViewModel.MpTrigger.X, ViewModel.MpTrigger.Y, "MP_TRIGGER");
+                if (ViewModel.MpTrigger.UseCoordinate)
+                {
+                    Console.WriteLine($"[{ViewModel.ClientName}] MP TRIGGER CLICK at ({ViewModel.MpTrigger.X},{ViewModel.MpTrigger.Y})");
+                    PerformBackgroundClick(ViewModel.MpTrigger.X, ViewModel.MpTrigger.Y, "MP_TRIGGER");
+                }
+                else if (ViewModel.MpTrigger.UseKeyPress && !string.IsNullOrEmpty(ViewModel.MpTrigger.KeyToPress))
+                {
+                    Console.WriteLine($"[{ViewModel.ClientName}] MP TRIGGER KEY PRESS '{ViewModel.MpTrigger.KeyToPress}'");
+                    PerformBackgroundKeyPress(ViewModel.MpTrigger.KeyToPress, "MP_TRIGGER");
+                }
                 ViewModel.MpTrigger.ExecutionCount++;
                 ViewModel.TriggerCount++;
             }
@@ -2067,11 +2396,18 @@ public partial class ClientCard : UserControl
                         ViewModel.PythonHpPotionClick.LastExecution = now;
                         Console.WriteLine($"[{ViewModel.ClientName}] PYTHON-HP: Color changed at {hpX},{hpY} (threshold {ViewModel.HpPercentageProbe.MonitorPercentage}%) - RGB({currentColor.R},{currentColor.G},{currentColor.B}) distance={distance:F1}");
                         
-                        // Trigger Python-style HP potion click
-                        if (ViewModel.PythonHpPotionClick.X > 0 && ViewModel.PythonHpPotionClick.Y > 0)
+                        // Trigger Python-style HP potion action
+                        if (ViewModel.PythonHpPotionClick.UseCoordinate && ViewModel.PythonHpPotionClick.X > 0 && ViewModel.PythonHpPotionClick.Y > 0)
                         {
                             Console.WriteLine($"[{ViewModel.ClientName}] PYTHON-HP: Triggering potion click at ({ViewModel.PythonHpPotionClick.X},{ViewModel.PythonHpPotionClick.Y}) cooldown={ViewModel.PythonHpPotionClick.CooldownMs}ms");
                             PerformBackgroundClick(ViewModel.PythonHpPotionClick.X, ViewModel.PythonHpPotionClick.Y, "PYTHON_HP_TRIGGER");
+                            ViewModel.TriggerCount++;
+                            ViewModel.PythonHpPotionClick.ExecutionCount++;
+                        }
+                        else if (ViewModel.PythonHpPotionClick.UseKeyPress && !string.IsNullOrEmpty(ViewModel.PythonHpPotionClick.KeyToPress))
+                        {
+                            Console.WriteLine($"[{ViewModel.ClientName}] PYTHON-HP: Triggering key press '{ViewModel.PythonHpPotionClick.KeyToPress}' cooldown={ViewModel.PythonHpPotionClick.CooldownMs}ms");
+                            PerformBackgroundKeyPress(ViewModel.PythonHpPotionClick.KeyToPress, "PYTHON_HP_TRIGGER");
                             ViewModel.TriggerCount++;
                             ViewModel.PythonHpPotionClick.ExecutionCount++;
                         }
@@ -2139,11 +2475,18 @@ public partial class ClientCard : UserControl
                         ViewModel.PythonMpPotionClick.LastExecution = now;
                         Console.WriteLine($"[{ViewModel.ClientName}] PYTHON-MP: Color changed at {mpX},{mpY} (threshold {ViewModel.MpPercentageProbe.MonitorPercentage}%) - RGB({currentColor.R},{currentColor.G},{currentColor.B}) distance={distance:F1}");
                         
-                        // Trigger Python-style MP potion click
-                        if (ViewModel.PythonMpPotionClick.X > 0 && ViewModel.PythonMpPotionClick.Y > 0)
+                        // Trigger Python-style MP potion action
+                        if (ViewModel.PythonMpPotionClick.UseCoordinate && ViewModel.PythonMpPotionClick.X > 0 && ViewModel.PythonMpPotionClick.Y > 0)
                         {
                             Console.WriteLine($"[{ViewModel.ClientName}] PYTHON-MP: Triggering potion click at ({ViewModel.PythonMpPotionClick.X},{ViewModel.PythonMpPotionClick.Y}) cooldown={ViewModel.PythonMpPotionClick.CooldownMs}ms");
                             PerformBackgroundClick(ViewModel.PythonMpPotionClick.X, ViewModel.PythonMpPotionClick.Y, "PYTHON_MP_TRIGGER");
+                            ViewModel.TriggerCount++;
+                            ViewModel.PythonMpPotionClick.ExecutionCount++;
+                        }
+                        else if (ViewModel.PythonMpPotionClick.UseKeyPress && !string.IsNullOrEmpty(ViewModel.PythonMpPotionClick.KeyToPress))
+                        {
+                            Console.WriteLine($"[{ViewModel.ClientName}] PYTHON-MP: Triggering key press '{ViewModel.PythonMpPotionClick.KeyToPress}' cooldown={ViewModel.PythonMpPotionClick.CooldownMs}ms");
+                            PerformBackgroundKeyPress(ViewModel.PythonMpPotionClick.KeyToPress, "PYTHON_MP_TRIGGER");
                             ViewModel.TriggerCount++;
                             ViewModel.PythonMpPotionClick.ExecutionCount++;
                         }
@@ -2178,20 +2521,10 @@ public partial class ClientCard : UserControl
         {
             // Get selected click mode from main window
             var mainWindow = Application.Current.MainWindow as MainWindow;
-            var selectedItem = mainWindow?.ClickModeComboBox.SelectedItem;
-            var clickMode = "";
-            
-            if (selectedItem is ComboBoxItem comboBoxItem)
-            {
-                clickMode = comboBoxItem.Content?.ToString() ?? "message";
-            }
-            else
-            {
-                clickMode = selectedItem?.ToString() ?? "message";
-            }
+            var clickMode = mainWindow?.ClickModeTextBox.Text ?? "message";
             
             // Debug what was selected
-            Console.WriteLine($"DEBUG: Selected item: {selectedItem}, Content: {clickMode}, Type: {selectedItem?.GetType().Name}");
+            Console.WriteLine($"DEBUG: Click mode: {clickMode}");
             
             // Route to appropriate click method based on dropdown selection
             switch (clickMode.ToLower())
@@ -2572,6 +2905,129 @@ public partial class ClientCard : UserControl
         {
             Console.WriteLine($"[{ViewModel.ClientName}] Background click error: {ex.Message}");
         }
+    }
+    
+    private void PerformBackgroundKeyPress(string key, string channel)
+    {
+        Console.WriteLine($"[{ViewModel.ClientName}] PerformBackgroundKeyPress called: key='{key}' channel={channel} hwnd={ViewModel.TargetHwnd}");
+        
+        if (ViewModel.TargetHwnd == IntPtr.Zero)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] ERROR: TargetHwnd is zero, cannot send key press");
+            return;
+        }
+        
+        if (string.IsNullOrEmpty(key))
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] ERROR: Key is null or empty");
+            return;
+        }
+        
+        try
+        {
+            // Convert key to virtual key code
+            var vkCode = GetVirtualKeyCode(key);
+            if (vkCode == 0)
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] ERROR: Could not convert key '{key}' to virtual key code");
+                return;
+            }
+            
+            var processName = GetProcessName(ViewModel.TargetHwnd);
+            
+            Console.WriteLine($"[{ViewModel.ClientName}] {channel} SendKey: Process={processName} Key='{key}' VK={vkCode:X2}");
+            
+            // Check if window still exists
+            if (!User32.IsWindow(ViewModel.TargetHwnd))
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] ERROR: Target window no longer exists");
+                return;
+            }
+            
+            // Optimized key press - only essential methods to avoid spam
+            
+            // Method 1: Hardware simulation with proper lParam (most effective)
+            uint scanCode = User32.MapVirtualKey((uint)vkCode, User32.MAPVK.MAPVK_VK_TO_VSC);
+            IntPtr lParam = (IntPtr)((scanCode << 16) | 1); // Repeat count = 1
+            IntPtr lParamUp = (IntPtr)((scanCode << 16) | 1 | (1 << 30) | (1 << 31));
+            
+            Console.WriteLine($"[{ViewModel.ClientName}] Sending optimized key: '{key}' (VK={vkCode:X2})");
+            
+            // Primary method: PostMessage with proper lParam
+            User32.PostMessage(ViewModel.TargetHwnd, User32.WindowMessage.WM_KEYDOWN, (IntPtr)vkCode, lParam);
+            System.Threading.Thread.Sleep(25);
+            User32.PostMessage(ViewModel.TargetHwnd, User32.WindowMessage.WM_KEYUP, (IntPtr)vkCode, lParamUp);
+            
+            // Method 2: Fallback to child windows (only if main window fails)
+            var childWindows = new List<IntPtr>();
+            User32.EnumChildWindows(ViewModel.TargetHwnd, (hwnd, lParam) =>
+            {
+                childWindows.Add((IntPtr)hwnd);
+                return true;
+            }, IntPtr.Zero);
+            
+            if (childWindows.Count > 0)
+            {
+                // Only send to the first child window to avoid spam
+                var primaryChild = childWindows[0];
+                User32.PostMessage(primaryChild, User32.WindowMessage.WM_KEYDOWN, (IntPtr)vkCode, lParam);
+                System.Threading.Thread.Sleep(25);
+                User32.PostMessage(primaryChild, User32.WindowMessage.WM_KEYUP, (IntPtr)vkCode, lParamUp);
+            }
+            
+            // Logging
+            if (channel.Contains("TEST") || DateTime.Now.Second % 10 == 0)
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] {channel} KEY PRESS: '{key}' (VK={vkCode:X2}) Process:{processName} Children:{childWindows.Count}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] Background key press error: {ex.Message}");
+        }
+    }
+    
+    private uint GetVirtualKeyCode(string key)
+    {
+        if (string.IsNullOrEmpty(key)) return 0;
+        
+        var upperKey = key.ToUpper();
+        
+        // Single character keys (A-Z, 0-9)
+        if (upperKey.Length == 1)
+        {
+            char c = upperKey[0];
+            if (c >= 'A' && c <= 'Z')
+                return (uint)c;
+            if (c >= '0' && c <= '9')
+                return (uint)c;
+        }
+        
+        // Special keys
+        return upperKey switch
+        {
+            "SPACE" => 0x20,
+            "ENTER" => 0x0D,
+            "TAB" => 0x09,
+            "ESC" => 0x1B,
+            "ESCAPE" => 0x1B,
+            "SHIFT" => 0x10,
+            "CTRL" => 0x11,
+            "ALT" => 0x12,
+            "F1" => 0x70,
+            "F2" => 0x71,
+            "F3" => 0x72,
+            "F4" => 0x73,
+            "F5" => 0x74,
+            "F6" => 0x75,
+            "F7" => 0x76,
+            "F8" => 0x77,
+            "F9" => 0x78,
+            "F10" => 0x79,
+            "F11" => 0x7A,
+            "F12" => 0x7B,
+            _ => 0
+        };
     }
     
     private void PerformPostMessageTest(int x, int y, string channel)
@@ -3720,10 +4176,16 @@ public partial class ClientCard : UserControl
                 {
                     ViewModel.BabeBotHp.LastExecution = now;
                     
-                    Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot HP TRIGGER: Color changed! Clicking ({ViewModel.BabeBotHp.PotionX},{ViewModel.BabeBotHp.PotionY})");
-                    
-                    // Send mouse click to potion coordinates
-                    PerformBackgroundClick(ViewModel.BabeBotHp.PotionX, ViewModel.BabeBotHp.PotionY, "BABEBOT_HP");
+                    if (ViewModel.BabeBotHp.UseCoordinate)
+                    {
+                        Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot HP TRIGGER: Color changed! Clicking ({ViewModel.BabeBotHp.PotionX},{ViewModel.BabeBotHp.PotionY})");
+                        PerformBackgroundClick(ViewModel.BabeBotHp.PotionX, ViewModel.BabeBotHp.PotionY, "BABEBOT_HP");
+                    }
+                    else if (ViewModel.BabeBotHp.UseKeyPress && !string.IsNullOrEmpty(ViewModel.BabeBotHp.KeyToPress))
+                    {
+                        Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot HP TRIGGER: Color changed! Key press '{ViewModel.BabeBotHp.KeyToPress}'");
+                        PerformBackgroundKeyPress(ViewModel.BabeBotHp.KeyToPress, "BABEBOT_HP");
+                    }
                     ViewModel.BabeBotHp.ExecutionCount++;
                     ViewModel.TriggerCount++;
                 }
@@ -3776,10 +4238,16 @@ public partial class ClientCard : UserControl
                 {
                     ViewModel.BabeBotMp.LastExecution = now;
                     
-                    Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot MP TRIGGER: Color changed! Clicking ({ViewModel.BabeBotMp.PotionX},{ViewModel.BabeBotMp.PotionY})");
-                    
-                    // Send mouse click to potion coordinates
-                    PerformBackgroundClick(ViewModel.BabeBotMp.PotionX, ViewModel.BabeBotMp.PotionY, "BABEBOT_MP");
+                    if (ViewModel.BabeBotMp.UseCoordinate)
+                    {
+                        Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot MP TRIGGER: Color changed! Clicking ({ViewModel.BabeBotMp.PotionX},{ViewModel.BabeBotMp.PotionY})");
+                        PerformBackgroundClick(ViewModel.BabeBotMp.PotionX, ViewModel.BabeBotMp.PotionY, "BABEBOT_MP");
+                    }
+                    else if (ViewModel.BabeBotMp.UseKeyPress && !string.IsNullOrEmpty(ViewModel.BabeBotMp.KeyToPress))
+                    {
+                        Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot MP TRIGGER: Color changed! Key press '{ViewModel.BabeBotMp.KeyToPress}'");
+                        PerformBackgroundKeyPress(ViewModel.BabeBotMp.KeyToPress, "BABEBOT_MP");
+                    }
                     ViewModel.BabeBotMp.ExecutionCount++;
                     ViewModel.TriggerCount++;
                 }
@@ -3811,14 +4279,14 @@ public partial class ClientCard : UserControl
         BabeBotHpY.Text = ViewModel.BabeBotHp.Y.ToString();
         BabeBotHpPotionX.Text = ViewModel.BabeBotHp.PotionX.ToString();
         BabeBotHpPotionY.Text = ViewModel.BabeBotHp.PotionY.ToString();
-        BabeBotHpThreshold.SelectedValue = ViewModel.BabeBotHp.ThresholdPercentage.ToString();
+        BabeBotHpThreshold.Text = ViewModel.BabeBotHp.ThresholdPercentage.ToString();
         
         BabeBotMpStart.Text = ViewModel.BabeBotMp.StartX.ToString();
         BabeBotMpEnd.Text = ViewModel.BabeBotMp.EndX.ToString();
         BabeBotMpY.Text = ViewModel.BabeBotMp.Y.ToString();
         BabeBotMpPotionX.Text = ViewModel.BabeBotMp.PotionX.ToString();
         BabeBotMpPotionY.Text = ViewModel.BabeBotMp.PotionY.ToString();
-        BabeBotMpThreshold.SelectedValue = ViewModel.BabeBotMp.ThresholdPercentage.ToString();
+        BabeBotMpThreshold.Text = ViewModel.BabeBotMp.ThresholdPercentage.ToString();
         
         // Attach event handlers for real-time updates
         BabeBotHpStart.TextChanged += (s, e) => UpdateBabeBotHpFromUI();
@@ -3826,14 +4294,24 @@ public partial class ClientCard : UserControl
         BabeBotHpY.TextChanged += (s, e) => UpdateBabeBotHpFromUI();
         BabeBotHpPotionX.TextChanged += (s, e) => UpdateBabeBotHpFromUI();
         BabeBotHpPotionY.TextChanged += (s, e) => UpdateBabeBotHpFromUI();
-        BabeBotHpThreshold.SelectionChanged += (s, e) => UpdateBabeBotHpFromUI();
+        BabeBotHpThreshold.TextChanged += (s, e) => UpdateBabeBotHpFromUI();
+        BabeBotHpUseCoordinate.Checked += (s, e) => { ViewModel.BabeBotHp.UseCoordinate = true; UpdateBabeBotHpFromUI(); };
+        BabeBotHpUseCoordinate.Unchecked += (s, e) => { ViewModel.BabeBotHp.UseCoordinate = false; UpdateBabeBotHpFromUI(); };
+        BabeBotHpUseKeyPress.Checked += (s, e) => { ViewModel.BabeBotHp.UseKeyPress = true; UpdateBabeBotHpFromUI(); };
+        BabeBotHpUseKeyPress.Unchecked += (s, e) => { ViewModel.BabeBotHp.UseKeyPress = false; UpdateBabeBotHpFromUI(); };
+        BabeBotHpKeyToPress.TextChanged += (s, e) => { ViewModel.BabeBotHp.KeyToPress = BabeBotHpKeyToPress.Text; UpdateBabeBotHpFromUI(); };
         
         BabeBotMpStart.TextChanged += (s, e) => UpdateBabeBotMpFromUI();
         BabeBotMpEnd.TextChanged += (s, e) => UpdateBabeBotMpFromUI();
         BabeBotMpY.TextChanged += (s, e) => UpdateBabeBotMpFromUI();
         BabeBotMpPotionX.TextChanged += (s, e) => UpdateBabeBotMpFromUI();
         BabeBotMpPotionY.TextChanged += (s, e) => UpdateBabeBotMpFromUI();
-        BabeBotMpThreshold.SelectionChanged += (s, e) => UpdateBabeBotMpFromUI();
+        BabeBotMpThreshold.TextChanged += (s, e) => UpdateBabeBotMpFromUI();
+        BabeBotMpUseCoordinate.Checked += (s, e) => { ViewModel.BabeBotMp.UseCoordinate = true; UpdateBabeBotMpFromUI(); };
+        BabeBotMpUseCoordinate.Unchecked += (s, e) => { ViewModel.BabeBotMp.UseCoordinate = false; UpdateBabeBotMpFromUI(); };
+        BabeBotMpUseKeyPress.Checked += (s, e) => { ViewModel.BabeBotMp.UseKeyPress = true; UpdateBabeBotMpFromUI(); };
+        BabeBotMpUseKeyPress.Unchecked += (s, e) => { ViewModel.BabeBotMp.UseKeyPress = false; UpdateBabeBotMpFromUI(); };
+        BabeBotMpKeyToPress.TextChanged += (s, e) => { ViewModel.BabeBotMp.KeyToPress = BabeBotMpKeyToPress.Text; UpdateBabeBotMpFromUI(); };
         
         // Enable/Disable checkbox handlers
         BabeBotHpEnabled.Checked += (s, e) =>
@@ -3878,7 +4356,7 @@ public partial class ClientCard : UserControl
             if (int.TryParse(BabeBotHpPotionY.Text, out int potionY))
                 ViewModel.BabeBotHp.PotionY = potionY;
             
-            if (BabeBotHpThreshold.SelectedItem is ComboBoxItem item && int.TryParse(item.Content.ToString(), out int threshold))
+            if (int.TryParse(BabeBotHpThreshold.Text, out int threshold))
                 ViewModel.BabeBotHp.ThresholdPercentage = threshold;
         }
         catch { /* Ignore parsing errors */ }
@@ -3899,7 +4377,7 @@ public partial class ClientCard : UserControl
             if (int.TryParse(BabeBotMpPotionY.Text, out int potionY))
                 ViewModel.BabeBotMp.PotionY = potionY;
             
-            if (BabeBotMpThreshold.SelectedItem is ComboBoxItem item && int.TryParse(item.Content.ToString(), out int threshold))
+            if (int.TryParse(BabeBotMpThreshold.Text, out int threshold))
                 ViewModel.BabeBotMp.ThresholdPercentage = threshold;
         }
         catch { /* Ignore parsing errors */ }
@@ -3950,8 +4428,8 @@ public partial class ClientCard : UserControl
         MultiHp1Y.TextChanged += (s, e) => UpdateMultiHpClient(0, "Y", MultiHp1Y.Text);
         MultiHp1ClickX.TextChanged += (s, e) => UpdateMultiHpClient(0, "ClickX", MultiHp1ClickX.Text);
         MultiHp1ClickY.TextChanged += (s, e) => UpdateMultiHpClient(0, "ClickY", MultiHp1ClickY.Text);
-        MultiHp1Threshold.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(0, "Threshold", MultiHp1Threshold);
-        MultiHp1Key.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(0, "Key", MultiHp1Key);
+        MultiHp1Threshold.TextChanged += (s, e) => UpdateMultiHpClientTextBox(0, "Threshold", MultiHp1Threshold);
+        MultiHp1Key.TextChanged += (s, e) => UpdateMultiHpClientTextBox(0, "Key", MultiHp1Key);
         MultiHp1Enabled.Checked += (s, e) => ViewModel.MultiHpClients[0].Enabled = true;
         MultiHp1Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[0].Enabled = false;
 
@@ -3961,8 +4439,8 @@ public partial class ClientCard : UserControl
         MultiHp2Y.TextChanged += (s, e) => UpdateMultiHpClient(1, "Y", MultiHp2Y.Text);
         MultiHp2ClickX.TextChanged += (s, e) => UpdateMultiHpClient(1, "ClickX", MultiHp2ClickX.Text);
         MultiHp2ClickY.TextChanged += (s, e) => UpdateMultiHpClient(1, "ClickY", MultiHp2ClickY.Text);
-        MultiHp2Threshold.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(1, "Threshold", MultiHp2Threshold);
-        MultiHp2Key.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(1, "Key", MultiHp2Key);
+        MultiHp2Threshold.TextChanged += (s, e) => UpdateMultiHpClientTextBox(1, "Threshold", MultiHp2Threshold);
+        MultiHp2Key.TextChanged += (s, e) => UpdateMultiHpClientTextBox(1, "Key", MultiHp2Key);
         MultiHp2Enabled.Checked += (s, e) => ViewModel.MultiHpClients[1].Enabled = true;
         MultiHp2Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[1].Enabled = false;
 
@@ -3972,8 +4450,8 @@ public partial class ClientCard : UserControl
         MultiHp3Y.TextChanged += (s, e) => UpdateMultiHpClient(2, "Y", MultiHp3Y.Text);
         MultiHp3ClickX.TextChanged += (s, e) => UpdateMultiHpClient(2, "ClickX", MultiHp3ClickX.Text);
         MultiHp3ClickY.TextChanged += (s, e) => UpdateMultiHpClient(2, "ClickY", MultiHp3ClickY.Text);
-        MultiHp3Threshold.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(2, "Threshold", MultiHp3Threshold);
-        MultiHp3Key.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(2, "Key", MultiHp3Key);
+        MultiHp3Threshold.TextChanged += (s, e) => UpdateMultiHpClientTextBox(2, "Threshold", MultiHp3Threshold);
+        MultiHp3Key.TextChanged += (s, e) => UpdateMultiHpClientTextBox(2, "Key", MultiHp3Key);
         MultiHp3Enabled.Checked += (s, e) => ViewModel.MultiHpClients[2].Enabled = true;
         MultiHp3Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[2].Enabled = false;
 
@@ -3983,8 +4461,8 @@ public partial class ClientCard : UserControl
         MultiHp4Y.TextChanged += (s, e) => UpdateMultiHpClient(3, "Y", MultiHp4Y.Text);
         MultiHp4ClickX.TextChanged += (s, e) => UpdateMultiHpClient(3, "ClickX", MultiHp4ClickX.Text);
         MultiHp4ClickY.TextChanged += (s, e) => UpdateMultiHpClient(3, "ClickY", MultiHp4ClickY.Text);
-        MultiHp4Threshold.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(3, "Threshold", MultiHp4Threshold);
-        MultiHp4Key.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(3, "Key", MultiHp4Key);
+        MultiHp4Threshold.TextChanged += (s, e) => UpdateMultiHpClientTextBox(3, "Threshold", MultiHp4Threshold);
+        MultiHp4Key.TextChanged += (s, e) => UpdateMultiHpClientTextBox(3, "Key", MultiHp4Key);
         MultiHp4Enabled.Checked += (s, e) => ViewModel.MultiHpClients[3].Enabled = true;
         MultiHp4Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[3].Enabled = false;
 
@@ -3994,8 +4472,8 @@ public partial class ClientCard : UserControl
         MultiHp5Y.TextChanged += (s, e) => UpdateMultiHpClient(4, "Y", MultiHp5Y.Text);
         MultiHp5ClickX.TextChanged += (s, e) => UpdateMultiHpClient(4, "ClickX", MultiHp5ClickX.Text);
         MultiHp5ClickY.TextChanged += (s, e) => UpdateMultiHpClient(4, "ClickY", MultiHp5ClickY.Text);
-        MultiHp5Threshold.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(4, "Threshold", MultiHp5Threshold);
-        MultiHp5Key.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(4, "Key", MultiHp5Key);
+        MultiHp5Threshold.TextChanged += (s, e) => UpdateMultiHpClientTextBox(4, "Threshold", MultiHp5Threshold);
+        MultiHp5Key.TextChanged += (s, e) => UpdateMultiHpClientTextBox(4, "Key", MultiHp5Key);
         MultiHp5Enabled.Checked += (s, e) => ViewModel.MultiHpClients[4].Enabled = true;
         MultiHp5Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[4].Enabled = false;
 
@@ -4005,8 +4483,8 @@ public partial class ClientCard : UserControl
         MultiHp6Y.TextChanged += (s, e) => UpdateMultiHpClient(5, "Y", MultiHp6Y.Text);
         MultiHp6ClickX.TextChanged += (s, e) => UpdateMultiHpClient(5, "ClickX", MultiHp6ClickX.Text);
         MultiHp6ClickY.TextChanged += (s, e) => UpdateMultiHpClient(5, "ClickY", MultiHp6ClickY.Text);
-        MultiHp6Threshold.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(5, "Threshold", MultiHp6Threshold);
-        MultiHp6Key.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(5, "Key", MultiHp6Key);
+        MultiHp6Threshold.TextChanged += (s, e) => UpdateMultiHpClientTextBox(5, "Threshold", MultiHp6Threshold);
+        MultiHp6Key.TextChanged += (s, e) => UpdateMultiHpClientTextBox(5, "Key", MultiHp6Key);
         MultiHp6Enabled.Checked += (s, e) => ViewModel.MultiHpClients[5].Enabled = true;
         MultiHp6Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[5].Enabled = false;
 
@@ -4016,8 +4494,8 @@ public partial class ClientCard : UserControl
         MultiHp7Y.TextChanged += (s, e) => UpdateMultiHpClient(6, "Y", MultiHp7Y.Text);
         MultiHp7ClickX.TextChanged += (s, e) => UpdateMultiHpClient(6, "ClickX", MultiHp7ClickX.Text);
         MultiHp7ClickY.TextChanged += (s, e) => UpdateMultiHpClient(6, "ClickY", MultiHp7ClickY.Text);
-        MultiHp7Threshold.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(6, "Threshold", MultiHp7Threshold);
-        MultiHp7Key.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(6, "Key", MultiHp7Key);
+        MultiHp7Threshold.TextChanged += (s, e) => UpdateMultiHpClientTextBox(6, "Threshold", MultiHp7Threshold);
+        MultiHp7Key.TextChanged += (s, e) => UpdateMultiHpClientTextBox(6, "Key", MultiHp7Key);
         MultiHp7Enabled.Checked += (s, e) => ViewModel.MultiHpClients[6].Enabled = true;
         MultiHp7Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[6].Enabled = false;
 
@@ -4027,8 +4505,8 @@ public partial class ClientCard : UserControl
         MultiHp8Y.TextChanged += (s, e) => UpdateMultiHpClient(7, "Y", MultiHp8Y.Text);
         MultiHp8ClickX.TextChanged += (s, e) => UpdateMultiHpClient(7, "ClickX", MultiHp8ClickX.Text);
         MultiHp8ClickY.TextChanged += (s, e) => UpdateMultiHpClient(7, "ClickY", MultiHp8ClickY.Text);
-        MultiHp8Threshold.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(7, "Threshold", MultiHp8Threshold);
-        MultiHp8Key.SelectionChanged += (s, e) => UpdateMultiHpClientCombo(7, "Key", MultiHp8Key);
+        MultiHp8Threshold.TextChanged += (s, e) => UpdateMultiHpClientTextBox(7, "Threshold", MultiHp8Threshold);
+        MultiHp8Key.TextChanged += (s, e) => UpdateMultiHpClientTextBox(7, "Key", MultiHp8Key);
         MultiHp8Enabled.Checked += (s, e) => ViewModel.MultiHpClients[7].Enabled = true;
         MultiHp8Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[7].Enabled = false;
     }
@@ -4063,23 +4541,23 @@ public partial class ClientCard : UserControl
         catch { /* Ignore parsing errors */ }
     }
 
-    private void UpdateMultiHpClientCombo(int clientIndex, string property, ComboBox combo)
+    private void UpdateMultiHpClientTextBox(int clientIndex, string property, TextBox textBox)
     {
         try
         {
             if (clientIndex < 0 || clientIndex >= ViewModel.MultiHpClients.Count) return;
-            if (combo.SelectedItem is not ComboBoxItem item) return;
+            if (string.IsNullOrEmpty(textBox.Text)) return;
 
             var client = ViewModel.MultiHpClients[clientIndex];
             
             switch (property)
             {
                 case "Threshold":
-                    if (int.TryParse(item.Content.ToString(), out int threshold))
+                    if (int.TryParse(textBox.Text, out int threshold))
                         client.ThresholdPercentage = threshold;
                     break;
                 case "Key":
-                    client.Key = item.Content.ToString() ?? "1";
+                    client.Key = textBox.Text;
                     break;
             }
         }
