@@ -1,0 +1,49 @@
+name: BabeMakro
+description: >
+  MMORPG oyunları için pencere tabanlı makro otomasyon sistemi.
+  Çoklu pencere desteği, HP/MP takibi, auto-attack, party heal, buff ve captcha çözme özellikleri içerir.
+language: dotnet
+framework: net8.0-windows
+type: desktop-app
+
+projects:
+  - name: UI
+    path: src/BabeMakro
+    description: "Ana WPF uygulaması, kullanıcı arayüzü (MainWindow, SettingsWindow, ClientConfig)."
+    dependencies:
+      - Core
+      - Capture.Win
+      - Tool.Overlay.WPF
+
+  - name: Core
+    path: src/Core
+    description: "Makro engine, event sistemi, captcha çözücü, probe mekanizmaları."
+    modules:
+      - Services (ActionScheduler, CaptchaService, EventBus)
+      - Implementations (ClickAction, ColorBasedCaptchaDetector, TesseractCaptchaSolver)
+      - Interfaces (ICaptchaSolver, IRule, ICaptureBackend, IClickProvider)
+
+  - name: Capture.Win
+    path: src/Capture.Win
+    description: "Windows API üzerinden ekran yakalama ve pencere okuma altyapısı."
+    modules:
+      - Backends (GetPixelBackend, PrintWindowBackend, WindowsGraphicsCaptureBackend)
+      - Providers (ClickProviderFactory, SendInputClickProvider, MessageClickProvider)
+
+  - name: Tool.Overlay.WPF
+    path: src/Tool.Overlay.WPF
+    description: "Oyun ekranı üzerine overlay UI çizim aracı."
+
+workflows:
+  - name: hp-mp-monitor
+    description: "Oyuncunun HP/MP değerlerini periyodik olarak kontrol eder."
+  - name: auto-attack
+    description: "Belirlenen eşiklere göre saldırı tuşlarını tetikler."
+  - name: party-heal
+    description: "Takım üyelerinin HP değerlerine göre heal yeteneklerini uygular."
+  - name: buff-rotation
+    description: "Belirlenen aralıklarla buff kombinasyonlarını uygular."
+  - name: captcha-solver
+    description: "Oyun içi captcha olaylarını otomatik çözer (Tesseract/ColorBased)."
+  - name: overlay-ui
+    description: "Overlay arayüzü ile kullanıcıya durum göstergeleri ve ayarlar sunar."

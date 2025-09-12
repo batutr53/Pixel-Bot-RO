@@ -28,6 +28,7 @@ public class WindowTarget
     public List<PeriodicClickConfig> PeriodicClicks { get; set; } = new();
     public RateLimitConfig? Limits { get; set; }
     public UISettings UISettings { get; set; } = new();
+    public CaptchaConfig? CaptchaConfig { get; set; }
 }
 
 public class ProbeConfig

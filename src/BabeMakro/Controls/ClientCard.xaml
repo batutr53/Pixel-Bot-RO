@@ -1,0 +1,2269 @@
+<UserControl x:Class="PixelAutomation.Tool.Overlay.WPF.Controls.ClientCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Width="500" Height="500">
+
+    <UserControl.Resources>
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#ffffff"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,10,0,5"/>
+        </Style>
+
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#cccccc"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Margin" Value="0,2"/>
+        </Style>
+
+        <Style x:Key="ValueStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#90EE90"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+        <Style x:Key="CoordTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Width" Value="45"/>
+            <Setter Property="Height" Value="22"/>
+            <Setter Property="Background" Value="#383838"/>
+            <Setter Property="Foreground" Value="#ffffff"/>
+            <Setter Property="BorderBrush" Value="#555555"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="2,1"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="SmallButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#0e639c"/>
+            <Setter Property="Foreground" Value="#ffffff"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="9"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border" 
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"
+                                              TextBlock.Foreground="{TemplateBinding Foreground}"
+                                              TextBlock.FontSize="{TemplateBinding FontSize}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1177bb"/>
+                    <Setter Property="Foreground" Value="#ffffff"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#0e639c"/>
+                    <Setter Property="Foreground" Value="#ffffff"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#0e639c"/>
+            <Setter Property="Foreground" Value="#ffffff"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border" 
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"
+                                              TextBlock.Foreground="{TemplateBinding Foreground}"
+                                              TextBlock.FontSize="{TemplateBinding FontSize}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1177bb"/>
+                    <Setter Property="Foreground" Value="#ffffff"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#0e639c"/>
+                    <Setter Property="Foreground" Value="#ffffff"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Border Background="#2d2d30" BorderBrush="#3f3f46" BorderThickness="1" CornerRadius="5" Margin="5" Padding="8">
+        <TabControl Background="Transparent" BorderThickness="0" Margin="0,0,0,1">
+            <TabControl.Resources>
+                <Style TargetType="TabItem">
+                    <Setter Property="Background" Value="#3c3c3c"/>
+                    <Setter Property="Foreground" Value="#ffffff"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Padding" Value="8,4"/>
+                    <Setter Property="Margin" Value="0,0,2,0"/>
+                    <Setter Property="FontSize" Value="10"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="TabItem">
+                                <Border x:Name="Border" 
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        Padding="{TemplateBinding Padding}"
+                                        Margin="{TemplateBinding Margin}">
+                                    <ContentPresenter x:Name="ContentSite"
+                                                      VerticalAlignment="Center"
+                                                      HorizontalAlignment="Center"
+                                                      ContentSource="Header"
+                                                      TextBlock.Foreground="{TemplateBinding Foreground}"
+                                                      TextBlock.FontSize="{TemplateBinding FontSize}"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="#007acc"/>
+                            <Setter Property="Foreground" Value="#ffffff"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#555555"/>
+                            <Setter Property="Foreground" Value="#ffffff"/>
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsSelected" Value="True"/>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Background" Value="#007acc"/>
+                            <Setter Property="Foreground" Value="#ffffff"/>
+                        </MultiTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TabControl.Resources>
+
+            <TabItem Header="🎮 Main" Width="80">
+                <StackPanel Height="409">
+                    <!-- Client Header -->
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <StackPanel Orientation="Horizontal">
+                                <Border Background="#ff1493" CornerRadius="8" Padding="4,2" Margin="0,0,8,0">
+                                    <TextBlock Text="👸" Foreground="White" FontWeight="Bold" FontSize="10"/>
+                                </Border>
+                                <TextBlock x:Name="ClientNameText" Text="Client 1" Style="{StaticResource SectionHeaderStyle}" FontSize="14" Margin="0,0,0,2"/>
+                            </StackPanel>
+                            <TextBlock x:Name="WindowTitleText" Text="No window selected" Style="{StaticResource LabelStyle}" FontSize="9" Foreground="#888888"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button Content="🎯" Width="25" Height="25" Style="{StaticResource SmallButtonStyle}" Click="SelectWindow_Click" ToolTip="Select Window" Margin="0,0,2,0"/>
+                            <Button Content="📍" Width="25" Height="25" Style="{StaticResource SmallButtonStyle}" Click="ShowCoordinateOverlay_Click" ToolTip="Show Window Coordinates" Margin="0,0,2,0" Background="#9333ea"/>
+                            <Ellipse x:Name="StatusIndicator" Width="12" Height="12" Fill="#dc3545" VerticalAlignment="Center" ToolTip="Disconnected"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- HP Probe Section -->
+                    <Border Background="#1a1a1a"  Padding="6" Margin="0,0,0,5" Visibility="Collapsed">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="❤️ HP Probe" Style="{StaticResource SectionHeaderStyle}" FontSize="11" Margin="0,0,0,3"/>
+                                <Button Grid.Column="1" Content="🎯 Show Shapes" Style="{StaticResource SmallButtonStyle}" Click="ShowDraggableShapes_Click" Width="80" Margin="0,0,5,0" FontSize="8"/>
+                                <CheckBox Grid.Column="2" x:Name="HpTriggerEnabled" Content="Enable" IsChecked="False" Foreground="#cccccc" FontSize="9"/>
+                            </Grid>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="Pos:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
+                                <TextBox Grid.Column="1" x:Name="HpX" Style="{StaticResource CoordTextBoxStyle}" Text="0"/>
+                                <TextBox Grid.Column="2" x:Name="HpY" Style="{StaticResource CoordTextBoxStyle}" Text="0"/>
+                                <TextBox Grid.Column="3" x:Name="HpTolerance" Style="{StaticResource CoordTextBoxStyle}" Text="70" ToolTip="HP % threshold (e.g. 70 = trigger below 70%)"/>
+                                <StackPanel Grid.Column="4" Orientation="Horizontal" Margin="5,0,0,0">
+                                    <Button Content="📍 Pick" Style="{StaticResource SmallButtonStyle}" Click="PickHpCoord_Click" Width="35" Margin="0,0,2,0"/>
+                                    <Button Content="🎨 Read" Style="{StaticResource SmallButtonStyle}" Click="ReadHpColor_Click" Width="40"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Margin="0,3,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="60"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="Color:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
+                                <Rectangle Grid.Column="1" x:Name="HpColorDisplay" Height="18" Fill="#FF0000" Stroke="#555555" StrokeThickness="1" Margin="0,0,5,0"/>
+                                <TextBlock Grid.Column="2" x:Name="HpColorText" Text="255,0,0" Style="{StaticResource ValueStyle}" VerticalAlignment="Center" FontSize="8"/>
+                            </Grid>
+
+                            <Grid Margin="0,3,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="HP%:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" x:Name="HpPercentageText" Text="100%" Style="{StaticResource ValueStyle}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#00FF00"/>
+                            </Grid>
+
+                            <Grid Margin="0,3,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="Pota:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
+                                <CheckBox Grid.Column="1" x:Name="HpUseCoordinate" Content="Pos" IsChecked="False" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                                <CheckBox Grid.Column="2" x:Name="HpUseKeyPress" Content="Key" IsChecked="True" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                                <TextBox Grid.Column="3" x:Name="HpTriggerX" Style="{StaticResource CoordTextBoxStyle}" Text="0" ToolTip="HP Potion Click X" IsEnabled="{Binding ElementName=HpUseCoordinate, Path=IsChecked}" Width="40"/>
+                                <TextBox Grid.Column="4" x:Name="HpTriggerY" Style="{StaticResource CoordTextBoxStyle}" Text="0" ToolTip="HP Potion Click Y" IsEnabled="{Binding ElementName=HpUseCoordinate, Path=IsChecked}" Width="40"/>
+                                <TextBox Grid.Column="5" x:Name="HpTriggerCooldown" Style="{StaticResource CoordTextBoxStyle}" Text="120" ToolTip="Cooldown ms"/>
+                                <StackPanel Grid.Column="6" Orientation="Horizontal" Margin="5,0,0,0">
+                                    <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickHpTrigger_Click" Width="20" Margin="0,0,2,0" IsEnabled="{Binding ElementName=HpUseCoordinate, Path=IsChecked}"/>
+                                    <TextBox x:Name="HpKeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="Q" Width="25" IsEnabled="{Binding ElementName=HpUseKeyPress, Path=IsChecked}"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- MP Probe Section -->
+                    <Border Background="#1a1a1a"  Padding="6" Margin="0,0,0,5" Visibility="Collapsed">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="💙 MP Probe" Style="{StaticResource SectionHeaderStyle}" FontSize="11" Margin="0,0,0,3"/>
+                                <CheckBox Grid.Column="1" x:Name="MpTriggerEnabled" Content="Enable" IsChecked="False" Foreground="#cccccc" FontSize="9"/>
+                            </Grid>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="Pos:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
+                                <TextBox Grid.Column="1" x:Name="MpX" Style="{StaticResource CoordTextBoxStyle}" Text="0"/>
+                                <TextBox Grid.Column="2" x:Name="MpY" Style="{StaticResource CoordTextBoxStyle}" Text="0"/>
+                                <TextBox Grid.Column="3" x:Name="MpTolerance" Style="{StaticResource CoordTextBoxStyle}" Text="50" ToolTip="MP % threshold (e.g. 50 = trigger below 50%)"/>
+                                <StackPanel Grid.Column="4" Orientation="Horizontal" Margin="5,0,0,0">
+                                    <Button Content="📍 Pick" Style="{StaticResource SmallButtonStyle}" Click="PickMpCoord_Click" Width="35" Margin="0,0,2,0"/>
+                                    <Button Content="🎨 Read" Style="{StaticResource SmallButtonStyle}" Click="ReadMpColor_Click" Width="40"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Margin="0,3,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="60"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="Color:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
+                                <Rectangle Grid.Column="1" x:Name="MpColorDisplay" Height="18" Fill="#0000FF" Stroke="#555555" StrokeThickness="1" Margin="0,0,5,0"/>
+                                <TextBlock Grid.Column="2" x:Name="MpColorText" Text="0,0,255" Style="{StaticResource ValueStyle}" VerticalAlignment="Center" FontSize="8"/>
+                            </Grid>
+
+                            <Grid Margin="0,3,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="MP%:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" x:Name="MpPercentageText" Text="100%" Style="{StaticResource ValueStyle}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#0088FF"/>
+                            </Grid>
+
+                            <Grid Margin="0,3,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="Pota:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
+                                <CheckBox Grid.Column="1" x:Name="MpUseCoordinate" Content="Pos" IsChecked="False" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                                <CheckBox Grid.Column="2" x:Name="MpUseKeyPress" Content="Key" IsChecked="True" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                                <TextBox Grid.Column="3" x:Name="MpTriggerX" Style="{StaticResource CoordTextBoxStyle}" Text="0" ToolTip="MP Potion Click X" IsEnabled="{Binding ElementName=MpUseCoordinate, Path=IsChecked}" Width="40"/>
+                                <TextBox Grid.Column="4" x:Name="MpTriggerY" Style="{StaticResource CoordTextBoxStyle}" Text="0" ToolTip="MP Potion Click Y" IsEnabled="{Binding ElementName=MpUseCoordinate, Path=IsChecked}" Width="40"/>
+                                <TextBox Grid.Column="5" x:Name="MpTriggerCooldown" Style="{StaticResource CoordTextBoxStyle}" Text="120" ToolTip="Cooldown ms"/>
+                                <StackPanel Grid.Column="6" Orientation="Horizontal" Margin="5,0,0,0">
+                                    <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickMpTrigger_Click" Width="20" Margin="0,0,2,0" IsEnabled="{Binding ElementName=MpUseCoordinate, Path=IsChecked}"/>
+                                    <TextBox x:Name="MpKeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="W" Width="25" IsEnabled="{Binding ElementName=MpUseKeyPress, Path=IsChecked}"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Python-Style HP/MP Percentage Monitoring Section -->
+                    <Border Background="#0d4f3c"  Padding="6" Margin="0,0,0,5" Visibility="Collapsed">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="🎯 Python-Style HP/MP %" Style="{StaticResource SectionHeaderStyle}" FontSize="11" Margin="0,0,0,3" Foreground="#90EE90"/>
+                                <CheckBox Grid.Column="1" x:Name="PercentageMonitoringEnabled" Content="Enable" IsChecked="False" Foreground="#cccccc" FontSize="9"/>
+                            </Grid>
+
+                            <!-- HP Percentage Bar -->
+                            <Grid Margin="0,3,0,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="❤️HP:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#FF6B6B"/>
+                                <TextBox Grid.Column="1" x:Name="HpPercentageStartX" Style="{StaticResource CoordTextBoxStyle}" Text="100" ToolTip="HP Bar Start X"/>
+                                <TextBox Grid.Column="2" x:Name="HpPercentageEndX" Style="{StaticResource CoordTextBoxStyle}" Text="250" ToolTip="HP Bar End X"/>
+                                <TextBox Grid.Column="3" x:Name="HpPercentageY" Style="{StaticResource CoordTextBoxStyle}" Text="67" ToolTip="HP Bar Y"/>
+                                <TextBox Grid.Column="4" x:Name="HpPercentageThreshold" Style="{StaticResource CoordTextBoxStyle}" Text="50" ToolTip="Trigger below this %"/>
+                                <TextBox Grid.Column="5" x:Name="HpPercentageTolerance" Style="{StaticResource CoordTextBoxStyle}" Text="30" ToolTip="Color tolerance"/>
+                                <StackPanel Grid.Column="6" Orientation="Horizontal" Margin="5,0,0,0">
+                                    <Button Content="📏" Style="{StaticResource SmallButtonStyle}" Click="PickHpPercentageBar_Click" Width="25" Margin="0,0,2,0" ToolTip="Pick HP Bar Area"/>
+                                    <Rectangle x:Name="HpPercentageColorDisplay" Width="20" Height="16" Fill="#100CFF" Stroke="#555" StrokeThickness="1" Margin="2,0"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- MP Percentage Bar -->
+                            <Grid Margin="0,0,0,3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="💙MP:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#4FC3F7"/>
+                                <TextBox Grid.Column="1" x:Name="MpPercentageStartX" Style="{StaticResource CoordTextBoxStyle}" Text="100" ToolTip="MP Bar Start X"/>
+                                <TextBox Grid.Column="2" x:Name="MpPercentageEndX" Style="{StaticResource CoordTextBoxStyle}" Text="250" ToolTip="MP Bar End X"/>
+                                <TextBox Grid.Column="3" x:Name="MpPercentageY" Style="{StaticResource CoordTextBoxStyle}" Text="84" ToolTip="MP Bar Y"/>
+                                <TextBox Grid.Column="4" x:Name="MpPercentageThreshold" Style="{StaticResource CoordTextBoxStyle}" Text="50" ToolTip="Trigger below this %"/>
+                                <TextBox Grid.Column="5" x:Name="MpPercentageTolerance" Style="{StaticResource CoordTextBoxStyle}" Text="30" ToolTip="Color tolerance"/>
+                                <StackPanel Grid.Column="6" Orientation="Horizontal" Margin="5,0,0,0">
+                                    <Button Content="📏" Style="{StaticResource SmallButtonStyle}" Click="PickMpPercentageBar_Click" Width="25" Margin="0,0,2,0" ToolTip="Pick MP Bar Area"/>
+                                    <Rectangle x:Name="MpPercentageColorDisplay" Width="20" Height="16" Fill="#FF4D17" Stroke="#555" StrokeThickness="1" Margin="2,0"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Python-style Potion Click Coordinates -->
+                            <Grid Margin="0,5,0,3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="🧪HP:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#FF6B6B"/>
+                                <CheckBox Grid.Column="1" x:Name="PythonHpUseCoordinate" Content="Pos" IsChecked="False" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                                <CheckBox Grid.Column="2" x:Name="PythonHpUseKeyPress" Content="Key" IsChecked="True" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                                <TextBox Grid.Column="3" x:Name="PythonHpPotionX" Style="{StaticResource CoordTextBoxStyle}" Text="400" ToolTip="HP Potion Click X" IsEnabled="{Binding ElementName=PythonHpUseCoordinate, Path=IsChecked}" Width="40"/>
+                                <TextBox Grid.Column="4" x:Name="PythonHpPotionY" Style="{StaticResource CoordTextBoxStyle}" Text="300" ToolTip="HP Potion Click Y" IsEnabled="{Binding ElementName=PythonHpUseCoordinate, Path=IsChecked}" Width="40"/>
+                                <TextBox Grid.Column="5" x:Name="PythonHpPotionCooldown" Style="{StaticResource CoordTextBoxStyle}" Text="500" ToolTip="Cooldown ms"/>
+                                <StackPanel Grid.Column="6" Orientation="Horizontal" Margin="5,0,0,0">
+                                    <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickPythonHpPotion_Click" Width="20" Margin="0,0,2,0" IsEnabled="{Binding ElementName=PythonHpUseCoordinate, Path=IsChecked}"/>
+                                    <TextBox x:Name="PythonHpKeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="Q" Width="25" IsEnabled="{Binding ElementName=PythonHpUseKeyPress, Path=IsChecked}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Margin="0,0,0,3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="💉MP:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#4FC3F7"/>
+                                <CheckBox Grid.Column="1" x:Name="PythonMpUseCoordinate" Content="Pos" IsChecked="False" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                                <CheckBox Grid.Column="2" x:Name="PythonMpUseKeyPress" Content="Key" IsChecked="True" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                                <TextBox Grid.Column="3" x:Name="PythonMpPotionX" Style="{StaticResource CoordTextBoxStyle}" Text="450" ToolTip="MP Potion Click X" IsEnabled="{Binding ElementName=PythonMpUseCoordinate, Path=IsChecked}" Width="40"/>
+                                <TextBox Grid.Column="4" x:Name="PythonMpPotionY" Style="{StaticResource CoordTextBoxStyle}" Text="350" ToolTip="MP Potion Click Y" IsEnabled="{Binding ElementName=PythonMpUseCoordinate, Path=IsChecked}" Width="40"/>
+                                <TextBox Grid.Column="5" x:Name="PythonMpPotionCooldown" Style="{StaticResource CoordTextBoxStyle}" Text="500" ToolTip="Cooldown ms"/>
+                                <StackPanel Grid.Column="6" Orientation="Horizontal" Margin="5,0,0,0">
+                                    <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickPythonMpPotion_Click" Width="20" Margin="0,0,2,0" IsEnabled="{Binding ElementName=PythonMpUseCoordinate, Path=IsChecked}"/>
+                                    <TextBox x:Name="PythonMpKeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="W" Width="25" IsEnabled="{Binding ElementName=PythonMpUseKeyPress, Path=IsChecked}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Current Status Display -->
+                            <Grid Margin="0,5,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="HP Status" Style="{StaticResource LabelStyle}" FontSize="8"/>
+                                    <TextBlock x:Name="HpPercentageStatus" Text="100%" Style="{StaticResource ValueStyle}" FontSize="10" Foreground="#90EE90"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2">
+                                        <Rectangle x:Name="HpCurrentColorDisplay" Width="12" Height="12" Fill="#000000" Stroke="#555" StrokeThickness="1" Margin="0,0,2,0"/>
+                                        <TextBlock x:Name="HpCurrentColorText" Text="0,0,0" Style="{StaticResource ValueStyle}" FontSize="7" Foreground="#888"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="MP Status" Style="{StaticResource LabelStyle}" FontSize="8"/>
+                                    <TextBlock x:Name="MpPercentageStatus" Text="100%" Style="{StaticResource ValueStyle}" FontSize="10" Foreground="#87CEEB"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2">
+                                        <Rectangle x:Name="MpCurrentColorDisplay" Width="12" Height="12" Fill="#000000" Stroke="#555" StrokeThickness="1" Margin="0,0,2,0"/>
+                                        <TextBlock x:Name="MpCurrentColorText" Text="0,0,0" Style="{StaticResource ValueStyle}" FontSize="7" Foreground="#888"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Monitor Position" Style="{StaticResource LabelStyle}" FontSize="8"/>
+                                    <TextBlock x:Name="PercentageMonitorPosition" Text="X: 175 (50%)" Style="{StaticResource ValueStyle}" FontSize="8" Foreground="#FFD700"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,3">
+                                        <Button Content="🎨 Capture Current Colors" Style="{StaticResource SmallButtonStyle}" Click="CaptureCurrentColors_Click" FontSize="8" Height="18" Padding="2" Margin="0,0,3,0"/>
+                                        <Button Content="🔍 Find HP/MP" Style="{StaticResource SmallButtonStyle}" Click="FindHpMpBars_Click" FontSize="8" Height="18" Padding="2"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- BabeBot Style HP/MP System -->
+                    <Border  Padding="6" Margin="0,0,0,5" RenderTransformOrigin="0.359,0.569">
+                        <StackPanel>
+                            <TextBlock Text="🤖 HP/MP %" Style="{StaticResource SectionHeaderStyle}" FontSize="11" Margin="0,0,0,5" Foreground="#DA70D6"/>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- HP Section -->
+                                <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                    <TextBlock Text="🩸 HP Monitor" Style="{StaticResource SectionHeaderStyle}" FontSize="9" Margin="0,0,0,3" Foreground="#FF6B6B"/>
+
+                                    <!-- HP Bar Coordinates -->
+                                    <Border Background="#2a2a2a" BorderBrush="#444444" BorderThickness="1" CornerRadius="3" Padding="8,5" Margin="0,0,0,4">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Text="📊 Monitor Area" Style="{StaticResource LabelStyle}" FontSize="8" Foreground="#aaaaaa" Margin="0,0,0,3"/>
+
+                                            <Grid Grid.Row="1">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="45"/>
+                                                    <ColumnDefinition Width="45"/>
+                                                    <ColumnDefinition Width="38"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Grid.Column="0" Text="Bar:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Foreground="#cccccc" Margin="0,0,5,0"/>
+                                                <TextBox Grid.Column="1" x:Name="BabeBotHpStart" Style="{StaticResource CoordTextBoxStyle}" Text="1" ToolTip="Start X" Width="42" Height="20" FontSize="10"/>
+                                                <TextBox Grid.Column="2" x:Name="BabeBotHpEnd" Style="{StaticResource CoordTextBoxStyle}" Text="90" ToolTip="End X" Width="42" Height="20" FontSize="10"/>
+                                                <TextBox Grid.Column="3" x:Name="BabeBotHpY" Style="{StaticResource CoordTextBoxStyle}" Text="5" ToolTip="Y Position" Width="35" Height="20" FontSize="10"/>
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- HP Action Settings -->
+                                    <Border Background="#2a2a2a" BorderBrush="#444444" BorderThickness="1" CornerRadius="3" Padding="8,5">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Text="⚡ Trigger Settings" Style="{StaticResource LabelStyle}" FontSize="8" Foreground="#aaaaaa" Margin="0,0,0,3"/>
+
+                                            <Grid Grid.Row="1">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="55"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="43"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Threshold Section -->
+                                                <TextBlock Grid.Column="0" Text="Trigger at:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Foreground="#cccccc" Margin="0,0,5,0"/>
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                                    <TextBox x:Name="BabeBotHpThreshold" FontSize="11" Height="20" Width="45" Text="90" TextAlignment="Center" Background="#383838" Foreground="#ffffff" BorderBrush="#555555" BorderThickness="1" VerticalContentAlignment="Center"/>
+                                                    <TextBlock Text="%" Style="{StaticResource LabelStyle}" FontSize="9" VerticalAlignment="Center" Margin="3,0,0,0" Foreground="#888888"/>
+                                                </StackPanel>
+
+                                                <!-- Key Section -->
+                                                <TextBlock Grid.Column="2" Text="Key:" Style="{StaticResource LabelStyle}" FontSize="9" VerticalAlignment="Center" Margin="10,0,5,0" Foreground="#cccccc"/>
+                                                <TextBox Grid.Column="3" x:Name="BabeBotHpKeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="Q" Width="39" Height="20" FontSize="11" IsEnabled="{Binding ElementName=BabeBotHpUseKeyPress, Path=IsChecked}" VerticalContentAlignment="Center"/>
+
+                                                <!-- Hidden Controls -->
+                                                <CheckBox x:Name="BabeBotHpUseCoordinate" Content="Pos" IsChecked="False" VerticalAlignment="Center" FontSize="7" Foreground="#cccccc" Visibility="Collapsed"/>
+                                                <CheckBox x:Name="BabeBotHpUseKeyPress" Content="Key" IsChecked="True" VerticalAlignment="Center" FontSize="7" Foreground="#cccccc" Visibility="Collapsed"/>
+                                                <TextBox x:Name="BabeBotHpPotionX" Style="{StaticResource CoordTextBoxStyle}" Text="376" ToolTip="HP Potion X" Width="20" IsEnabled="{Binding ElementName=BabeBotHpUseCoordinate, Path=IsChecked}" Visibility="Collapsed"/>
+                                                <TextBox x:Name="BabeBotHpPotionY" Style="{StaticResource CoordTextBoxStyle}" Text="236" ToolTip="HP Potion Y" Width="20" IsEnabled="{Binding ElementName=BabeBotHpUseCoordinate, Path=IsChecked}" Visibility="Collapsed"/>
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- HP Controls -->
+                                    <Border Background="#2a2a2a" BorderBrush="#444444" BorderThickness="1" CornerRadius="3" Padding="8,5" Margin="0,2,0,2">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Text="🔧 Actions" Style="{StaticResource LabelStyle}" FontSize="8" Foreground="#aaaaaa" Margin="0,0,0,3"/>
+
+                                            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                                                <Button x:Name="BabeBotHpCalibrate" Content="📊 Calibrate" Style="{StaticResource SmallButtonStyle}" Click="BabeBotHpCalibrate_Click" FontSize="8" Height="20" Width="180" Padding="8,4" Background="#28a745" Foreground="White" BorderBrush="#1e7e34" BorderThickness="1" FontWeight="SemiBold"/>
+
+                                                <!-- Hidden Controls -->
+                                                <CheckBox x:Name="BabeBotHpEnabled" IsChecked="False" VerticalAlignment="Center" Visibility="Collapsed"/>
+                                                <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickBabeBotHpPotion_Click" Width="25" IsEnabled="{Binding ElementName=BabeBotHpUseCoordinate, Path=IsChecked}" Visibility="Collapsed"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- HP Status -->
+                                    <Border Background="#2a2a2a" BorderBrush="#444444" BorderThickness="1" CornerRadius="3" Padding="8,5" Margin="0,2,0,0">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Text="📊 Current Status" Style="{StaticResource LabelStyle}" FontSize="8" Foreground="#aaaaaa" Margin="0,0,0,3"/>
+
+                                            <Grid Grid.Row="1" Margin="0,0,0,3">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Rectangle Grid.Column="0" x:Name="BabeBotHpCurrentColor" Height="16" Fill="#000000" Stroke="#555" StrokeThickness="1" Margin="0,0,5,0"/>
+                                                <TextBlock Grid.Column="1" x:Name="BabeBotHpCurrentText" Text="0,0,0" Style="{StaticResource ValueStyle}" FontSize="8" VerticalAlignment="Center" Foreground="#cccccc"/>
+                                            </Grid>
+
+                                            <TextBlock Grid.Row="2" x:Name="BabeBotHpStatus" Text="--" Style="{StaticResource ValueStyle}" FontSize="9" Foreground="#90EE90" FontWeight="Bold"/>
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
+
+                                <!-- MP Section -->
+                                <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                    <TextBlock Text="💙 MP Monitor" Style="{StaticResource SectionHeaderStyle}" FontSize="9" Margin="0,0,0,3" Foreground="#4FC3F7"/>
+
+                                    <!-- MP Bar Coordinates -->
+                                    <Border Background="#2a2a2a" BorderBrush="#444444" BorderThickness="1" CornerRadius="3" Padding="8,5" Margin="0,0,0,4">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Text="📊 Monitor Area" Style="{StaticResource LabelStyle}" FontSize="8" Foreground="#aaaaaa" Margin="0,0,0,3"/>
+
+                                            <Grid Grid.Row="1">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="45"/>
+                                                    <ColumnDefinition Width="45"/>
+                                                    <ColumnDefinition Width="38"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Grid.Column="0" Text="Bar:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Foreground="#cccccc" Margin="0,0,5,0"/>
+                                                <TextBox Grid.Column="1" x:Name="BabeBotMpStart" Style="{StaticResource CoordTextBoxStyle}" Text="1" ToolTip="Start X" Width="42" Height="20" FontSize="10"/>
+                                                <TextBox Grid.Column="2" x:Name="BabeBotMpEnd" Style="{StaticResource CoordTextBoxStyle}" Text="90" ToolTip="End X" Width="42" Height="20" FontSize="10"/>
+                                                <TextBox Grid.Column="3" x:Name="BabeBotMpY" Style="{StaticResource CoordTextBoxStyle}" Text="12" ToolTip="Y Position" Width="35" Height="20" FontSize="10"/>
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- MP Action Settings -->
+                                    <Border Background="#2a2a2a" BorderBrush="#444444" BorderThickness="1" CornerRadius="3" Padding="8,5">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Text="⚡ Trigger Settings" Style="{StaticResource LabelStyle}" FontSize="8" Foreground="#aaaaaa" Margin="0,0,0,3"/>
+
+                                            <Grid Grid.Row="1">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="55"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="43"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Threshold Section -->
+                                                <TextBlock Grid.Column="0" Text="Trigger at:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Foreground="#cccccc" Margin="0,0,5,0"/>
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                                    <TextBox x:Name="BabeBotMpThreshold" FontSize="11" Height="20" Width="45" Text="90" TextAlignment="Center" Background="#383838" Foreground="#ffffff" BorderBrush="#555555" BorderThickness="1" VerticalContentAlignment="Center"/>
+                                                    <TextBlock Text="%" Style="{StaticResource LabelStyle}" FontSize="9" VerticalAlignment="Center" Margin="3,0,0,0" Foreground="#888888"/>
+                                                </StackPanel>
+
+                                                <!-- Key Section -->
+                                                <TextBlock Grid.Column="2" Text="Key:" Style="{StaticResource LabelStyle}" FontSize="9" VerticalAlignment="Center" Margin="10,0,5,0" Foreground="#cccccc"/>
+                                                <TextBox Grid.Column="3" x:Name="BabeBotMpKeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="W" Width="39" Height="20" FontSize="11" IsEnabled="{Binding ElementName=BabeBotMpUseKeyPress, Path=IsChecked}" VerticalContentAlignment="Center"/>
+
+                                                <!-- Hidden Controls -->
+                                                <CheckBox x:Name="BabeBotMpUseCoordinate" Content="Pos" IsChecked="False" VerticalAlignment="Center" FontSize="7" Foreground="#cccccc" Visibility="Collapsed"/>
+                                                <CheckBox x:Name="BabeBotMpUseKeyPress" Content="Key" IsChecked="True" VerticalAlignment="Center" FontSize="7" Foreground="#cccccc" Visibility="Collapsed"/>
+                                                <TextBox x:Name="BabeBotMpPotionX" Style="{StaticResource CoordTextBoxStyle}" Text="376" ToolTip="MP Potion X" Width="20" IsEnabled="{Binding ElementName=BabeBotMpUseCoordinate, Path=IsChecked}" Visibility="Collapsed"/>
+                                                <TextBox x:Name="BabeBotMpPotionY" Style="{StaticResource CoordTextBoxStyle}" Text="200" ToolTip="MP Potion Y" Width="20" IsEnabled="{Binding ElementName=BabeBotMpUseCoordinate, Path=IsChecked}" Visibility="Collapsed"/>
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- MP Controls -->
+                                    <Border Background="#2a2a2a" BorderBrush="#444444" BorderThickness="1" CornerRadius="3" Padding="8,5" Margin="0,2,0,2">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Text="🔧 Actions" Style="{StaticResource LabelStyle}" FontSize="8" Foreground="#aaaaaa" Margin="0,0,0,3"/>
+
+                                            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                                                <Button x:Name="BabeBotMpCalibrate" Content="📊 Calibrate" Style="{StaticResource SmallButtonStyle}" Click="BabeBotMpCalibrate_Click" FontSize="8" Height="20" Width="180" Padding="8,4" Background="#28a745" Foreground="White" BorderBrush="#1e7e34" BorderThickness="1" HorizontalAlignment="Center" FontWeight="SemiBold"/>
+
+                                                <!-- Hidden Controls -->
+                                                <CheckBox x:Name="BabeBotMpEnabled" IsChecked="False" VerticalAlignment="Center" Visibility="Collapsed"/>
+                                                <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickBabeBotMpPotion_Click" Width="25" IsEnabled="{Binding ElementName=BabeBotMpUseCoordinate, Path=IsChecked}" Visibility="Collapsed"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- MP Status -->
+                                    <Border Background="#2a2a2a" BorderBrush="#444444" BorderThickness="1" CornerRadius="3" Padding="8,5" Margin="0,2,0,0">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Text="📊 Current Status" Style="{StaticResource LabelStyle}" FontSize="8" Foreground="#aaaaaa" Margin="0,0,0,3"/>
+
+                                            <Grid Grid.Row="1" Margin="0,0,0,3">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Rectangle Grid.Column="0" x:Name="BabeBotMpCurrentColor" Height="16" Fill="#000000" Stroke="#555" StrokeThickness="1" Margin="0,0,5,0"/>
+                                                <TextBlock Grid.Column="1" x:Name="BabeBotMpCurrentText" Text="0,0,0" Style="{StaticResource ValueStyle}" FontSize="8" VerticalAlignment="Center" Foreground="#cccccc"/>
+                                            </Grid>
+
+                                            <TextBlock Grid.Row="2" x:Name="BabeBotMpStatus" Text="--" Style="{StaticResource ValueStyle}" FontSize="9" Foreground="#87CEEB" FontWeight="Bold"/>
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Periodic Clicks Section -->
+                    <Border Background="#1a1a1a"  Padding="6" Margin="0,0,0,5" Visibility="Collapsed">
+                        <StackPanel>
+                            <TextBlock Text="⏰ Periodic Clicks" Style="{StaticResource SectionHeaderStyle}" FontSize="11" Margin="0,0,0,3"/>
+
+                            <!-- Main Y Click -->
+                            <Grid Margin="0,0,0,3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="15"/>
+                                    <ColumnDefinition Width="25"/>
+                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <CheckBox Grid.Column="0" x:Name="YClickEnabled" IsChecked="False" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="Y:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#FFD700"/>
+                                <CheckBox Grid.Column="2" x:Name="YUseCoordinate" Content="Pos" IsChecked="False" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                                <CheckBox Grid.Column="3" x:Name="YUseKeyPress" Content="Key" IsChecked="True" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                                <TextBox Grid.Column="4" x:Name="YClickX" Style="{StaticResource CoordTextBoxStyle}" Text="540" IsEnabled="{Binding ElementName=YUseCoordinate, Path=IsChecked}" Width="40"/>
+                                <TextBox Grid.Column="5" x:Name="YClickY" Style="{StaticResource CoordTextBoxStyle}" Text="760" IsEnabled="{Binding ElementName=YUseCoordinate, Path=IsChecked}" Width="40"/>
+                                <TextBox Grid.Column="6" x:Name="YClickPeriod" Style="{StaticResource CoordTextBoxStyle}" Text="120" ToolTip="Period in ms"/>
+                                <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
+                                    <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickYCoord_Click" Width="20" Margin="0,0,2,0" IsEnabled="{Binding ElementName=YUseCoordinate, Path=IsChecked}"/>
+                                    <TextBox x:Name="YKeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="Y" Width="25" IsEnabled="{Binding ElementName=YUseKeyPress, Path=IsChecked}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Extra Clicks -->
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="15"/>
+                                    <ColumnDefinition Width="25"/>
+                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <CheckBox Grid.Column="0" x:Name="Extra1Enabled" IsChecked="False" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="E1:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
+                                <CheckBox Grid.Column="2" x:Name="Extra1UseCoordinate" Content="Pos" IsChecked="False" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                                <CheckBox Grid.Column="3" x:Name="Extra1UseKeyPress" Content="Key" IsChecked="True" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                                <TextBox Grid.Column="4" x:Name="Extra1X" Style="{StaticResource CoordTextBoxStyle}" Text="700" IsEnabled="{Binding ElementName=Extra1UseCoordinate, Path=IsChecked}" Width="40"/>
+                                <TextBox Grid.Column="5" x:Name="Extra1Y" Style="{StaticResource CoordTextBoxStyle}" Text="820" IsEnabled="{Binding ElementName=Extra1UseCoordinate, Path=IsChecked}" Width="40"/>
+                                <TextBox Grid.Column="6" x:Name="Extra1Period" Style="{StaticResource CoordTextBoxStyle}" Text="250"/>
+                                <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
+                                    <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickExtra1Coord_Click" Width="20" Margin="0,0,2,0" IsEnabled="{Binding ElementName=Extra1UseCoordinate, Path=IsChecked}"/>
+                                    <TextBox x:Name="Extra1KeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="" Width="25" IsEnabled="{Binding ElementName=Extra1UseKeyPress, Path=IsChecked}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="15"/>
+                                    <ColumnDefinition Width="25"/>
+                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <CheckBox Grid.Column="0" x:Name="Extra2Enabled" IsChecked="False" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="E2:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
+                                <CheckBox Grid.Column="2" x:Name="Extra2UseCoordinate" Content="Pos" IsChecked="False" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                                <CheckBox Grid.Column="3" x:Name="Extra2UseKeyPress" Content="Key" IsChecked="True" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                                <TextBox Grid.Column="4" x:Name="Extra2X" Style="{StaticResource CoordTextBoxStyle}" Text="720" IsEnabled="{Binding ElementName=Extra2UseCoordinate, Path=IsChecked}" Width="40"/>
+                                <TextBox Grid.Column="5" x:Name="Extra2Y" Style="{StaticResource CoordTextBoxStyle}" Text="840" IsEnabled="{Binding ElementName=Extra2UseCoordinate, Path=IsChecked}" Width="40"/>
+                                <TextBox Grid.Column="6" x:Name="Extra2Period" Style="{StaticResource CoordTextBoxStyle}" Text="500"/>
+                                <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
+                                    <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickExtra2Coord_Click" Width="20" Margin="0,0,2,0" IsEnabled="{Binding ElementName=Extra2UseCoordinate, Path=IsChecked}"/>
+                                    <TextBox x:Name="Extra2KeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="" Width="25" IsEnabled="{Binding ElementName=Extra2UseKeyPress, Path=IsChecked}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="15"/>
+                                    <ColumnDefinition Width="25"/>
+                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <CheckBox Grid.Column="0" x:Name="Extra3Enabled" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="E3:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
+                                <CheckBox Grid.Column="2" x:Name="Extra3UseCoordinate" Content="Pos" IsChecked="False" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                                <CheckBox Grid.Column="3" x:Name="Extra3UseKeyPress" Content="Key" IsChecked="True" VerticalAlignment="Center" FontSize="8" Foreground="#cccccc"/>
+                                <TextBox Grid.Column="4" x:Name="Extra3X" Style="{StaticResource CoordTextBoxStyle}" Text="740" IsEnabled="{Binding ElementName=Extra3UseCoordinate, Path=IsChecked}" Width="40"/>
+                                <TextBox Grid.Column="5" x:Name="Extra3Y" Style="{StaticResource CoordTextBoxStyle}" Text="860" IsEnabled="{Binding ElementName=Extra3UseCoordinate, Path=IsChecked}" Width="40"/>
+                                <TextBox Grid.Column="6" x:Name="Extra3Period" Style="{StaticResource CoordTextBoxStyle}" Text="1000"/>
+                                <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="5,0,0,0">
+                                    <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickExtra3Coord_Click" Width="20" Margin="0,0,2,0" IsEnabled="{Binding ElementName=Extra3UseCoordinate, Path=IsChecked}"/>
+                                    <TextBox x:Name="Extra3KeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="" Width="25" IsEnabled="{Binding ElementName=Extra3UseKeyPress, Path=IsChecked}"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Statistics -->
+                    <Border Background="#1a1a1a"  Padding="6" Visibility="Collapsed">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="FPS" Style="{StaticResource LabelStyle}"/>
+                                <TextBlock x:Name="FpsValue" Text="0.0" Style="{StaticResource ValueStyle}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Clicks" Style="{StaticResource LabelStyle}"/>
+                                <TextBlock x:Name="ClicksValue" Text="0" Style="{StaticResource ValueStyle}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Triggers" Style="{StaticResource LabelStyle}"/>
+                                <TextBlock x:Name="TriggersValue" Text="0" Style="{StaticResource ValueStyle}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Action Buttons -->
+                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0" HorizontalAlignment="Center">
+                        <Button x:Name="StartButton" Click="StartClient_Click" Width="85" Height="32" Margin="0,0,8,0"
+                                Background="#28a745" Foreground="White" FontWeight="Bold" FontSize="12"
+                                BorderBrush="#1e7e34" BorderThickness="1">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="▶️" FontSize="14" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Start" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="StopButton" Click="StopClient_Click" Width="85" Height="32" IsEnabled="False"
+                                Background="#dc3545" Foreground="White" FontWeight="Bold" FontSize="12"
+                                BorderBrush="#c82333" BorderThickness="1">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⏸️" FontSize="14" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Stop" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Header="⚔️ Attack" Width="80" Height="30">
+                <StackPanel>
+                    <!-- Attack System Header -->
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="⚔️ Attack/Skills System" Style="{StaticResource SectionHeaderStyle}" FontSize="12" Foreground="#FF6B6B"/>
+                        <CheckBox Grid.Column="1" x:Name="AttackSystemEnabled" Content="Enable" IsChecked="False" Foreground="#cccccc" FontSize="9"/>
+                    </Grid>
+
+                    <!-- Master Attack Controls -->
+                    <Border Background="#0d4f3c"  Padding="6" Margin="0,0,0,5">
+                        <StackPanel>
+                            <TextBlock Text="⚔️ Master Attack Control" Style="{StaticResource SectionHeaderStyle}" FontSize="11" Foreground="#4CAF50" Margin="0,0,0,5"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Button Grid.Column="0" Content="▶ Start Attack" x:Name="StartAttackButton" Style="{StaticResource SmallButtonStyle}" Click="StartAttack_Click" Height="25" Margin="0,0,2,0"/>
+                                <Button Grid.Column="1" Content="⏹ Stop Attack" x:Name="StopAttackButton" Style="{StaticResource SmallButtonStyle}" Click="StopAttack_Click" Height="25" Margin="2,0,0,0" IsEnabled="False"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Add New Skill Section -->
+                    <Border Background="#1a1a1a"  Padding="8" Margin="0,0,0,5">
+                        <StackPanel>
+                            <TextBlock Text="➕ Add New Skill" Style="{StaticResource SectionHeaderStyle}" FontSize="11" Foreground="#FFA726" Margin="0,0,0,8"/>
+
+                            <!-- Labels Row -->
+                            <Grid Margin="0,0,0,3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="70"/>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="60"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="Skill Name:" Style="{StaticResource LabelStyle}" FontSize="9" Margin="0,0,5,0" Height="13" VerticalAlignment="Top"/>
+                                <TextBlock Text="Key:" Style="{StaticResource LabelStyle}" FontSize="9" Margin="122,1,5,-1"/>
+                                <TextBlock Grid.Column="1" Text="Interval (ms):" Style="{StaticResource LabelStyle}" FontSize="9" Margin="35,0,40,0" Grid.ColumnSpan="2"/>
+                                <TextBlock Grid.Column="3" Text="" Margin="0,0,0,0"/>
+                            </Grid>
+
+                            <!-- Input Controls Row -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="70"/>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="60"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBox Grid.Column="0" x:Name="SkillNameInput" Style="{StaticResource CoordTextBoxStyle}" Text="" Margin="0,0,142,0" Height="22" Width="100" TextChanged="SkillNameInput_TextChanged"/>
+                                <TextBox x:Name="SkillKeyInput" Style="{StaticResource CoordTextBoxStyle}" Text="" Margin="121,0,21,0" Height="22" Width="100"/>
+                                <TextBox Grid.Column="1" x:Name="SkillIntervalInput" Style="{StaticResource CoordTextBoxStyle}" Text="1500" Margin="35,0,40,0" Height="22" Grid.ColumnSpan="2" Width="NaN"/>
+                                <Button Grid.Column="3" Content="➕ Add" x:Name="AddSkillButton" Style="{StaticResource SmallButtonStyle}" Click="AddSkill_Click" Height="22"/>
+                            </Grid>
+
+                            <!-- Example/Help Text -->
+                            <TextBlock Text="Example: Name='Fire Bolt', Key='F1', Interval='1500' (1.5 seconds)" 
+                                       Style="{StaticResource ValueStyle}" FontSize="8" Foreground="#888" 
+                                       Margin="0,5,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Attack Skills List -->
+                    <ScrollViewer Height="214" VerticalScrollBarVisibility="Auto">
+                        <StackPanel x:Name="AttackSkillsContainer">
+                            <!-- Default skill will be added here -->
+                        </StackPanel>
+                    </ScrollViewer>
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Header="🎭 Buff/AC" Width="80">
+                <StackPanel>
+                    <!-- Buff/AC System Header -->
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="🎭 Party Buff/AC System" Style="{StaticResource SectionHeaderStyle}" FontSize="12" Foreground="#FF9800"/>
+                        <CheckBox Grid.Column="1" x:Name="BuffAcSystemEnabled" Content="Enable" IsChecked="False" Foreground="#cccccc" FontSize="9"/>
+                    </Grid>
+
+                    <!-- Member Selection for Buff/AC -->
+                    <Border Background="#1a1a1a"  Padding="6" Margin="0,0,0,5">
+                        <StackPanel>
+                            <TextBlock Text="👥 Member Selection Keys" Style="{StaticResource SectionHeaderStyle}" FontSize="10" Foreground="#4FC3F7" Margin="0,0,0,5"/>
+
+                            <!-- Row 1: Members 1-4 -->
+                            <Grid Margin="0,0,0,3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
+                                    <CheckBox x:Name="Member1Enabled" IsChecked="{Binding BuffAcSettings.Member1Enabled}" Foreground="#4FC3F7" Margin="0,0,3,0" ToolTip="Enable Member 1"/>
+                                    <TextBlock Text="1:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Margin="0,0,2,0"/>
+                                    <TextBox x:Name="Member1KeyInput" Style="{StaticResource CoordTextBoxStyle}" Text="{Binding BuffAcSettings.Member1Key}" Width="18" ToolTip="Member 1 selection key"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
+                                    <CheckBox x:Name="Member2Enabled" IsChecked="{Binding BuffAcSettings.Member2Enabled}" Foreground="#4FC3F7" Margin="0,0,3,0" ToolTip="Enable Member 2"/>
+                                    <TextBlock Text="2:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Margin="0,0,2,0"/>
+                                    <TextBox x:Name="Member2KeyInput" Style="{StaticResource CoordTextBoxStyle}" Text="{Binding BuffAcSettings.Member2Key}" Width="18" ToolTip="Member 2 selection key"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,5,0">
+                                    <CheckBox x:Name="Member3Enabled" IsChecked="{Binding BuffAcSettings.Member3Enabled}" Foreground="#4FC3F7" Margin="0,0,3,0" ToolTip="Enable Member 3"/>
+                                    <TextBlock Text="3:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Margin="0,0,2,0"/>
+                                    <TextBox x:Name="Member3KeyInput" Style="{StaticResource CoordTextBoxStyle}" Text="{Binding BuffAcSettings.Member3Key}" Width="18" ToolTip="Member 3 selection key"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="3" Orientation="Horizontal">
+                                    <CheckBox x:Name="Member4Enabled" IsChecked="{Binding BuffAcSettings.Member4Enabled}" Foreground="#4FC3F7" Margin="0,0,3,0" ToolTip="Enable Member 4"/>
+                                    <TextBlock Text="4:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Margin="0,0,2,0"/>
+                                    <TextBox x:Name="Member4KeyInput" Style="{StaticResource CoordTextBoxStyle}" Text="{Binding BuffAcSettings.Member4Key}" Width="18" ToolTip="Member 4 selection key"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Row 2: Members 5-8 -->
+                            <Grid Margin="0,0,0,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
+                                    <CheckBox x:Name="Member5Enabled" IsChecked="{Binding BuffAcSettings.Member5Enabled}" Foreground="#4FC3F7" Margin="0,0,3,0" ToolTip="Enable Member 5"/>
+                                    <TextBlock Text="5:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Margin="0,0,2,0"/>
+                                    <TextBox x:Name="Member5KeyInput" Style="{StaticResource CoordTextBoxStyle}" Text="{Binding BuffAcSettings.Member5Key}" Width="18" ToolTip="Member 5 selection key"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
+                                    <CheckBox x:Name="Member6Enabled" IsChecked="{Binding BuffAcSettings.Member6Enabled}" Foreground="#4FC3F7" Margin="0,0,3,0" ToolTip="Enable Member 6"/>
+                                    <TextBlock Text="6:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Margin="0,0,2,0"/>
+                                    <TextBox x:Name="Member6KeyInput" Style="{StaticResource CoordTextBoxStyle}" Text="{Binding BuffAcSettings.Member6Key}" Width="18" ToolTip="Member 6 selection key"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,5,0">
+                                    <CheckBox x:Name="Member7Enabled" IsChecked="{Binding BuffAcSettings.Member7Enabled}" Foreground="#4FC3F7" Margin="0,0,3,0" ToolTip="Enable Member 7"/>
+                                    <TextBlock Text="7:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Margin="0,0,2,0"/>
+                                    <TextBox x:Name="Member7KeyInput" Style="{StaticResource CoordTextBoxStyle}" Text="{Binding BuffAcSettings.Member7Key}" Width="18" ToolTip="Member 7 selection key"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="3" Orientation="Horizontal">
+                                    <CheckBox x:Name="Member8Enabled" IsChecked="{Binding BuffAcSettings.Member8Enabled}" Foreground="#4FC3F7" Margin="0,0,3,0" ToolTip="Enable Member 8"/>
+                                    <TextBlock Text="8:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Margin="0,0,2,0"/>
+                                    <TextBox x:Name="Member8KeyInput" Style="{StaticResource CoordTextBoxStyle}" Text="{Binding BuffAcSettings.Member8Key}" Width="18" ToolTip="Member 8 selection key"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Buff/AC Configuration -->
+                    <Border Background="#1a1a1a"  Padding="6" Margin="0,0,0,5">
+                        <StackPanel>
+                            <TextBlock Text="🛡️ Buff/AC Configuration" Style="{StaticResource SectionHeaderStyle}" FontSize="10" Foreground="#FFA726" Margin="0,0,0,5"/>
+
+                            <!-- Row 1: Buff Settings -->
+                            <Grid Margin="0,0,0,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="70"/>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="Buff Key:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
+                                <TextBox Grid.Column="1" x:Name="BuffKeyInput" Style="{StaticResource CoordTextBoxStyle}" Text="6" ToolTip="Buff skill key" Margin="0,0,5,0"/>
+                                <TextBlock Grid.Column="2" Text="Buff Anim:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
+                                <TextBox Grid.Column="3" x:Name="BuffAnimInput" Style="{StaticResource CoordTextBoxStyle}" Text="2.5" ToolTip="Buff animation time (seconds)"/>
+                            </Grid>
+
+                            <!-- Row 2: AC Settings -->
+                            <Grid Margin="0,0,0,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="70"/>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="AC Key:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
+                                <TextBox Grid.Column="1" x:Name="AcKeyInput" Style="{StaticResource CoordTextBoxStyle}" Text="1" ToolTip="AC skill key" Margin="0,0,5,0"/>
+                                <TextBlock Grid.Column="2" Text="AC Anim:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
+                                <TextBox Grid.Column="3" x:Name="AcAnimInput" Style="{StaticResource CoordTextBoxStyle}" Text="2.5" ToolTip="AC animation time (seconds)"/>
+                            </Grid>
+
+                            <!-- Row 3: Cycle Settings -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="70"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="Time (s):" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
+                                <TextBox Grid.Column="1" x:Name="CycleIntervalInput" Style="{StaticResource CoordTextBoxStyle}" Text="30" ToolTip="Cycle interval in seconds" Margin="10,1,15,1"/>
+                                <TextBlock Grid.Column="2" Text="Interval between full buff/AC cycles" Style="{StaticResource ValueStyle}" VerticalAlignment="Center" FontSize="9" Foreground="#888" Margin="10,0,0,0"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Buff/AC Control -->
+                    <Border Background="#0d4f3c"  Padding="6" Margin="0,0,0,5">
+                        <StackPanel>
+                            <TextBlock Text="🎭 Buff/AC Control" Style="{StaticResource SectionHeaderStyle}" FontSize="11" Foreground="#4CAF50" Margin="0,0,0,5"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Button Grid.Column="0" Content="🎭 Start Buff/AC" x:Name="StartBuffAcButton" Style="{StaticResource SmallButtonStyle}" Click="StartBuffAc_Click" Height="25" Margin="0,0,2,0"/>
+                                <Button Grid.Column="1" Content="🛑 Stop Buff/AC" x:Name="StopBuffAcButton" Style="{StaticResource SmallButtonStyle}" Click="StopBuffAc_Click" Height="25" Margin="2,0,0,0" IsEnabled="False"/>
+                            </Grid>
+
+                            <!-- Status Display -->
+                            <TextBlock x:Name="BuffAcStatusText" Text="Status: Stopped" Style="{StaticResource ValueStyle}" FontSize="9" Foreground="#90EE90" Margin="0,5,0,0" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- System Info -->
+                    <Border Background="#2d1b3d"  Padding="6" Margin="0,0,0,5">
+                        <StackPanel>
+                            <TextBlock Text="ℹ️ How Buff/AC Works:" Style="{StaticResource SectionHeaderStyle}" FontSize="10" Foreground="#BB86FC" Margin="0,0,0,5"/>
+                            <TextBlock Style="{StaticResource ValueStyle}" FontSize="8" Foreground="#ccc" TextWrapping="Wrap">
+                                • Cycles through all enabled party members every X seconds
+                                • For each member: Selects → Casts Buff → Waits → Casts AC → Waits  
+                                • Automatically pauses Heal and Attack systems during buff/AC cycle
+                                • Resumes other systems after completing the cycle
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Header="🎭 Party Heal" Width="80">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <!-- Party Heal System Header -->
+                        <TextBlock Text="💊 Party Heal System" Style="{StaticResource SectionHeaderStyle}" FontSize="12" Foreground="#4CAF50" Margin="0,0,0,8"/>
+
+                        <!-- Master Controls -->
+                        <Border Background="#1a3d2e" CornerRadius="6" Padding="8" Margin="0,0,0,8">
+                            <StackPanel>
+                                <TextBlock Text="Master Controls" Style="{StaticResource SectionHeaderStyle}" FontSize="11" Foreground="#4CAF50" Margin="0,0,0,8"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Button Grid.Column="0" Content="🎯 Calibrate All" x:Name="CalibrateAllPartyButton" Style="{StaticResource ActionButtonStyle}" Height="35" Margin="0,0,4,0" Click="CalibrateAllParty_Click"/>
+                                    <Button Grid.Column="1" Content="🔄 Enable All" x:Name="EnableAllPartyButton" Style="{StaticResource ActionButtonStyle}" Height="35" Margin="4,0,0,0" Click="EnableAllParty_Click"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Global Settings -->
+                        <Border Background="#1a1a1a" CornerRadius="3" Padding="6" Margin="0,0,0,5">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Animation Delay" Style="{StaticResource LabelStyle}" FontSize="9"/>
+                                    <TextBox x:Name="AnimationDelay" Style="{StaticResource CoordTextBoxStyle}" Text="1500" ToolTip="Skill animation wait time in ms"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                    <TextBlock Text="Check Interval" Style="{StaticResource LabelStyle}" FontSize="9"/>
+                                    <TextBox x:Name="MultiHpCheckInterval" Style="{StaticResource CoordTextBoxStyle}" Text="100" ToolTip="HP check interval in ms"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2" Margin="10,0,0,0">
+                                    <CheckBox x:Name="MultiHpEnabled" Content="Enable Multi HP System" IsChecked="False" Foreground="#cccccc" VerticalAlignment="Center" Margin="0,0,0,8"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button x:Name="StartMultiHpButton" Click="StartMultiHp_Click" Height="35" Width="80" Margin="0,0,8,0" 
+                                                Background="#28a745" Foreground="White" BorderThickness="0" FontWeight="Bold" FontSize="12">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="▶" FontSize="14" Margin="0,0,5,0"/>
+                                                <TextBlock Text="START"/>
+                                            </StackPanel>
+                                        </Button>
+                                        <Button x:Name="StopMultiHpButton" Click="StopMultiHp_Click" Height="35" Width="80" IsEnabled="False" Margin="0,0,8,0"
+                                                Background="#dc3545" Foreground="White" BorderThickness="0" FontWeight="Bold" FontSize="12">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="⏹" FontSize="14" Margin="0,0,5,0"/>
+                                                <TextBlock Text="STOP"/>
+                                            </StackPanel>
+                                        </Button>
+                                        <Button x:Name="ShowPartyHpOverlayButton" Click="ShowPartyHpOverlay_Click" Height="35" Width="90" 
+                                                Background="#6f42c1" Foreground="White" BorderThickness="0" FontWeight="Bold" FontSize="11">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="👁️" FontSize="12" Margin="0,0,5,0"/>
+                                                <TextBlock Text="SHOW HP"/>
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Party Members Container -->
+                        <ScrollViewer Height="214" VerticalScrollBarVisibility="Hidden">
+                            <StackPanel x:Name="PartyMembersContainer">
+                                <!-- Party Member 1 -->
+                                <Border Background="#1a1a1a" Padding="6" Margin="0,0,0,5">
+                                    <StackPanel>
+                                        <!-- Row 1: Member ID, Controls, Status -->
+                                        <Grid Margin="0,0,0,3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Row Number -->
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Calibrate -->
+                                                <ColumnDefinition Width="40"/>
+                                                <!-- Enable -->
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Monitor -->
+                                                <ColumnDefinition Width="*"/>
+                                                <!-- Status -->
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Row Number -->
+                                            <Border Grid.Column="0" Background="#333" BorderBrush="#505050" BorderThickness="1" CornerRadius="4">
+                                                <TextBlock Text="1" Foreground="#FFFFFF" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="10"/>
+                                            </Border>
+
+                                            <!-- Calibrate Button -->
+                                            <Button Grid.Column="1" Content="🎯" Background="#FF9800" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="CalibratePartyMember1_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Enable Button -->
+                                            <Button Grid.Column="2" x:Name="PartyMember1EnableBtn" Content="OFF" Background="#666666" Foreground="White" BorderThickness="0" Width="38" Height="25" Click="TogglePartyMember1Enable_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Monitor Button -->
+                                            <Button Grid.Column="3" x:Name="PartyMember1MonitorBtn" Content="▶" Background="#2196F3" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="TogglePartyMember1Monitor_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Status Label -->
+                                            <Border Grid.Column="4" Background="#2d2d2d" BorderBrush="#444" BorderThickness="1" CornerRadius="4" Margin="5,0,0,0">
+                                                <TextBlock x:Name="PartyMember1Status" Text="--% | OFF" Foreground="#888" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="9" Padding="2"/>
+                                            </Border>
+                                        </Grid>
+
+                                        <!-- Row 2: Keys and HP Threshold -->
+                                        <Grid Margin="0,0,0,3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- User Key -->
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="User:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember1UserKey" Text="1" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#FF9800" TextAlignment="Center" FontSize="11" Width="30"/>
+                                            </StackPanel>
+
+                                            <!-- Skill Key -->
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="Skill:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember1SkillKey" Text="1" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#2196F3" TextAlignment="Center" FontSize="11" Width="30"/>
+                                            </StackPanel>
+
+                                            <!-- HP Threshold -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                                <TextBlock Text="HP%:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember1HpThreshold" Text="30" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#4CAF50" TextAlignment="Center" FontSize="11" Width="40"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- Row 3: Coordinates -->
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- X1 Start -->
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="X1:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember1HpXStart" Text="1" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+
+                                            <!-- X2 End -->
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="X2:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember1HpXEnd" Text="90" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+
+                                            <!-- Y Coordinate -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                                <TextBlock Text="Y:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember1HpY" Text="5" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Party Member 2 -->
+                                <Border Background="#1a1a1a" Padding="6" Margin="0,0,0,5">
+                                    <StackPanel>
+                                        <!-- Row 1: Member ID, Controls, Status -->
+                                        <Grid Margin="0,0,0,3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Row Number -->
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Calibrate -->
+                                                <ColumnDefinition Width="40"/>
+                                                <!-- Enable -->
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Monitor -->
+                                                <ColumnDefinition Width="*"/>
+                                                <!-- Status -->
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Row Number -->
+                                            <Border Grid.Column="0" Background="#333" BorderBrush="#505050" BorderThickness="1" CornerRadius="4">
+                                                <TextBlock Text="2" Foreground="#FFFFFF" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="10"/>
+                                            </Border>
+
+                                            <!-- Calibrate Button -->
+                                            <Button Grid.Column="1" Content="🎯" Background="#FF9800" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="CalibratePartyMember2_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Enable Button -->
+                                            <Button Grid.Column="2" x:Name="PartyMember2EnableBtn" Content="OFF" Background="#666666" Foreground="White" BorderThickness="0" Width="38" Height="25" Click="TogglePartyMember2Enable_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Monitor Button -->
+                                            <Button Grid.Column="3" x:Name="PartyMember2MonitorBtn" Content="▶" Background="#2196F3" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="TogglePartyMember2Monitor_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Status Label -->
+                                            <Border Grid.Column="4" Background="#2d2d2d" BorderBrush="#444" BorderThickness="1" CornerRadius="4" Margin="5,0,0,0">
+                                                <TextBlock x:Name="PartyMember2Status" Text="--% | OFF" Foreground="#888" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="9" Padding="2"/>
+                                            </Border>
+                                        </Grid>
+
+                                        <!-- Row 2: Keys and HP Threshold -->
+                                        <Grid Margin="0,0,0,3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- User Key -->
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="User:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember2UserKey" Text="2" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#FF9800" TextAlignment="Center" FontSize="11" Width="30"/>
+                                            </StackPanel>
+
+                                            <!-- Skill Key -->
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="Skill:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember2SkillKey" Text="2" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#2196F3" TextAlignment="Center" FontSize="11" Width="30"/>
+                                            </StackPanel>
+
+                                            <!-- HP Threshold -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                                <TextBlock Text="HP%:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember2HpThreshold" Text="30" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#4CAF50" TextAlignment="Center" FontSize="11" Width="40"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- Row 3: Coordinates -->
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- X1 Start -->
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="X1:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember2HpXStart" Text="1" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+
+                                            <!-- X2 End -->
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="X2:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember2HpXEnd" Text="90" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+
+                                            <!-- Y Coordinate -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                                <TextBlock Text="Y:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember2HpY" Text="5" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Party Member 3 -->
+                                <Border Background="#1a1a1a" Padding="6" Margin="0,0,0,5">
+                                    <StackPanel>
+                                        <!-- Row 1: Member ID, Controls, Status -->
+                                        <Grid Margin="0,0,0,3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Row Number -->
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Calibrate -->
+                                                <ColumnDefinition Width="40"/>
+                                                <!-- Enable -->
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Monitor -->
+                                                <ColumnDefinition Width="*"/>
+                                                <!-- Status -->
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Row Number -->
+                                            <Border Grid.Column="0" Background="#333" BorderBrush="#505050" BorderThickness="1" CornerRadius="4">
+                                                <TextBlock Text="3" Foreground="#FFFFFF" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="10"/>
+                                            </Border>
+
+                                            <!-- Calibrate Button -->
+                                            <Button Grid.Column="1" Content="🎯" Background="#FF9800" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="CalibratePartyMember3_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Enable Button -->
+                                            <Button Grid.Column="2" x:Name="PartyMember3EnableBtn" Content="OFF" Background="#666666" Foreground="White" BorderThickness="0" Width="38" Height="25" Click="TogglePartyMember3Enable_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Monitor Button -->
+                                            <Button Grid.Column="3" x:Name="PartyMember3MonitorBtn" Content="▶" Background="#2196F3" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="TogglePartyMember3Monitor_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Status Label -->
+                                            <Border Grid.Column="4" Background="#2d2d2d" BorderBrush="#444" BorderThickness="1" CornerRadius="4" Margin="5,0,0,0">
+                                                <TextBlock x:Name="PartyMember3Status" Text="--% | OFF" Foreground="#888" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="9" Padding="2"/>
+                                            </Border>
+                                        </Grid>
+
+                                        <!-- Row 2: Keys and HP Threshold -->
+                                        <Grid Margin="0,0,0,3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- User Key -->
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="User:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember3UserKey" Text="3" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#FF9800" TextAlignment="Center" FontSize="11" Width="30"/>
+                                            </StackPanel>
+
+                                            <!-- Skill Key -->
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="Skill:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember3SkillKey" Text="3" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#2196F3" TextAlignment="Center" FontSize="11" Width="30"/>
+                                            </StackPanel>
+
+                                            <!-- HP Threshold -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                                <TextBlock Text="HP%:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember3HpThreshold" Text="30" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#4CAF50" TextAlignment="Center" FontSize="11" Width="40"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- Row 3: Coordinates -->
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- X1 Start -->
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="X1:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember3HpXStart" Text="1" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+
+                                            <!-- X2 End -->
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="X2:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember3HpXEnd" Text="90" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+
+                                            <!-- Y Coordinate -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                                <TextBlock Text="Y:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember3HpY" Text="5" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Party Member 4 -->
+                                <Border Background="#1a1a1a" Padding="6" Margin="0,0,0,5">
+                                    <StackPanel>
+                                        <!-- Row 1: Member ID, Controls, Status -->
+                                        <Grid Margin="0,0,0,3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Row Number -->
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Calibrate -->
+                                                <ColumnDefinition Width="40"/>
+                                                <!-- Enable -->
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Monitor -->
+                                                <ColumnDefinition Width="*"/>
+                                                <!-- Status -->
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Row Number -->
+                                            <Border Grid.Column="0" Background="#333" BorderBrush="#505050" BorderThickness="1" CornerRadius="4">
+                                                <TextBlock Text="4" Foreground="#FFFFFF" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="10"/>
+                                            </Border>
+
+                                            <!-- Calibrate Button -->
+                                            <Button Grid.Column="1" Content="🎯" Background="#FF9800" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="CalibratePartyMember4_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Enable Button -->
+                                            <Button Grid.Column="2" x:Name="PartyMember4EnableBtn" Content="OFF" Background="#666666" Foreground="White" BorderThickness="0" Width="38" Height="25" Click="TogglePartyMember4Enable_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Monitor Button -->
+                                            <Button Grid.Column="3" x:Name="PartyMember4MonitorBtn" Content="▶" Background="#2196F3" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="TogglePartyMember4Monitor_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Status Label -->
+                                            <Border Grid.Column="4" Background="#2d2d2d" BorderBrush="#444" BorderThickness="1" CornerRadius="4" Margin="5,0,0,0">
+                                                <TextBlock x:Name="PartyMember4Status" Text="--% | OFF" Foreground="#888" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="9" Padding="2"/>
+                                            </Border>
+                                        </Grid>
+
+                                        <!-- Row 2: Keys and HP Threshold -->
+                                        <Grid Margin="0,0,0,3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- User Key -->
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="User:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember4UserKey" Text="4" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#FF9800" TextAlignment="Center" FontSize="11" Width="30"/>
+                                            </StackPanel>
+
+                                            <!-- Skill Key -->
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="Skill:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember4SkillKey" Text="4" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#2196F3" TextAlignment="Center" FontSize="11" Width="30"/>
+                                            </StackPanel>
+
+                                            <!-- HP Threshold -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                                <TextBlock Text="HP%:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember4HpThreshold" Text="30" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#4CAF50" TextAlignment="Center" FontSize="11" Width="40"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- Row 3: Coordinates -->
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- X1 Start -->
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="X1:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember4HpXStart" Text="1" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+
+                                            <!-- X2 End -->
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="X2:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember4HpXEnd" Text="90" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+
+                                            <!-- Y Coordinate -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                                <TextBlock Text="Y:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember4HpY" Text="5" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Party Member 5 -->
+                                <Border Background="#1a1a1a" Padding="6" Margin="0,0,0,5">
+                                    <StackPanel>
+                                        <!-- Row 1: Member ID, Controls, Status -->
+                                        <Grid Margin="0,0,0,3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Row Number -->
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Calibrate -->
+                                                <ColumnDefinition Width="40"/>
+                                                <!-- Enable -->
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Monitor -->
+                                                <ColumnDefinition Width="*"/>
+                                                <!-- Status -->
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Row Number -->
+                                            <Border Grid.Column="0" Background="#333" BorderBrush="#505050" BorderThickness="1" CornerRadius="4">
+                                                <TextBlock Text="5" Foreground="#FFFFFF" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="10"/>
+                                            </Border>
+
+                                            <!-- Calibrate Button -->
+                                            <Button Grid.Column="1" Content="🎯" Background="#FF9800" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="CalibratePartyMember5_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Enable Button -->
+                                            <Button Grid.Column="2" x:Name="PartyMember5EnableBtn" Content="OFF" Background="#666666" Foreground="White" BorderThickness="0" Width="38" Height="25" Click="TogglePartyMember5Enable_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Monitor Button -->
+                                            <Button Grid.Column="3" x:Name="PartyMember5MonitorBtn" Content="▶" Background="#2196F3" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="TogglePartyMember5Monitor_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Status Label -->
+                                            <Border Grid.Column="4" Background="#2d2d2d" BorderBrush="#444" BorderThickness="1" CornerRadius="4" Margin="5,0,0,0">
+                                                <TextBlock x:Name="PartyMember5Status" Text="--% | OFF" Foreground="#888" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="9" Padding="2"/>
+                                            </Border>
+                                        </Grid>
+
+                                        <!-- Row 2: Keys and HP Threshold -->
+                                        <Grid Margin="0,0,0,3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- User Key -->
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="User:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember5UserKey" Text="5" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#FF9800" TextAlignment="Center" FontSize="11" Width="30"/>
+                                            </StackPanel>
+
+                                            <!-- Skill Key -->
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="Skill:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember5SkillKey" Text="5" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#2196F3" TextAlignment="Center" FontSize="11" Width="30"/>
+                                            </StackPanel>
+
+                                            <!-- HP Threshold -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                                <TextBlock Text="HP%:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember5HpThreshold" Text="30" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#4CAF50" TextAlignment="Center" FontSize="11" Width="40"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- Row 3: Coordinates -->
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- X1 Start -->
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="X1:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember5HpXStart" Text="1" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+
+                                            <!-- X2 End -->
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="X2:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember5HpXEnd" Text="90" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+
+                                            <!-- Y Coordinate -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                                <TextBlock Text="Y:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember5HpY" Text="5" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Party Member 6 -->
+                                <Border Background="#1a1a1a" Padding="6" Margin="0,0,0,5">
+                                    <StackPanel>
+                                        <!-- Row 1: Member ID, Controls, Status -->
+                                        <Grid Margin="0,0,0,3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Row Number -->
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Calibrate -->
+                                                <ColumnDefinition Width="40"/>
+                                                <!-- Enable -->
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Monitor -->
+                                                <ColumnDefinition Width="*"/>
+                                                <!-- Status -->
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Row Number -->
+                                            <Border Grid.Column="0" Background="#333" BorderBrush="#505050" BorderThickness="1" CornerRadius="4">
+                                                <TextBlock Text="6" Foreground="#FFFFFF" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="10"/>
+                                            </Border>
+
+                                            <!-- Calibrate Button -->
+                                            <Button Grid.Column="1" Content="🎯" Background="#FF9800" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="CalibratePartyMember6_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Enable Button -->
+                                            <Button Grid.Column="2" x:Name="PartyMember6EnableBtn" Content="OFF" Background="#666666" Foreground="White" BorderThickness="0" Width="38" Height="25" Click="TogglePartyMember6Enable_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Monitor Button -->
+                                            <Button Grid.Column="3" x:Name="PartyMember6MonitorBtn" Content="▶" Background="#2196F3" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="TogglePartyMember6Monitor_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Status Label -->
+                                            <Border Grid.Column="4" Background="#2d2d2d" BorderBrush="#444" BorderThickness="1" CornerRadius="4" Margin="5,0,0,0">
+                                                <TextBlock x:Name="PartyMember6Status" Text="--% | OFF" Foreground="#888" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="9" Padding="2"/>
+                                            </Border>
+                                        </Grid>
+
+                                        <!-- Row 2: Keys and HP Threshold -->
+                                        <Grid Margin="0,0,0,3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- User Key -->
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="User:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember6UserKey" Text="6" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#FF9800" TextAlignment="Center" FontSize="11" Width="30"/>
+                                            </StackPanel>
+
+                                            <!-- Skill Key -->
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="Skill:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember6SkillKey" Text="6" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#2196F3" TextAlignment="Center" FontSize="11" Width="30"/>
+                                            </StackPanel>
+
+                                            <!-- HP Threshold -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                                <TextBlock Text="HP%:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember6HpThreshold" Text="30" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#4CAF50" TextAlignment="Center" FontSize="11" Width="40"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- Row 3: Coordinates -->
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- X1 Start -->
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="X1:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember6HpXStart" Text="1" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+
+                                            <!-- X2 End -->
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="X2:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember6HpXEnd" Text="90" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+
+                                            <!-- Y Coordinate -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                                <TextBlock Text="Y:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember6HpY" Text="5" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Party Member 7 -->
+                                <Border Background="#1a1a1a" Padding="6" Margin="0,0,0,5">
+                                    <StackPanel>
+                                        <!-- Row 1: Member ID, Controls, Status -->
+                                        <Grid Margin="0,0,0,3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Row Number -->
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Calibrate -->
+                                                <ColumnDefinition Width="40"/>
+                                                <!-- Enable -->
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Monitor -->
+                                                <ColumnDefinition Width="*"/>
+                                                <!-- Status -->
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Row Number -->
+                                            <Border Grid.Column="0" Background="#333" BorderBrush="#505050" BorderThickness="1" CornerRadius="4">
+                                                <TextBlock Text="7" Foreground="#FFFFFF" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="10"/>
+                                            </Border>
+
+                                            <!-- Calibrate Button -->
+                                            <Button Grid.Column="1" Content="🎯" Background="#FF9800" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="CalibratePartyMember7_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Enable Button -->
+                                            <Button Grid.Column="2" x:Name="PartyMember7EnableBtn" Content="OFF" Background="#666666" Foreground="White" BorderThickness="0" Width="38" Height="25" Click="TogglePartyMember7Enable_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Monitor Button -->
+                                            <Button Grid.Column="3" x:Name="PartyMember7MonitorBtn" Content="▶" Background="#2196F3" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="TogglePartyMember7Monitor_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Status Label -->
+                                            <Border Grid.Column="4" Background="#2d2d2d" BorderBrush="#444" BorderThickness="1" CornerRadius="4" Margin="5,0,0,0">
+                                                <TextBlock x:Name="PartyMember7Status" Text="--% | OFF" Foreground="#888" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="9" Padding="2"/>
+                                            </Border>
+                                        </Grid>
+
+                                        <!-- Row 2: Keys and HP Threshold -->
+                                        <Grid Margin="0,0,0,3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- User Key -->
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="User:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember7UserKey" Text="7" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#FF9800" TextAlignment="Center" FontSize="11" Width="30"/>
+                                            </StackPanel>
+
+                                            <!-- Skill Key -->
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="Skill:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember7SkillKey" Text="7" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#2196F3" TextAlignment="Center" FontSize="11" Width="30"/>
+                                            </StackPanel>
+
+                                            <!-- HP Threshold -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                                <TextBlock Text="HP%:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember7HpThreshold" Text="30" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#4CAF50" TextAlignment="Center" FontSize="11" Width="40"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- Row 3: Coordinates -->
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- X1 Start -->
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="X1:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember7HpXStart" Text="1" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+
+                                            <!-- X2 End -->
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="X2:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember7HpXEnd" Text="90" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+
+                                            <!-- Y Coordinate -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                                <TextBlock Text="Y:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember7HpY" Text="5" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Party Member 8 -->
+                                <Border Background="#1a1a1a" Padding="6" Margin="0,0,0,5">
+                                    <StackPanel>
+                                        <!-- Row 1: Member ID, Controls, Status -->
+                                        <Grid Margin="0,0,0,3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Row Number -->
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Calibrate -->
+                                                <ColumnDefinition Width="40"/>
+                                                <!-- Enable -->
+                                                <ColumnDefinition Width="30"/>
+                                                <!-- Monitor -->
+                                                <ColumnDefinition Width="*"/>
+                                                <!-- Status -->
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Row Number -->
+                                            <Border Grid.Column="0" Background="#333" BorderBrush="#505050" BorderThickness="1" CornerRadius="4">
+                                                <TextBlock Text="8" Foreground="#FFFFFF" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="10"/>
+                                            </Border>
+
+                                            <!-- Calibrate Button -->
+                                            <Button Grid.Column="1" Content="🎯" Background="#FF9800" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="CalibratePartyMember8_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Enable Button -->
+                                            <Button Grid.Column="2" x:Name="PartyMember8EnableBtn" Content="OFF" Background="#666666" Foreground="White" BorderThickness="0" Width="38" Height="25" Click="TogglePartyMember8Enable_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Monitor Button -->
+                                            <Button Grid.Column="3" x:Name="PartyMember8MonitorBtn" Content="▶" Background="#2196F3" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="TogglePartyMember8Monitor_Click" Margin="3,0,0,0"/>
+
+                                            <!-- Status Label -->
+                                            <Border Grid.Column="4" Background="#2d2d2d" BorderBrush="#444" BorderThickness="1" CornerRadius="4" Margin="5,0,0,0">
+                                                <TextBlock x:Name="PartyMember8Status" Text="--% | OFF" Foreground="#888" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="9" Padding="2"/>
+                                            </Border>
+                                        </Grid>
+
+                                        <!-- Row 2: Keys and HP Threshold -->
+                                        <Grid Margin="0,0,0,3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- User Key -->
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="User:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember8UserKey" Text="8" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#FF9800" TextAlignment="Center" FontSize="11" Width="30"/>
+                                            </StackPanel>
+
+                                            <!-- Skill Key -->
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="Skill:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember8SkillKey" Text="8" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#2196F3" TextAlignment="Center" FontSize="11" Width="30"/>
+                                            </StackPanel>
+
+                                            <!-- HP Threshold -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                                <TextBlock Text="HP%:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
+                                                <TextBox x:Name="PartyMember8HpThreshold" Text="30" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#4CAF50" TextAlignment="Center" FontSize="11" Width="40"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- Row 3: Coordinates -->
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- X1 Start -->
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="X1:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember8HpXStart" Text="1" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+
+                                            <!-- X2 End -->
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
+                                                <TextBlock Text="X2:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember8HpXEnd" Text="90" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+
+                                            <!-- Y Coordinate -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                                <TextBlock Text="Y:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
+                                                <TextBox x:Name="PartyMember8HpY" Text="5" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+
+                        <!-- Hidden Legacy Controls for Backward Compatibility -->
+                        <StackPanel Visibility="Collapsed">
+                            <!-- MultiHp1 Legacy Controls -->
+                            <CheckBox x:Name="MultiHp1Enabled" IsChecked="False"/>
+                            <TextBox x:Name="MultiHp1StartX" Text="1"/>
+                            <TextBox x:Name="MultiHp1EndX" Text="90"/>
+                            <TextBox x:Name="MultiHp1Y" Text="5"/>
+                            <TextBox x:Name="MultiHp1Threshold" Text="30"/>
+                            <TextBox x:Name="MultiHp1ClickX" Text="376"/>
+                            <TextBox x:Name="MultiHp1ClickY" Text="236"/>
+                            <TextBox x:Name="MultiHp1Key" Text="1"/>
+                            <TextBlock x:Name="MultiHp1Status" Text="Waiting..."/>
+                            <TextBlock x:Name="MultiHp1Percentage" Text="100%"/>
+                            <Rectangle x:Name="MultiHp1ColorBar" Fill="#000000"/>
+
+                            <!-- MultiHp2 Legacy Controls -->
+                            <CheckBox x:Name="MultiHp2Enabled" IsChecked="False"/>
+                            <TextBox x:Name="MultiHp2StartX" Text="1"/>
+                            <TextBox x:Name="MultiHp2EndX" Text="90"/>
+                            <TextBox x:Name="MultiHp2Y" Text="5"/>
+                            <TextBox x:Name="MultiHp2Threshold" Text="30"/>
+                            <TextBox x:Name="MultiHp2ClickX" Text="376"/>
+                            <TextBox x:Name="MultiHp2ClickY" Text="236"/>
+                            <TextBox x:Name="MultiHp2Key" Text="2"/>
+                            <TextBlock x:Name="MultiHp2Status" Text="Waiting..."/>
+                            <TextBlock x:Name="MultiHp2Percentage" Text="100%"/>
+                            <Rectangle x:Name="MultiHp2ColorBar" Fill="#000000"/>
+
+                            <!-- MultiHp3 Legacy Controls -->
+                            <CheckBox x:Name="MultiHp3Enabled" IsChecked="False"/>
+                            <TextBox x:Name="MultiHp3StartX" Text="1"/>
+                            <TextBox x:Name="MultiHp3EndX" Text="90"/>
+                            <TextBox x:Name="MultiHp3Y" Text="5"/>
+                            <TextBox x:Name="MultiHp3Threshold" Text="30"/>
+                            <TextBox x:Name="MultiHp3ClickX" Text="376"/>
+                            <TextBox x:Name="MultiHp3ClickY" Text="236"/>
+                            <TextBox x:Name="MultiHp3Key" Text="3"/>
+                            <TextBlock x:Name="MultiHp3Status" Text="Waiting..."/>
+                            <TextBlock x:Name="MultiHp3Percentage" Text="100%"/>
+                            <Rectangle x:Name="MultiHp3ColorBar" Fill="#000000"/>
+
+                            <!-- MultiHp4 Legacy Controls -->
+                            <CheckBox x:Name="MultiHp4Enabled" IsChecked="False"/>
+                            <TextBox x:Name="MultiHp4StartX" Text="1"/>
+                            <TextBox x:Name="MultiHp4EndX" Text="90"/>
+                            <TextBox x:Name="MultiHp4Y" Text="5"/>
+                            <TextBox x:Name="MultiHp4Threshold" Text="30"/>
+                            <TextBox x:Name="MultiHp4ClickX" Text="376"/>
+                            <TextBox x:Name="MultiHp4ClickY" Text="236"/>
+                            <TextBox x:Name="MultiHp4Key" Text="4"/>
+                            <TextBlock x:Name="MultiHp4Status" Text="Waiting..."/>
+                            <TextBlock x:Name="MultiHp4Percentage" Text="100%"/>
+                            <Rectangle x:Name="MultiHp4ColorBar" Fill="#000000"/>
+
+                            <!-- MultiHp5 Legacy Controls -->
+                            <CheckBox x:Name="MultiHp5Enabled" IsChecked="False"/>
+                            <TextBox x:Name="MultiHp5StartX" Text="1"/>
+                            <TextBox x:Name="MultiHp5EndX" Text="90"/>
+                            <TextBox x:Name="MultiHp5Y" Text="5"/>
+                            <TextBox x:Name="MultiHp5Threshold" Text="30"/>
+                            <TextBox x:Name="MultiHp5ClickX" Text="376"/>
+                            <TextBox x:Name="MultiHp5ClickY" Text="236"/>
+                            <TextBox x:Name="MultiHp5Key" Text="5"/>
+                            <TextBlock x:Name="MultiHp5Status" Text="Waiting..."/>
+                            <TextBlock x:Name="MultiHp5Percentage" Text="100%"/>
+                            <Rectangle x:Name="MultiHp5ColorBar" Fill="#000000"/>
+
+                            <!-- MultiHp6 Legacy Controls -->
+                            <CheckBox x:Name="MultiHp6Enabled" IsChecked="False"/>
+                            <TextBox x:Name="MultiHp6StartX" Text="1"/>
+                            <TextBox x:Name="MultiHp6EndX" Text="90"/>
+                            <TextBox x:Name="MultiHp6Y" Text="5"/>
+                            <TextBox x:Name="MultiHp6Threshold" Text="30"/>
+                            <TextBox x:Name="MultiHp6ClickX" Text="376"/>
+                            <TextBox x:Name="MultiHp6ClickY" Text="236"/>
+                            <TextBox x:Name="MultiHp6Key" Text="6"/>
+                            <TextBlock x:Name="MultiHp6Status" Text="Waiting..."/>
+                            <TextBlock x:Name="MultiHp6Percentage" Text="100%"/>
+                            <Rectangle x:Name="MultiHp6ColorBar" Fill="#000000"/>
+
+                            <!-- MultiHp7 Legacy Controls -->
+                            <CheckBox x:Name="MultiHp7Enabled" IsChecked="False"/>
+                            <TextBox x:Name="MultiHp7StartX" Text="1"/>
+                            <TextBox x:Name="MultiHp7EndX" Text="90"/>
+                            <TextBox x:Name="MultiHp7Y" Text="5"/>
+                            <TextBox x:Name="MultiHp7Threshold" Text="30"/>
+                            <TextBox x:Name="MultiHp7ClickX" Text="376"/>
+                            <TextBox x:Name="MultiHp7ClickY" Text="236"/>
+                            <TextBox x:Name="MultiHp7Key" Text="7"/>
+                            <TextBlock x:Name="MultiHp7Status" Text="Waiting..."/>
+                            <TextBlock x:Name="MultiHp7Percentage" Text="100%"/>
+                            <Rectangle x:Name="MultiHp7ColorBar" Fill="#000000"/>
+
+                            <!-- MultiHp8 Legacy Controls -->
+                            <CheckBox x:Name="MultiHp8Enabled" IsChecked="False"/>
+                            <TextBox x:Name="MultiHp8StartX" Text="1"/>
+                            <TextBox x:Name="MultiHp8EndX" Text="90"/>
+                            <TextBox x:Name="MultiHp8Y" Text="5"/>
+                            <TextBox x:Name="MultiHp8Threshold" Text="30"/>
+                            <TextBox x:Name="MultiHp8ClickX" Text="376"/>
+                            <TextBox x:Name="MultiHp8ClickY" Text="236"/>
+                            <TextBox x:Name="MultiHp8Key" Text="8"/>
+                            <TextBlock x:Name="MultiHp8Status" Text="Waiting..."/>
+                            <TextBlock x:Name="MultiHp8Percentage" Text="100%"/>
+                            <Rectangle x:Name="MultiHp8ColorBar" Fill="#000000"/>
+                        </StackPanel>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="⚙️ Settings" Width="80">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="5">
+                        <!-- Anti-Captcha Header -->
+                        <Border Background="#1a1a1a" CornerRadius="3" Padding="8" Margin="0,0,0,5">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                    <Border Background="#ff1493" CornerRadius="8" Padding="4,2" Margin="0,0,8,0">
+                                        <TextBlock Text="🤖" Foreground="White" FontWeight="Bold" FontSize="10"/>
+                                    </Border>
+                                    <TextBlock Text="Anti-Captcha System" Style="{StaticResource SectionHeaderStyle}" FontSize="11" Foreground="#FFD700"/>
+                                </StackPanel>
+
+                                <CheckBox Grid.Column="1" x:Name="CaptchaEnabled" Content="Enable" IsChecked="False" Foreground="#cccccc" FontSize="9"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Captcha Area Configuration -->
+                        <Border Background="#2d2d30"  Padding="6" Margin="0,0,0,5">
+                            <StackPanel>
+                                <TextBlock Text="📍 Captcha Detection Area" Style="{StaticResource LabelStyle}" FontSize="10" Foreground="#87CEEB" Margin="0,0,0,5"/>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Captcha Area Coordinates -->
+                                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                        <TextBlock Text="X:" Style="{StaticResource LabelStyle}" FontSize="9"/>
+                                        <TextBox x:Name="CaptchaX" Style="{StaticResource CoordTextBoxStyle}" Text="400" Width="40"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" Margin="0,0,8,0">
+                                        <TextBlock Text="Y:" Style="{StaticResource LabelStyle}" FontSize="9"/>
+                                        <TextBox x:Name="CaptchaY" Style="{StaticResource CoordTextBoxStyle}" Text="350" Width="40"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2" Margin="0,0,8,0">
+                                        <TextBlock Text="Width:" Style="{StaticResource LabelStyle}" FontSize="9"/>
+                                        <TextBox x:Name="CaptchaWidth" Style="{StaticResource CoordTextBoxStyle}" Text="300" Width="40"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="3" Margin="0,0,8,0">
+                                        <TextBlock Text="Height:" Style="{StaticResource LabelStyle}" FontSize="9"/>
+                                        <TextBox x:Name="CaptchaHeight" Style="{StaticResource CoordTextBoxStyle}" Text="100" Width="40"/>
+                                    </StackPanel>
+
+                                    <Button Grid.Column="4" Content="📷 Preview" x:Name="CaptchaPreviewButton" 
+                                            Style="{StaticResource SmallButtonStyle}" Height="20" Margin="0,14,0,0"
+                                            Click="CaptchaPreview_Click"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Input Area Configuration -->
+                        <Border Background="#2d2d30"  Padding="6" Margin="0,0,0,5">
+                            <StackPanel>
+                                <TextBlock Text="✏️ Input Coordinates" Style="{StaticResource LabelStyle}" FontSize="10" Foreground="#87CEEB" Margin="0,0,0,5"/>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Text Input Coordinates -->
+                                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                        <TextBlock Text="Text X:" Style="{StaticResource LabelStyle}" FontSize="9"/>
+                                        <TextBox x:Name="CaptchaTextX" Style="{StaticResource CoordTextBoxStyle}" Text="700" Width="40"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" Margin="0,0,8,0">
+                                        <TextBlock Text="Text Y:" Style="{StaticResource LabelStyle}" FontSize="9"/>
+                                        <TextBox x:Name="CaptchaTextY" Style="{StaticResource CoordTextBoxStyle}" Text="460" Width="40"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2" Margin="0,0,8,0">
+                                        <TextBlock Text="Btn X:" Style="{StaticResource LabelStyle}" FontSize="9"/>
+                                        <TextBox x:Name="CaptchaButtonX" Style="{StaticResource CoordTextBoxStyle}" Text="700" Width="40"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="3" Margin="0,0,8,0">
+                                        <TextBlock Text="Btn Y:" Style="{StaticResource LabelStyle}" FontSize="9"/>
+                                        <TextBox x:Name="CaptchaButtonY" Style="{StaticResource CoordTextBoxStyle}" Text="490" Width="40"/>
+                                    </StackPanel>
+
+                                    <Button Grid.Column="4" Content="🧪 Test" x:Name="CaptchaTestButton" 
+                                            Style="{StaticResource SmallButtonStyle}" Height="20" Margin="0,14,0,0"
+                                            Click="CaptchaTest_Click"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- OCR Settings -->
+                        <Border Background="#2d2d30"  Padding="6" Margin="0,0,0,5">
+                            <StackPanel>
+                                <TextBlock Text="⚙️ OCR Settings" Style="{StaticResource LabelStyle}" FontSize="10" Foreground="#87CEEB" Margin="0,0,0,5"/>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" Margin="0,0,4,0">
+                                        <TextBlock Text="Contrast:" Style="{StaticResource LabelStyle}" FontSize="9"/>
+                                        <TextBox x:Name="CaptchaContrast" Style="{StaticResource CoordTextBoxStyle}" Text="3.5" Width="45"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" Margin="0,0,4,0">
+                                        <TextBlock Text="Sharp:" Style="{StaticResource LabelStyle}" FontSize="9"/>
+                                        <TextBox x:Name="CaptchaSharpness" Style="{StaticResource CoordTextBoxStyle}" Text="3.0" Width="45"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2" Margin="0,0,4,0">
+                                        <TextBlock Text="Scale:" Style="{StaticResource LabelStyle}" FontSize="9"/>
+                                        <TextBox x:Name="CaptchaScale" Style="{StaticResource CoordTextBoxStyle}" Text="4" Width="45"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="3">
+                                        <TextBlock Text="Interval:" Style="{StaticResource LabelStyle}" FontSize="9"/>
+                                        <TextBox x:Name="CaptchaInterval" Style="{StaticResource CoordTextBoxStyle}" Text="5000" Width="45" ToolTip="Check interval in ms"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                    <CheckBox x:Name="CaptchaGrayscale" Content="Grayscale" IsChecked="True" Foreground="#cccccc" FontSize="9" Margin="0,0,10,0"/>
+                                    <CheckBox x:Name="CaptchaHistogram" Content="Histogram Eq." IsChecked="True" Foreground="#cccccc" FontSize="9"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Control Buttons -->
+                        <Grid Margin="0,5,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Column="0" Content="▶️ Start" x:Name="CaptchaStartButton" 
+                                    Style="{StaticResource SmallButtonStyle}" Height="22" Margin="0,0,2,0"
+                                    Background="#28a745" Click="CaptchaStart_Click"/>
+
+                            <Button Grid.Column="1" Content="⏸️ Stop" x:Name="CaptchaStopButton" 
+                                    Style="{StaticResource SmallButtonStyle}" Height="22" Margin="2,0,2,0"
+                                    Background="#dc3545" IsEnabled="False" Click="CaptchaStop_Click"/>
+
+                            <Button Grid.Column="2" Content="💾 Save" x:Name="CaptchaSaveButton" 
+                                    Style="{StaticResource SmallButtonStyle}" Height="22" Margin="2,0,0,0"
+                                    Background="#0e639c" Click="CaptchaSave_Click"/>
+                        </Grid>
+
+                        <!-- Status Display -->
+                        <Border Background="#1a1a1a"  Padding="6" Margin="0,8,0,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock x:Name="CaptchaStatus" Text="🔴 Monitor: OFF" Style="{StaticResource LabelStyle}" FontSize="10" Foreground="#FFD700"/>
+                                    <TextBlock x:Name="CaptchaLastResult" Text="Last: No captcha detected" Style="{StaticResource LabelStyle}" FontSize="9" Foreground="#87CEEB" Margin="0,2,0,0"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock x:Name="CaptchaSolveCount" Text="Solved: 0" Style="{StaticResource ValueStyle}" FontSize="9"/>
+                                    <TextBlock x:Name="CaptchaDetectCount" Text="Detected: 0" Style="{StaticResource ValueStyle}" FontSize="9"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+    </Border>
+</UserControl>

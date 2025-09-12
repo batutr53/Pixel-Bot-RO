@@ -1,0 +1,210 @@
+<Window x:Class="PixelAutomation.Tool.Overlay.WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="BabeMakro Control Panel"
+        Height="700" Width="600"
+        MinHeight="700" MaxHeight="700"
+        MinWidth="600" MaxWidth="600"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        Background="#1e1e1e">
+    
+    <Window.Resources>
+        <Style x:Key="ClientCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="#2d2d30"/>
+            <Setter Property="BorderBrush" Value="#3f3f46"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Padding" Value="10"/>
+        </Style>
+        
+        <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#ffffff"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        
+        <Style x:Key="InfoTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#cccccc"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="11"/>
+        </Style>
+        
+        <Style x:Key="CoordinateTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Width" Value="50"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Background" Value="#383838"/>
+            <Setter Property="Foreground" Value="#ffffff"/>
+            <Setter Property="BorderBrush" Value="#555555"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+        </Style>
+        
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#0e639c"/>
+            <Setter Property="Foreground" Value="#ffffff"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Height" Value="25"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1177bb"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header Panel -->
+        <Border Grid.Row="0" Background="#252526" BorderBrush="#3f3f46" BorderThickness="0,0,0,1" Padding="15,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <!-- BabeMakro Logo Area -->
+                    <Border Background="#ff1493" CornerRadius="15" Padding="8,4" Margin="0,0,15,0">
+                        <TextBlock Text="BabeMakro" Foreground="White" FontWeight="Bold" FontSize="14" FontFamily="Arial Black"/>
+                    </Border>
+                    <!-- Profile, Capture, Click controls are hidden -->
+                    <!--
+                    <TextBlock Text="Profile:" Style="{StaticResource InfoTextStyle}" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                    <TextBox x:Name="ProfileTextBox" Width="150" Height="25" Margin="0,0,15,0" Text="Default" Style="{StaticResource CoordinateTextBoxStyle}"/>
+                    <Button Content="⬅" Width="25" Height="25" Style="{StaticResource ActionButtonStyle}" Click="PreviousProfile_Click" Margin="0,0,2,0"/>
+                    <Button Content="➡" Width="25" Height="25" Style="{StaticResource ActionButtonStyle}" Click="NextProfile_Click" Margin="0,0,15,0"/>
+                    <TextBlock Text="Capture:" Style="{StaticResource InfoTextStyle}" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                    <TextBox x:Name="CaptureModeTextBox" Width="80" Height="25" Margin="0,0,15,0" Text="WGC" Style="{StaticResource CoordinateTextBoxStyle}"/>
+                    <TextBlock Text="Click:" Style="{StaticResource InfoTextStyle}" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                    <TextBox x:Name="ClickModeTextBox" Width="140" Height="25" Text="message" Style="{StaticResource CoordinateTextBoxStyle}"/>
+                    -->
+                </StackPanel>
+                
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <!-- Only show essential controls -->
+                    <Button Content="💾 Save" Style="{StaticResource ActionButtonStyle}" Click="SaveConfig_Click" Margin="0,0,5,0"/>
+                    <Button Content="📁 Load" Style="{StaticResource ActionButtonStyle}" Click="LoadConfig_Click" Margin="0,0,10,0"/>
+                    <Button x:Name="PanicToggleButton" Content="🚀 PANIC START" Background="#28a745" Style="{StaticResource ActionButtonStyle}" Click="PanicToggle_Click" Margin="0,0,5,0"/>
+                    
+                    <!-- Hidden controls -->
+                    <!--
+                    <Border Background="#FF5722" CornerRadius="3" Padding="2" Margin="0,0,5,0">
+                        <Button x:Name="MasterAttackButton" Content="▶ Attack" Width="80" Height="25" Background="Transparent" Foreground="White" BorderThickness="0" FontWeight="Bold" FontSize="11" Click="MasterAttack_Click"/>
+                    </Border>
+                    <Border Background="#9C27B0" CornerRadius="3" Padding="2" Margin="0,0,10,0">
+                        <Button x:Name="MasterHealButton" Content="▶ Heal/Buff" Width="80" Height="25" Background="Transparent" Foreground="White" BorderThickness="0" FontWeight="Bold" FontSize="11" Click="MasterHeal_Click"/>
+                    </Border>
+                    <Button Content="⚙️ Settings" Style="{StaticResource ActionButtonStyle}" Click="Settings_Click" Margin="0,0,10,0"/>
+                    <CheckBox x:Name="OverlayModeCheckBox" Content="Overlay Mode" Foreground="#cccccc" VerticalAlignment="Center" Margin="0,0,10,0" Checked="OverlayMode_Checked" Unchecked="OverlayMode_Unchecked"/>
+                    -->
+                </StackPanel>
+            </Grid>
+        </Border>
+        
+        <!-- Main Content - Tab-based Client Layout -->
+        <TabControl x:Name="ClientTabControl" Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="10" TabStripPlacement="Left">
+            <TabControl.Resources>
+                <Style TargetType="TabItem">
+                    <Setter Property="Background" Value="#3c3c3c"/>
+                    <Setter Property="Foreground" Value="#ffffff"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Padding" Value="8,12"/>
+                    <Setter Property="Margin" Value="0,2"/>
+                    <Setter Property="FontSize" Value="14"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="MinWidth" Value="35"/>
+                    <Setter Property="Width" Value="35"/>
+                    <Setter Property="Height" Value="50"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="TabItem">
+                                <Border x:Name="Border" 
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        Padding="{TemplateBinding Padding}"
+                                        Margin="{TemplateBinding Margin}">
+                                    <ContentPresenter x:Name="ContentSite"
+                                                      VerticalAlignment="Center"
+                                                      HorizontalAlignment="Center"
+                                                      ContentSource="Header"
+                                                      TextBlock.Foreground="{TemplateBinding Foreground}"
+                                                      TextBlock.FontSize="{TemplateBinding FontSize}"
+                                                      TextBlock.FontWeight="{TemplateBinding FontWeight}"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="#ff1493"/>
+                            <Setter Property="Foreground" Value="#ffffff"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#555555"/>
+                            <Setter Property="Foreground" Value="#ffffff"/>
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsSelected" Value="True"/>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Background" Value="#ff1493"/>
+                            <Setter Property="Foreground" Value="#ffffff"/>
+                        </MultiTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TabControl.Resources>
+            
+            <!-- Client tabs with simple numbers -->
+            <TabItem Header="1" x:Name="Client1Tab"/>
+            <TabItem Header="2" x:Name="Client2Tab"/>
+            <TabItem Header="3" x:Name="Client3Tab"/>
+            <TabItem Header="4" x:Name="Client4Tab"/>
+            <TabItem Header="5" x:Name="Client5Tab"/>
+            <TabItem Header="6" x:Name="Client6Tab"/>
+            <TabItem Header="7" x:Name="Client7Tab"/>
+            <TabItem Header="8" x:Name="Client8Tab"/>
+        </TabControl>
+        
+        <!-- Status Bar -->
+        <Border Grid.Row="2" Background="#007acc" BorderBrush="#1e1e1e" BorderThickness="0,1,0,0" Padding="15,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock x:Name="StatusText" Text="Ready" Foreground="White" VerticalAlignment="Center" Margin="0,0,20,0"/>
+                    <TextBlock Text="Connected Clients:" Foreground="White" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBlock x:Name="ConnectedClientsText" Text="0/8" Foreground="#90EE90" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,20,0"/>
+                    <TextBlock Text="FPS:" Foreground="White" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBlock x:Name="FpsText" Text="0" Foreground="#90EE90" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,20,0"/>
+                    <TextBlock Text="Total Clicks:" Foreground="White" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBlock x:Name="TotalClicksText" Text="0" Foreground="#90EE90" VerticalAlignment="Center" FontWeight="Bold"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <TextBlock Text="🔥 Active Workers:" Foreground="White" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBlock x:Name="ActiveWorkersText" Text="0" Foreground="#FFD700" VerticalAlignment="Center" FontWeight="Bold"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        
+        <!-- Overlay Canvas (when in overlay mode) -->
+        <Canvas x:Name="OverlayCanvas" Grid.RowSpan="3" Background="Transparent" Visibility="Collapsed" IsHitTestVisible="False"/>
+    </Grid>
+</Window>

@@ -1,0 +1,160 @@
+{
+  "profiles": {
+    "Test": {
+      "global": {
+        "captureMode": "WGC",
+        "clickMode": "message",
+        "defaultHz": 80,
+        "logLevel": "Info",
+        "enableTelemetry": true,
+        "dryRun": false
+      },
+      "windows": [
+        {
+          "titleRegex": "Client 1",
+          "hwndString": "590144",
+          "processName": null,
+          "dpiAware": true,
+          "probes": [
+            {
+              "name": "HP1",
+              "kind": "point",
+              "x": 150,
+              "y": 67,
+              "width": null,
+              "height": null,
+              "box": 5,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [255, 0, 0],
+              "toColor": [0, 0, 0],
+              "tolerance": 70,
+              "debounceMs": 30
+            },
+            {
+              "name": "MP1",
+              "kind": "point",
+              "x": 150,
+              "y": 84,
+              "width": null,
+              "height": null,
+              "box": 5,
+              "mode": "edge",
+              "metric": "rgb",
+              "refColor": [0, 0, 255],
+              "toColor": [0, 0, 0],
+              "tolerance": 50,
+              "debounceMs": 30
+            }
+          ],
+          "percentageProbes": [
+            {
+              "name": "BabeBotHP1",
+              "type": "HP",
+              "startX": 1,
+              "endX": 90,
+              "y": 12,
+              "monitorPercentage": 30,
+              "expectedColor": [255, 0, 0],
+              "emptyColor": null,
+              "tolerance": 30,
+              "box": 1,
+              "mode": "edge",
+              "metric": "rgb",
+              "debounceMs": 100
+            },
+            {
+              "name": "BabeBotMP1",
+              "type": "MP",
+              "startX": 103,
+              "endX": 306,
+              "y": 104,
+              "monitorPercentage": 90,
+              "expectedColor": [0, 0, 255],
+              "emptyColor": null,
+              "tolerance": 30,
+              "box": 1,
+              "mode": "edge",
+              "metric": "rgb",
+              "debounceMs": 100
+            }
+          ],
+          "events": [
+            {
+              "when": "HP1:edge-down",
+              "click": {
+                "x": 400,
+                "y": 300
+              },
+              "cooldownMs": 120,
+              "priority": 1
+            },
+            {
+              "when": "MP1:edge-down",
+              "click": {
+                "x": 450,
+                "y": 350
+              },
+              "cooldownMs": 120,
+              "priority": 1
+            }
+          ],
+          "periodicClicks": [
+            {
+              "name": "BabeBotHP",
+              "x": 376,
+              "y": 236,
+              "periodMs": 500,
+              "periodSec": null,
+              "enabled": false
+            },
+            {
+              "name": "BabeBotMP",
+              "x": 376,
+              "y": 200,
+              "periodMs": 500,
+              "periodSec": null,
+              "enabled": false
+            },
+            {
+              "name": "Y",
+              "x": 540,
+              "y": 760,
+              "periodMs": 120,
+              "periodSec": null,
+              "enabled": true
+            },
+            {
+              "name": "Extra1",
+              "x": 700,
+              "y": 820,
+              "periodMs": 250,
+              "periodSec": null,
+              "enabled": false
+            },
+            {
+              "name": "Extra2",
+              "x": 600,
+              "y": 500,
+              "periodMs": 500,
+              "periodSec": null,
+              "enabled": false
+            },
+            {
+              "name": "Extra3",
+              "x": 650,
+              "y": 600,
+              "periodMs": 1000,
+              "periodSec": null,
+              "enabled": false
+            }
+          ],
+          "limits": null
+        }
+      ],
+      "hotkeys": null
+    }
+  },
+  "hotkeySets": {},
+  "activeHotkeys": "Default"
+}

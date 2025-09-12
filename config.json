@@ -12,15 +12,15 @@
       "windows": [
         {
           "titleRegex": "Client 1",
-          "hwndString": "721930",
+          "hwndString": null,
           "processName": null,
           "dpiAware": true,
           "probes": [
             {
               "name": "HP1",
               "kind": "point",
-              "x": 0,
-              "y": 0,
+              "x": 150,
+              "y": 67,
               "width": null,
               "height": null,
               "box": 5,
@@ -42,8 +42,8 @@
             {
               "name": "MP1",
               "kind": "point",
-              "x": 0,
-              "y": 0,
+              "x": 150,
+              "y": 84,
               "width": null,
               "height": null,
               "box": 5,
@@ -68,9 +68,9 @@
               "name": "BabeBotHP1",
               "type": "HP",
               "startX": 1,
-              "endX": 11,
-              "y": 11,
-              "monitorPercentage": 11,
+              "endX": 325,
+              "y": 81,
+              "monitorPercentage": 90,
               "expectedColor": [
                 255,
                 0,
@@ -86,10 +86,10 @@
             {
               "name": "BabeBotMP1",
               "type": "MP",
-              "startX": 11,
-              "endX": 11,
-              "y": 11,
-              "monitorPercentage": 15,
+              "startX": 103,
+              "endX": 306,
+              "y": 104,
+              "monitorPercentage": 90,
               "expectedColor": [
                 0,
                 0,
@@ -153,8 +153,8 @@
             {
               "when": "HP1:edge-down",
               "click": {
-                "x": 0,
-                "y": 0,
+                "x": 400,
+                "y": 300,
                 "useCoordinate": false,
                 "useKeyPress": true,
                 "keyToPress": "F1"
@@ -165,8 +165,8 @@
             {
               "when": "MP1:edge-down",
               "click": {
-                "x": 0,
-                "y": 0,
+                "x": 450,
+                "y": 350,
                 "useCoordinate": false,
                 "useKeyPress": true,
                 "keyToPress": "F2"
@@ -200,8 +200,8 @@
             },
             {
               "name": "Y",
-              "x": 0,
-              "y": 0,
+              "x": 540,
+              "y": 760,
               "periodMs": 120,
               "periodSec": null,
               "enabled": true,
@@ -211,8 +211,8 @@
             },
             {
               "name": "Extra1",
-              "x": 0,
-              "y": 0,
+              "x": 700,
+              "y": 820,
               "periodMs": 250,
               "periodSec": null,
               "enabled": false,
@@ -222,8 +222,8 @@
             },
             {
               "name": "Extra2",
-              "x": 0,
-              "y": 0,
+              "x": 600,
+              "y": 500,
               "periodMs": 500,
               "periodSec": null,
               "enabled": false,
@@ -233,8 +233,8 @@
             },
             {
               "name": "Extra3",
-              "x": 0,
-              "y": 0,
+              "x": 650,
+              "y": 600,
               "periodMs": 1000,
               "periodSec": null,
               "enabled": false,
@@ -268,14 +268,16 @@
           "limits": null,
           "uiSettings": {
             "values": {
-              "HpProbeX": "0",
-              "HpProbeY": "0",
-              "MpProbeX": "0",
-              "MpProbeY": "0",
-              "HpTriggerX": "0",
-              "HpTriggerY": "0",
-              "MpTriggerX": "0",
-              "MpTriggerY": "0",
+              "HpProbeX": "150",
+              "HpProbeY": "67",
+              "MpProbeX": "150",
+              "MpProbeY": "84",
+              "HpTolerance": "70",
+              "MpTolerance": "50",
+              "HpTriggerX": "400",
+              "HpTriggerY": "300",
+              "MpTriggerX": "450",
+              "MpTriggerY": "350",
               "HpCooldown": "120",
               "MpCooldown": "120",
               "HpTriggerEnabled": true,
@@ -286,17 +288,28 @@
               "MpUseKeyPress": true,
               "HpKeyToPress": "Q",
               "MpKeyToPress": "W",
-              "YClickX": "0",
-              "YClickY": "0",
+              "PercentageMonitoringEnabled": false,
+              "HpPercentageStartX": "100",
+              "HpPercentageEndX": "250",
+              "HpPercentageY": "67",
+              "HpPercentageThreshold": "50",
+              "HpPercentageTolerance": "30",
+              "MpPercentageStartX": "100",
+              "MpPercentageEndX": "250",
+              "MpPercentageY": "84",
+              "MpPercentageThreshold": "50",
+              "MpPercentageTolerance": "30",
+              "YClickX": "540",
+              "YClickY": "760",
               "YClickPeriod": "120",
-              "Extra1X": "0",
-              "Extra1Y": "0",
+              "Extra1X": "700",
+              "Extra1Y": "820",
               "Extra1Period": "250",
-              "Extra2X": "0",
-              "Extra2Y": "0",
+              "Extra2X": "600",
+              "Extra2Y": "500",
               "Extra2Period": "500",
-              "Extra3X": "0",
-              "Extra3Y": "0",
+              "Extra3X": "650",
+              "Extra3Y": "600",
               "Extra3Period": "1000",
               "YClickEnabled": true,
               "Extra1Enabled": false,
@@ -315,19 +328,19 @@
               "Extra2KeyToPress": "",
               "Extra3KeyToPress": "",
               "BabeBotHpStart": "1",
-              "BabeBotHpEnd": "11",
-              "BabeBotHpY": "11",
-              "BabeBotHpThreshold": "11",
+              "BabeBotHpEnd": "325",
+              "BabeBotHpY": "81",
+              "BabeBotHpThreshold": "90",
               "BabeBotHpPotionX": "376",
               "BabeBotHpPotionY": "236",
               "BabeBotHpEnabled": false,
               "BabeBotHpUseCoordinate": false,
               "BabeBotHpUseKeyPress": true,
               "BabeBotHpKeyToPress": "Q",
-              "BabeBotMpStart": "11",
-              "BabeBotMpEnd": "11",
-              "BabeBotMpY": "11",
-              "BabeBotMpThreshold": "15",
+              "BabeBotMpStart": "103",
+              "BabeBotMpEnd": "306",
+              "BabeBotMpY": "104",
+              "BabeBotMpThreshold": "90",
               "BabeBotMpPotionX": "376",
               "BabeBotMpPotionY": "200",
               "BabeBotMpEnabled": false,
@@ -400,13 +413,27 @@
               "MultiHp8Enabled": false,
               "MultiHpEnabled": false,
               "AnimationDelay": "1500",
-              "MultiHpCheckInterval": "100"
+              "MultiHpCheckInterval": "100",
+              "AttackSystemEnabled": false,
+              "SkillNameInput": "",
+              "SkillKeyInput": "",
+              "SkillIntervalInput": "1500",
+              "AttackSkillsCount": 2,
+              "AttackSkill0Name": "Disabled",
+              "AttackSkill0Key": "F1",
+              "AttackSkill0Interval": 1500,
+              "AttackSkill0Enabled": false,
+              "AttackSkill1Name": "Disabled",
+              "AttackSkill1Key": "F2",
+              "AttackSkill1Interval": 1500,
+              "AttackSkill1Enabled": false
             }
-          }
+          },
+          "captchaConfig": null
         },
         {
           "titleRegex": "Client 2",
-          "hwndString": "75956918",
+          "hwndString": null,
           "processName": null,
           "dpiAware": true,
           "probes": [
@@ -551,7 +578,7 @@
                 "y": 0,
                 "useCoordinate": false,
                 "useKeyPress": true,
-                "keyToPress": "F1"
+                "keyToPress": "Q"
               },
               "cooldownMs": 120,
               "priority": 1
@@ -563,7 +590,7 @@
                 "y": 0,
                 "useCoordinate": false,
                 "useKeyPress": true,
-                "keyToPress": "F2"
+                "keyToPress": "W"
               },
               "cooldownMs": 120,
               "priority": 1
@@ -579,7 +606,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F6"
+              "keyToPress": "Q"
             },
             {
               "name": "BabeBotMP",
@@ -590,7 +617,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F7"
+              "keyToPress": "W"
             },
             {
               "name": "Y",
@@ -612,7 +639,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F3"
+              "keyToPress": null
             },
             {
               "name": "Extra2",
@@ -623,7 +650,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F4"
+              "keyToPress": null
             },
             {
               "name": "Extra3",
@@ -634,7 +661,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F5"
+              "keyToPress": null
             },
             {
               "name": "PythonHpPotion",
@@ -666,6 +693,8 @@
               "HpProbeY": "0",
               "MpProbeX": "0",
               "MpProbeY": "0",
+              "HpTolerance": "70",
+              "MpTolerance": "50",
               "HpTriggerX": "0",
               "HpTriggerY": "0",
               "MpTriggerX": "0",
@@ -680,6 +709,17 @@
               "MpUseKeyPress": true,
               "HpKeyToPress": "Q",
               "MpKeyToPress": "W",
+              "PercentageMonitoringEnabled": false,
+              "HpPercentageStartX": "100",
+              "HpPercentageEndX": "250",
+              "HpPercentageY": "67",
+              "HpPercentageThreshold": "50",
+              "HpPercentageTolerance": "30",
+              "MpPercentageStartX": "100",
+              "MpPercentageEndX": "250",
+              "MpPercentageY": "84",
+              "MpPercentageThreshold": "50",
+              "MpPercentageTolerance": "30",
               "YClickX": "0",
               "YClickY": "0",
               "YClickPeriod": "120",
@@ -794,13 +834,19 @@
               "MultiHp8Enabled": false,
               "MultiHpEnabled": false,
               "AnimationDelay": "1500",
-              "MultiHpCheckInterval": "100"
+              "MultiHpCheckInterval": "100",
+              "AttackSystemEnabled": false,
+              "SkillNameInput": "",
+              "SkillKeyInput": "",
+              "SkillIntervalInput": "1500",
+              "AttackSkillsCount": 0
             }
-          }
+          },
+          "captchaConfig": null
         },
         {
           "titleRegex": "Client 3",
-          "hwndString": "328658",
+          "hwndString": null,
           "processName": null,
           "dpiAware": true,
           "probes": [
@@ -945,7 +991,7 @@
                 "y": 0,
                 "useCoordinate": false,
                 "useKeyPress": true,
-                "keyToPress": "F1"
+                "keyToPress": "Q"
               },
               "cooldownMs": 120,
               "priority": 1
@@ -957,7 +1003,7 @@
                 "y": 0,
                 "useCoordinate": false,
                 "useKeyPress": true,
-                "keyToPress": "F2"
+                "keyToPress": "W"
               },
               "cooldownMs": 120,
               "priority": 1
@@ -973,7 +1019,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F6"
+              "keyToPress": "Q"
             },
             {
               "name": "BabeBotMP",
@@ -984,7 +1030,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F7"
+              "keyToPress": "W"
             },
             {
               "name": "Y",
@@ -1006,7 +1052,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F3"
+              "keyToPress": null
             },
             {
               "name": "Extra2",
@@ -1017,7 +1063,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F4"
+              "keyToPress": null
             },
             {
               "name": "Extra3",
@@ -1028,7 +1074,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F5"
+              "keyToPress": null
             },
             {
               "name": "PythonHpPotion",
@@ -1060,6 +1106,8 @@
               "HpProbeY": "0",
               "MpProbeX": "0",
               "MpProbeY": "0",
+              "HpTolerance": "70",
+              "MpTolerance": "50",
               "HpTriggerX": "0",
               "HpTriggerY": "0",
               "MpTriggerX": "0",
@@ -1074,6 +1122,17 @@
               "MpUseKeyPress": true,
               "HpKeyToPress": "Q",
               "MpKeyToPress": "W",
+              "PercentageMonitoringEnabled": false,
+              "HpPercentageStartX": "100",
+              "HpPercentageEndX": "250",
+              "HpPercentageY": "67",
+              "HpPercentageThreshold": "50",
+              "HpPercentageTolerance": "30",
+              "MpPercentageStartX": "100",
+              "MpPercentageEndX": "250",
+              "MpPercentageY": "84",
+              "MpPercentageThreshold": "50",
+              "MpPercentageTolerance": "30",
               "YClickX": "0",
               "YClickY": "0",
               "YClickPeriod": "120",
@@ -1188,13 +1247,19 @@
               "MultiHp8Enabled": false,
               "MultiHpEnabled": false,
               "AnimationDelay": "1500",
-              "MultiHpCheckInterval": "100"
+              "MultiHpCheckInterval": "100",
+              "AttackSystemEnabled": false,
+              "SkillNameInput": "",
+              "SkillKeyInput": "",
+              "SkillIntervalInput": "1500",
+              "AttackSkillsCount": 0
             }
-          }
+          },
+          "captchaConfig": null
         },
         {
           "titleRegex": "Client 4",
-          "hwndString": "1115438",
+          "hwndString": null,
           "processName": null,
           "dpiAware": true,
           "probes": [
@@ -1339,7 +1404,7 @@
                 "y": 0,
                 "useCoordinate": false,
                 "useKeyPress": true,
-                "keyToPress": "F1"
+                "keyToPress": "Q"
               },
               "cooldownMs": 120,
               "priority": 1
@@ -1351,7 +1416,7 @@
                 "y": 0,
                 "useCoordinate": false,
                 "useKeyPress": true,
-                "keyToPress": "F2"
+                "keyToPress": "W"
               },
               "cooldownMs": 120,
               "priority": 1
@@ -1367,7 +1432,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F6"
+              "keyToPress": "Q"
             },
             {
               "name": "BabeBotMP",
@@ -1378,7 +1443,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F7"
+              "keyToPress": "W"
             },
             {
               "name": "Y",
@@ -1400,7 +1465,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F3"
+              "keyToPress": null
             },
             {
               "name": "Extra2",
@@ -1411,7 +1476,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F4"
+              "keyToPress": null
             },
             {
               "name": "Extra3",
@@ -1422,7 +1487,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F5"
+              "keyToPress": null
             },
             {
               "name": "PythonHpPotion",
@@ -1454,6 +1519,8 @@
               "HpProbeY": "0",
               "MpProbeX": "0",
               "MpProbeY": "0",
+              "HpTolerance": "70",
+              "MpTolerance": "50",
               "HpTriggerX": "0",
               "HpTriggerY": "0",
               "MpTriggerX": "0",
@@ -1468,6 +1535,17 @@
               "MpUseKeyPress": true,
               "HpKeyToPress": "Q",
               "MpKeyToPress": "W",
+              "PercentageMonitoringEnabled": false,
+              "HpPercentageStartX": "100",
+              "HpPercentageEndX": "250",
+              "HpPercentageY": "67",
+              "HpPercentageThreshold": "50",
+              "HpPercentageTolerance": "30",
+              "MpPercentageStartX": "100",
+              "MpPercentageEndX": "250",
+              "MpPercentageY": "84",
+              "MpPercentageThreshold": "50",
+              "MpPercentageTolerance": "30",
               "YClickX": "0",
               "YClickY": "0",
               "YClickPeriod": "120",
@@ -1582,13 +1660,19 @@
               "MultiHp8Enabled": false,
               "MultiHpEnabled": false,
               "AnimationDelay": "1500",
-              "MultiHpCheckInterval": "100"
+              "MultiHpCheckInterval": "100",
+              "AttackSystemEnabled": false,
+              "SkillNameInput": "",
+              "SkillKeyInput": "",
+              "SkillIntervalInput": "1500",
+              "AttackSkillsCount": 0
             }
-          }
+          },
+          "captchaConfig": null
         },
         {
           "titleRegex": "Client 5",
-          "hwndString": "459666",
+          "hwndString": null,
           "processName": null,
           "dpiAware": true,
           "probes": [
@@ -1733,7 +1817,7 @@
                 "y": 0,
                 "useCoordinate": false,
                 "useKeyPress": true,
-                "keyToPress": "F1"
+                "keyToPress": "Q"
               },
               "cooldownMs": 120,
               "priority": 1
@@ -1745,7 +1829,7 @@
                 "y": 0,
                 "useCoordinate": false,
                 "useKeyPress": true,
-                "keyToPress": "F2"
+                "keyToPress": "W"
               },
               "cooldownMs": 120,
               "priority": 1
@@ -1761,7 +1845,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F6"
+              "keyToPress": "Q"
             },
             {
               "name": "BabeBotMP",
@@ -1772,7 +1856,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F7"
+              "keyToPress": "W"
             },
             {
               "name": "Y",
@@ -1794,7 +1878,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F3"
+              "keyToPress": null
             },
             {
               "name": "Extra2",
@@ -1805,7 +1889,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F4"
+              "keyToPress": null
             },
             {
               "name": "Extra3",
@@ -1816,7 +1900,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F5"
+              "keyToPress": null
             },
             {
               "name": "PythonHpPotion",
@@ -1848,6 +1932,8 @@
               "HpProbeY": "0",
               "MpProbeX": "0",
               "MpProbeY": "0",
+              "HpTolerance": "70",
+              "MpTolerance": "50",
               "HpTriggerX": "0",
               "HpTriggerY": "0",
               "MpTriggerX": "0",
@@ -1862,6 +1948,17 @@
               "MpUseKeyPress": true,
               "HpKeyToPress": "Q",
               "MpKeyToPress": "W",
+              "PercentageMonitoringEnabled": false,
+              "HpPercentageStartX": "100",
+              "HpPercentageEndX": "250",
+              "HpPercentageY": "67",
+              "HpPercentageThreshold": "50",
+              "HpPercentageTolerance": "30",
+              "MpPercentageStartX": "100",
+              "MpPercentageEndX": "250",
+              "MpPercentageY": "84",
+              "MpPercentageThreshold": "50",
+              "MpPercentageTolerance": "30",
               "YClickX": "0",
               "YClickY": "0",
               "YClickPeriod": "120",
@@ -1976,13 +2073,19 @@
               "MultiHp8Enabled": false,
               "MultiHpEnabled": false,
               "AnimationDelay": "1500",
-              "MultiHpCheckInterval": "100"
+              "MultiHpCheckInterval": "100",
+              "AttackSystemEnabled": false,
+              "SkillNameInput": "",
+              "SkillKeyInput": "",
+              "SkillIntervalInput": "1500",
+              "AttackSkillsCount": 0
             }
-          }
+          },
+          "captchaConfig": null
         },
         {
           "titleRegex": "Client 6",
-          "hwndString": "591100",
+          "hwndString": null,
           "processName": null,
           "dpiAware": true,
           "probes": [
@@ -2127,7 +2230,7 @@
                 "y": 0,
                 "useCoordinate": false,
                 "useKeyPress": true,
-                "keyToPress": "F1"
+                "keyToPress": "Q"
               },
               "cooldownMs": 120,
               "priority": 1
@@ -2139,7 +2242,7 @@
                 "y": 0,
                 "useCoordinate": false,
                 "useKeyPress": true,
-                "keyToPress": "F2"
+                "keyToPress": "W"
               },
               "cooldownMs": 120,
               "priority": 1
@@ -2155,7 +2258,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F6"
+              "keyToPress": "Q"
             },
             {
               "name": "BabeBotMP",
@@ -2166,7 +2269,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F7"
+              "keyToPress": "W"
             },
             {
               "name": "Y",
@@ -2188,7 +2291,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F3"
+              "keyToPress": null
             },
             {
               "name": "Extra2",
@@ -2199,7 +2302,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F4"
+              "keyToPress": null
             },
             {
               "name": "Extra3",
@@ -2210,7 +2313,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F5"
+              "keyToPress": null
             },
             {
               "name": "PythonHpPotion",
@@ -2242,6 +2345,8 @@
               "HpProbeY": "0",
               "MpProbeX": "0",
               "MpProbeY": "0",
+              "HpTolerance": "70",
+              "MpTolerance": "50",
               "HpTriggerX": "0",
               "HpTriggerY": "0",
               "MpTriggerX": "0",
@@ -2256,6 +2361,17 @@
               "MpUseKeyPress": true,
               "HpKeyToPress": "Q",
               "MpKeyToPress": "W",
+              "PercentageMonitoringEnabled": false,
+              "HpPercentageStartX": "100",
+              "HpPercentageEndX": "250",
+              "HpPercentageY": "67",
+              "HpPercentageThreshold": "50",
+              "HpPercentageTolerance": "30",
+              "MpPercentageStartX": "100",
+              "MpPercentageEndX": "250",
+              "MpPercentageY": "84",
+              "MpPercentageThreshold": "50",
+              "MpPercentageTolerance": "30",
               "YClickX": "0",
               "YClickY": "0",
               "YClickPeriod": "120",
@@ -2370,13 +2486,19 @@
               "MultiHp8Enabled": false,
               "MultiHpEnabled": false,
               "AnimationDelay": "1500",
-              "MultiHpCheckInterval": "100"
+              "MultiHpCheckInterval": "100",
+              "AttackSystemEnabled": false,
+              "SkillNameInput": "",
+              "SkillKeyInput": "",
+              "SkillIntervalInput": "1500",
+              "AttackSkillsCount": 0
             }
-          }
+          },
+          "captchaConfig": null
         },
         {
           "titleRegex": "Client 7",
-          "hwndString": "394930",
+          "hwndString": null,
           "processName": null,
           "dpiAware": true,
           "probes": [
@@ -2521,7 +2643,7 @@
                 "y": 0,
                 "useCoordinate": false,
                 "useKeyPress": true,
-                "keyToPress": "F1"
+                "keyToPress": "Q"
               },
               "cooldownMs": 120,
               "priority": 1
@@ -2533,7 +2655,7 @@
                 "y": 0,
                 "useCoordinate": false,
                 "useKeyPress": true,
-                "keyToPress": "F2"
+                "keyToPress": "W"
               },
               "cooldownMs": 120,
               "priority": 1
@@ -2549,7 +2671,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F6"
+              "keyToPress": "Q"
             },
             {
               "name": "BabeBotMP",
@@ -2560,7 +2682,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F7"
+              "keyToPress": "W"
             },
             {
               "name": "Y",
@@ -2582,7 +2704,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F3"
+              "keyToPress": null
             },
             {
               "name": "Extra2",
@@ -2593,7 +2715,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F4"
+              "keyToPress": null
             },
             {
               "name": "Extra3",
@@ -2604,7 +2726,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F5"
+              "keyToPress": null
             },
             {
               "name": "PythonHpPotion",
@@ -2636,6 +2758,8 @@
               "HpProbeY": "0",
               "MpProbeX": "0",
               "MpProbeY": "0",
+              "HpTolerance": "70",
+              "MpTolerance": "50",
               "HpTriggerX": "0",
               "HpTriggerY": "0",
               "MpTriggerX": "0",
@@ -2650,6 +2774,17 @@
               "MpUseKeyPress": true,
               "HpKeyToPress": "Q",
               "MpKeyToPress": "W",
+              "PercentageMonitoringEnabled": false,
+              "HpPercentageStartX": "100",
+              "HpPercentageEndX": "250",
+              "HpPercentageY": "67",
+              "HpPercentageThreshold": "50",
+              "HpPercentageTolerance": "30",
+              "MpPercentageStartX": "100",
+              "MpPercentageEndX": "250",
+              "MpPercentageY": "84",
+              "MpPercentageThreshold": "50",
+              "MpPercentageTolerance": "30",
               "YClickX": "0",
               "YClickY": "0",
               "YClickPeriod": "120",
@@ -2764,13 +2899,19 @@
               "MultiHp8Enabled": false,
               "MultiHpEnabled": false,
               "AnimationDelay": "1500",
-              "MultiHpCheckInterval": "100"
+              "MultiHpCheckInterval": "100",
+              "AttackSystemEnabled": false,
+              "SkillNameInput": "",
+              "SkillKeyInput": "",
+              "SkillIntervalInput": "1500",
+              "AttackSkillsCount": 0
             }
-          }
+          },
+          "captchaConfig": null
         },
         {
           "titleRegex": "Client 8",
-          "hwndString": "1443352",
+          "hwndString": null,
           "processName": null,
           "dpiAware": true,
           "probes": [
@@ -2915,7 +3056,7 @@
                 "y": 0,
                 "useCoordinate": false,
                 "useKeyPress": true,
-                "keyToPress": "F1"
+                "keyToPress": "Q"
               },
               "cooldownMs": 120,
               "priority": 1
@@ -2927,7 +3068,7 @@
                 "y": 0,
                 "useCoordinate": false,
                 "useKeyPress": true,
-                "keyToPress": "F2"
+                "keyToPress": "W"
               },
               "cooldownMs": 120,
               "priority": 1
@@ -2943,7 +3084,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F6"
+              "keyToPress": "Q"
             },
             {
               "name": "BabeBotMP",
@@ -2954,7 +3095,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F7"
+              "keyToPress": "W"
             },
             {
               "name": "Y",
@@ -2976,7 +3117,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F3"
+              "keyToPress": null
             },
             {
               "name": "Extra2",
@@ -2987,7 +3128,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F4"
+              "keyToPress": null
             },
             {
               "name": "Extra3",
@@ -2998,7 +3139,7 @@
               "enabled": false,
               "useCoordinate": false,
               "useKeyPress": true,
-              "keyToPress": "F5"
+              "keyToPress": null
             },
             {
               "name": "PythonHpPotion",
@@ -3030,6 +3171,8 @@
               "HpProbeY": "0",
               "MpProbeX": "0",
               "MpProbeY": "0",
+              "HpTolerance": "70",
+              "MpTolerance": "50",
               "HpTriggerX": "0",
               "HpTriggerY": "0",
               "MpTriggerX": "0",
@@ -3044,6 +3187,17 @@
               "MpUseKeyPress": true,
               "HpKeyToPress": "Q",
               "MpKeyToPress": "W",
+              "PercentageMonitoringEnabled": false,
+              "HpPercentageStartX": "100",
+              "HpPercentageEndX": "250",
+              "HpPercentageY": "67",
+              "HpPercentageThreshold": "50",
+              "HpPercentageTolerance": "30",
+              "MpPercentageStartX": "100",
+              "MpPercentageEndX": "250",
+              "MpPercentageY": "84",
+              "MpPercentageThreshold": "50",
+              "MpPercentageTolerance": "30",
               "YClickX": "0",
               "YClickY": "0",
               "YClickPeriod": "120",
@@ -3158,9 +3312,15 @@
               "MultiHp8Enabled": false,
               "MultiHpEnabled": false,
               "AnimationDelay": "1500",
-              "MultiHpCheckInterval": "100"
+              "MultiHpCheckInterval": "100",
+              "AttackSystemEnabled": false,
+              "SkillNameInput": "",
+              "SkillKeyInput": "",
+              "SkillIntervalInput": "1500",
+              "AttackSkillsCount": 0
             }
-          }
+          },
+          "captchaConfig": null
         }
       ],
       "hotkeys": null

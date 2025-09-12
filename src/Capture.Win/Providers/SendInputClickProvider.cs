@@ -128,9 +128,111 @@ public class SendInputClickProvider : IClickProvider
         }
     }
 
+    public async Task<bool> SendTextAsync(IntPtr hwnd, string text)
+    {
+        if (string.IsNullOrEmpty(text) || hwnd == IntPtr.Zero)
+            return false;
+
+        try
+        {
+            SetForegroundWindow(hwnd);
+            await Task.Delay(100);
+
+            var inputs = new List<INPUT>();
+            foreach (char c in text)
+            {
+                if (char.IsControl(c)) continue;
+                
+                inputs.Add(new INPUT
+                {
+                    type = INPUTTYPE.INPUT_KEYBOARD,
+                    ki = new KEYBDINPUT
+                    {
+                        wVk = 0,
+                        wScan = c,
+                        dwFlags = KEYEVENTF.KEYEVENTF_UNICODE
+                    }
+                });
+            }
+
+            SendInput((uint)inputs.Count, inputs.ToArray(), Marshal.SizeOf<INPUT>());
+            return true;
+        }
+        catch
+        {
+            return await (_fallbackProvider?.SendTextAsync(hwnd, text) ?? Task.FromResult(false));
+        }
+    }
+
+    public async Task<bool> SendKeyAsync(IntPtr hwnd, string key)
+    {
+        if (string.IsNullOrEmpty(key) || hwnd == IntPtr.Zero)
+            return false;
+
+        try
+        {
+            var virtualKey = GetVirtualKeyCode(key.ToLower());
+            if (virtualKey == 0) return false;
+
+            SetForegroundWindow(hwnd);
+            await Task.Delay(50);
+
+            var inputs = new INPUT[]
+            {
+                new INPUT
+                {
+                    type = INPUTTYPE.INPUT_KEYBOARD,
+                    ki = new KEYBDINPUT
+                    {
+                        wVk = (ushort)virtualKey,
+                        dwFlags = 0
+                    }
+                },
+                new INPUT
+                {
+                    type = INPUTTYPE.INPUT_KEYBOARD,
+                    ki = new KEYBDINPUT
+                    {
+                        wVk = (ushort)virtualKey,
+                        dwFlags = KEYEVENTF.KEYEVENTF_KEYUP
+                    }
+                }
+            };
+
+            SendInput(2, inputs, Marshal.SizeOf<INPUT>());
+            return true;
+        }
+        catch
+        {
+            return await (_fallbackProvider?.SendKeyAsync(hwnd, key) ?? Task.FromResult(false));
+        }
+    }
+
     public void SetFallbackProvider(IClickProvider fallback)
     {
         _fallbackProvider = fallback;
+    }
+
+    private static VK GetVirtualKeyCode(string key)
+    {
+        return key switch
+        {
+            "return" or "enter" => VK.VK_RETURN,
+            "space" => VK.VK_SPACE,
+            "escape" or "esc" => VK.VK_ESCAPE,
+            "tab" => VK.VK_TAB,
+            "backspace" => VK.VK_BACK,
+            "delete" or "del" => VK.VK_DELETE,
+            _ when key.Length == 1 => GetCharVK(key[0]),
+            _ => 0
+        };
+    }
+
+    private static VK GetCharVK(char c)
+    {
+        if (c >= 'a' && c <= 'z') return (VK)('A' + (c - 'a'));
+        if (c >= '0' && c <= '9') return (VK)c;
+        return 0;
     }
 
     private static Rectangle GetVirtualScreenBounds()

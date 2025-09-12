@@ -61,9 +61,80 @@ public class MessageClickProvider : IClickProvider
         }
     }
 
+    public async Task<bool> SendTextAsync(IntPtr hwnd, string text)
+    {
+        if (string.IsNullOrEmpty(text) || hwnd == IntPtr.Zero)
+            return false;
+
+        try
+        {
+            SetForegroundWindow(hwnd);
+            await Task.Delay(100);
+
+            foreach (char c in text)
+            {
+                if (char.IsControl(c)) continue;
+                PostMessage(hwnd, (uint)WindowMessage.WM_CHAR, (IntPtr)c, IntPtr.Zero);
+                await Task.Delay(10);
+            }
+            return true;
+        }
+        catch
+        {
+            return await (_fallbackProvider?.SendTextAsync(hwnd, text) ?? Task.FromResult(false));
+        }
+    }
+
+    public async Task<bool> SendKeyAsync(IntPtr hwnd, string key)
+    {
+        if (string.IsNullOrEmpty(key) || hwnd == IntPtr.Zero)
+            return false;
+
+        try
+        {
+            var virtualKey = GetVirtualKeyCode(key.ToLower());
+            if (virtualKey == 0) return false;
+
+            SetForegroundWindow(hwnd);
+            await Task.Delay(50);
+
+            PostMessage(hwnd, (uint)WindowMessage.WM_KEYDOWN, (IntPtr)virtualKey, IntPtr.Zero);
+            await Task.Delay(10);
+            PostMessage(hwnd, (uint)WindowMessage.WM_KEYUP, (IntPtr)virtualKey, IntPtr.Zero);
+            
+            return true;
+        }
+        catch
+        {
+            return await (_fallbackProvider?.SendKeyAsync(hwnd, key) ?? Task.FromResult(false));
+        }
+    }
+
     public void SetFallbackProvider(IClickProvider fallback)
     {
         _fallbackProvider = fallback;
+    }
+
+    private static ushort GetVirtualKeyCode(string key)
+    {
+        return key switch
+        {
+            "return" or "enter" => 0x0D,
+            "space" => 0x20,
+            "escape" or "esc" => 0x1B,
+            "tab" => 0x09,
+            "backspace" => 0x08,
+            "delete" or "del" => 0x2E,
+            _ when key.Length == 1 => GetCharVK(key[0]),
+            _ => 0
+        };
+    }
+
+    private static ushort GetCharVK(char c)
+    {
+        if (c >= 'a' && c <= 'z') return (ushort)('A' + (c - 'a'));
+        if (c >= '0' && c <= '9') return (ushort)(c);
+        return 0;
     }
 
     private static IntPtr MakeLParam(int x, int y)
