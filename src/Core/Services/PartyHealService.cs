@@ -66,8 +66,10 @@ public class PartyHealService : IPartyHealService
         
         _isRunning = true;
         
+        // Use higher default interval to reduce CPU usage
+        var pollInterval = Math.Max(Configuration.Global.PollIntervalMs, 100); // Minimum 100ms
         _monitoringTimer = new Timer(MonitorPartyMembers, null, 
-            TimeSpan.Zero, TimeSpan.FromMilliseconds(Configuration.Global.PollIntervalMs));
+            TimeSpan.Zero, TimeSpan.FromMilliseconds(pollInterval));
         
         StatusChanged?.Invoke(this, new PartyHealStatusChangedEventArgs 
         { 
@@ -176,61 +178,78 @@ public class PartyHealService : IPartyHealService
             return;
         }
 
-        try
+        // Run monitoring on background thread to prevent UI blocking
+        await Task.Run(async () =>
         {
-            var now = DateTime.Now;
-            var enabledMembers = Configuration.Members.Where(m => m.Enabled && m.IsConfigured).ToList();
-            
-            _logger.LogDebug("[PartyHeal] Monitor cycle: {EnabledCount} enabled members, Window=0x{Window:X8}", 
-                enabledMembers.Count, _targetWindow.ToInt64());
-            
-            // Check if we're still in heal animation delay
-            bool inHealAnimation = now < _healAnimationEndTime;
-            
-            var membersNeedingHeal = new List<(int index, double distance, DateTime detectedAt)>();
-
-            // Check all enabled members
-            foreach (var member in enabledMembers)
+            try
             {
-                var memberState = _memberStates[member.Index];
+                var now = DateTime.Now;
+                var enabledMembers = Configuration.Members.Where(m => m.Enabled && m.IsConfigured).ToList();
                 
-                // Skip if member is on cooldown
-                if (now < memberState.NextAvailableTime)
-                    continue;
+                // Skip this cycle if no members are enabled
+                if (!enabledMembers.Any()) return;
+                
+                // Check if we're still in heal animation delay
+                bool inHealAnimation = now < _healAnimationEndTime;
+                if (inHealAnimation) return; // Skip check during animation
+                
+                var membersNeedingHeal = new List<(int index, double distance, DateTime detectedAt)>();
 
-                var color = await GetPixelColorSafeAsync(member.ThresholdPixel);
-                if (color == null) 
+                // Batch capture all member pixels in one operation for efficiency
+                var captureResults = new Dictionary<int, Color?>();
+                
+                // Parallel check for better performance
+                await Parallel.ForEachAsync(enabledMembers, new ParallelOptions { MaxDegreeOfParallelism = 2 }, async (member, ct) =>
                 {
-                    Console.WriteLine($"[PartyHeal] Member {member.Index}: Failed to get color at {member.ThresholdPixel}");
-                    continue;
+                    var memberState = _memberStates[member.Index];
+                    
+                    // Skip if member is on cooldown
+                    if (now < memberState.NextAvailableTime)
+                        return;
+
+                    var color = await GetPixelColorSafeAsync(member.ThresholdPixel);
+                    if (color != null)
+                    {
+                        lock (captureResults)
+                        {
+                            captureResults[member.Index] = color;
+                        }
+                    }
+                });
+                
+                // Process results
+                foreach (var kvp in captureResults)
+                {
+                    var member = enabledMembers.First(m => m.Index == kvp.Key);
+                    var memberState = _memberStates[member.Index];
+                    var color = kvp.Value;
+                    
+                    if (color == null) continue;
+                    
+                    var distance = CalculateColorDistance(color.Value, Configuration.Global.BaselineColor);
+                    
+                    memberState.LastDetectedColor = color.Value;
+                    memberState.LastColorDistance = distance;
+                    memberState.LastCheck = now;
+                    
+                    // Check if HP is below threshold (color distance > tolerance)
+                    if (distance > Configuration.Global.ColorTolerance)
+                    {
+                        membersNeedingHeal.Add((member.Index, distance, now));
+                    }
                 }
 
-                var distance = CalculateColorDistance(color.Value, Configuration.Global.BaselineColor);
-                
-                memberState.LastDetectedColor = color.Value;
-                memberState.LastColorDistance = distance;
-                memberState.LastCheck = now;
-                
-                Console.WriteLine($"[PartyHeal] Member {member.Index}: Color={color.Value} Baseline={Configuration.Global.BaselineColor} Distance={distance:F1} Threshold={Configuration.Global.ColorTolerance}");
-
-                // Check if HP is below threshold (color distance > tolerance)
-                if (distance > Configuration.Global.ColorTolerance)
+                // Process healing logic
+                if (membersNeedingHeal.Count > 0)
                 {
-                    membersNeedingHeal.Add((member.Index, distance, now));
-                    Console.WriteLine($"[PartyHeal] Member {member.Index} NEEDS HEAL! Distance={distance:F1} > Tolerance={Configuration.Global.ColorTolerance}");
+                    await ProcessHealingQueue(membersNeedingHeal, inHealAnimation);
                 }
             }
-
-            // Process healing logic
-            if (membersNeedingHeal.Count > 0)
+            catch (Exception ex)
             {
-                await ProcessHealingQueue(membersNeedingHeal, inHealAnimation);
+                _logger.LogError(ex, "Error in party heal monitoring cycle");
             }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error in party heal monitoring cycle");
-        }
+        });
     }
 
     private async Task ProcessHealingQueue(List<(int index, double distance, DateTime detectedAt)> needsHealing, bool inHealAnimation)

@@ -5779,7 +5779,8 @@ public partial class ClientCard : UserControl, IDisposable
         Console.WriteLine($"[{ViewModel.ClientName}] 🎭 Starting buff/AC cycle #{ViewModel.BuffAcSettings.CycleCount}...");
         BuffAcStatusText.Text = $"Status: Cycling #{ViewModel.BuffAcSettings.CycleCount} - {_buffAcEnabledMembers.Count} members";
         
-        // Pause heal system during cycle - removed
+        // Pause party heal system during buff/AC cycle
+        PausePartyHealForBuffAc();
         
         // CORRECT FLOW: Process each member individually
         _currentBuffAcMemberIndex = 0;
@@ -5942,7 +5943,8 @@ public partial class ClientCard : UserControl, IDisposable
         }
         BuffAcStatusText.Text = $"Status: Active - Next cycle in {ViewModel.BuffAcSettings.CycleIntervalSeconds}s";
         
-        // Resume heal systems after cycle - removed
+        // Resume party heal system after buff/AC cycle completion
+        ResumePartyHealAfterBuffAc();
         
         Console.WriteLine($"[{ViewModel.ClientName}] ✅ Buff/AC cycle #{ViewModel.BuffAcSettings.CycleCount} completed");
     }
@@ -5965,6 +5967,25 @@ public partial class ClientCard : UserControl, IDisposable
         {
             Console.WriteLine($"[{ViewModel.ClientName}] ▶️ Resuming attack system after buff/AC cycle");
             StartAttackSystem();
+        }
+    }
+    
+    private void PausePartyHealForBuffAc()
+    {
+        if (_partyHealRunning)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] ⏸️ Pausing party heal system for buff/AC cycle");
+            Task.Run(async () => await StopPartyHealAsync());
+        }
+    }
+    
+    private void ResumePartyHealAfterBuffAc()
+    {
+        // Resume party heal system if it was enabled before
+        if (PartyHealSystemEnabled.IsChecked == true && !_partyHealRunning)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] ▶️ Resuming party heal system after buff/AC cycle");
+            Task.Run(async () => await StartPartyHealAsync());
         }
     }
     
@@ -6497,7 +6518,10 @@ public partial class ClientCard : UserControl, IDisposable
             config.Global.SkillKey = PartyHealSkillKey.Text;
             
             if (int.TryParse(PartyHealPollInterval.Text, out int pollInterval))
-                config.Global.PollIntervalMs = pollInterval;
+            {
+                // Enforce minimum poll interval to prevent performance issues
+                config.Global.PollIntervalMs = Math.Max(pollInterval, 150); // Minimum 150ms
+            }
                 
             // Parse HP color
             try
@@ -6564,6 +6588,20 @@ public partial class ClientCard : UserControl, IDisposable
         {
             // Update settings from UI first
             UpdatePartyHealSettings();
+            
+            // Set optimized default values if not configured
+            if (_partyHealService.Configuration.Global.PollIntervalMs < 150)
+            {
+                _partyHealService.Configuration.Global.PollIntervalMs = 150; // Default 150ms for better performance
+                PartyHealPollInterval.Text = "150";
+            }
+            
+            // Set other performance-optimized defaults
+            _partyHealService.Configuration.Global.AnimationDelayMs = 1000; // 1 second animation delay
+            _partyHealService.Configuration.Global.MinActionSpacingMs = 200; // 200ms minimum between actions
+            _partyHealService.Configuration.Global.HumanizeDelayMsMin = 50;
+            _partyHealService.Configuration.Global.HumanizeDelayMsMax = 150;
+            _partyHealService.Configuration.Global.ColorTolerance = 30; // Reasonable color tolerance
             
             // Set target window for PartyHeal service
             _partyHealService.SetTargetWindow(ViewModel.TargetHwnd);
