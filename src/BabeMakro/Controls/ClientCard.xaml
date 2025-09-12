@@ -1136,942 +1136,229 @@
                 </StackPanel>
             </TabItem>
 
-            <TabItem Header="🎭 Party Heal" Width="80">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-                        <!-- Party Heal System Header -->
-                        <TextBlock Text="💊 Party Heal System" Style="{StaticResource SectionHeaderStyle}" FontSize="12" Foreground="#4CAF50" Margin="0,0,0,8"/>
+            <TabItem Header="🧙 Party Heal" Width="80">
+                <StackPanel>
+                    <!-- Party Heal System Header -->
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                        <!-- Master Controls -->
-                        <Border Background="#1a3d2e" CornerRadius="6" Padding="8" Margin="0,0,0,8">
-                            <StackPanel>
-                                <TextBlock Text="Master Controls" Style="{StaticResource SectionHeaderStyle}" FontSize="11" Foreground="#4CAF50" Margin="0,0,0,8"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="🧙 Party Heal System" Style="{StaticResource SectionHeaderStyle}" FontSize="12" Foreground="#9C27B0"/>
+                        <CheckBox Grid.Column="1" x:Name="PartyHealSystemEnabled" Content="Enable" IsChecked="False" Foreground="#cccccc" FontSize="9"/>
+                    </Grid>
 
-                                    <Button Grid.Column="0" Content="🎯 Calibrate All" x:Name="CalibrateAllPartyButton" Style="{StaticResource ActionButtonStyle}" Height="35" Margin="0,0,4,0" Click="CalibrateAllParty_Click"/>
-                                    <Button Grid.Column="1" Content="🔄 Enable All" x:Name="EnableAllPartyButton" Style="{StaticResource ActionButtonStyle}" Height="35" Margin="4,0,0,0" Click="EnableAllParty_Click"/>
-                                </Grid>
-                            </StackPanel>
-                        </Border>
+                    <!-- Global Settings -->
+                    <Border Background="#2a2a2a" BorderBrush="#444444" BorderThickness="1" CornerRadius="3" Padding="8,5" Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                        <!-- Global Settings -->
-                        <Border Background="#1a1a1a" CornerRadius="3" Padding="6" Margin="0,0,0,5">
-                            <Grid>
+                            <TextBlock Grid.Row="0" Text="🔧 Global Settings" Style="{StaticResource LabelStyle}" FontSize="8" Foreground="#aaaaaa" Margin="0,0,0,5"/>
+
+                            <Grid Grid.Row="1">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="60"/>
-                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="65"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="Heal Key:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Foreground="#cccccc" Margin="0,0,3,0"/>
+                                <TextBox Grid.Column="1" x:Name="PartyHealSkillKey" Style="{StaticResource CoordTextBoxStyle}" Text="F1" Width="45" Height="20" FontSize="10"/>
+                                
+                                <TextBlock Grid.Column="2" Text="Poll (ms):" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Foreground="#cccccc" Margin="8,0,3,0"/>
+                                <TextBox Grid.Column="3" x:Name="PartyHealPollInterval" Style="{StaticResource CoordTextBoxStyle}" Text="10" Width="45" Height="20" FontSize="10"/>
+                                
+                                <TextBlock Grid.Column="4" Text="HP Color:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Foreground="#cccccc" Margin="8,0,3,0"/>
+                                <TextBox Grid.Column="5" x:Name="PartyHealBaselineColor" Style="{StaticResource CoordTextBoxStyle}" Text="FF0000" Width="60" Height="20" FontSize="10" ToolTip="HP bar color (hex)"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <!-- Member Configuration -->
+                    <Border Background="#2a2a2a" BorderBrush="#444444" BorderThickness="1" CornerRadius="3" Padding="8,5" Margin="0,0,0,5">
+                        <StackPanel>
+                            <TextBlock Text="👥 Party Member Settings" Style="{StaticResource LabelStyle}" FontSize="10" Foreground="#9C27B0" Margin="0,0,0,8"/>
+                            
+                            <!-- Row 1: Members 1-4 -->
+                            <Grid Margin="0,0,0,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Animation Delay" Style="{StaticResource LabelStyle}" FontSize="9"/>
-                                    <TextBox x:Name="AnimationDelay" Style="{StaticResource CoordTextBoxStyle}" Text="1500" ToolTip="Skill animation wait time in ms"/>
-                                </StackPanel>
-
-                                <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                                    <TextBlock Text="Check Interval" Style="{StaticResource LabelStyle}" FontSize="9"/>
-                                    <TextBox x:Name="MultiHpCheckInterval" Style="{StaticResource CoordTextBoxStyle}" Text="100" ToolTip="HP check interval in ms"/>
-                                </StackPanel>
-
-                                <StackPanel Grid.Column="2" Margin="10,0,0,0">
-                                    <CheckBox x:Name="MultiHpEnabled" Content="Enable Multi HP System" IsChecked="False" Foreground="#cccccc" VerticalAlignment="Center" Margin="0,0,0,8"/>
+                                <StackPanel Grid.Column="0" Orientation="Vertical" Margin="0,0,5,0">
+                                    <CheckBox x:Name="PartyMember1Enabled" Foreground="#9C27B0" Margin="0,0,0,2" ToolTip="Enable Member 1"/>
                                     <StackPanel Orientation="Horizontal">
-                                        <Button x:Name="StartMultiHpButton" Click="StartMultiHp_Click" Height="35" Width="80" Margin="0,0,8,0" 
-                                                Background="#28a745" Foreground="White" BorderThickness="0" FontWeight="Bold" FontSize="12">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="▶" FontSize="14" Margin="0,0,5,0"/>
-                                                <TextBlock Text="START"/>
-                                            </StackPanel>
-                                        </Button>
-                                        <Button x:Name="StopMultiHpButton" Click="StopMultiHp_Click" Height="35" Width="80" IsEnabled="False" Margin="0,0,8,0"
-                                                Background="#dc3545" Foreground="White" BorderThickness="0" FontWeight="Bold" FontSize="12">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="⏹" FontSize="14" Margin="0,0,5,0"/>
-                                                <TextBlock Text="STOP"/>
-                                            </StackPanel>
-                                        </Button>
-                                        <Button x:Name="ShowPartyHpOverlayButton" Click="ShowPartyHpOverlay_Click" Height="35" Width="90" 
-                                                Background="#6f42c1" Foreground="White" BorderThickness="0" FontWeight="Bold" FontSize="11">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="👁️" FontSize="12" Margin="0,0,5,0"/>
-                                                <TextBlock Text="SHOW HP"/>
-                                            </StackPanel>
-                                        </Button>
+                                        <TextBlock Text="1:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Margin="0,0,2,0"/>
+                                        <TextBox x:Name="PartyMember1Key" Style="{StaticResource CoordTextBoxStyle}" Text="Q" Width="18" ToolTip="Member 1 key"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock Text="HP%:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="8" Margin="0,0,2,0"/>
+                                        <TextBox x:Name="PartyMember1Threshold" Style="{StaticResource CoordTextBoxStyle}" Text="50" Width="25" ToolTip="HP threshold %"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBox x:Name="PartyMember1XStart" Style="{StaticResource CoordTextBoxStyle}" Text="100" Width="35" ToolTip="HP Bar X Start"/>
+                                        <TextBox x:Name="PartyMember1XEnd" Style="{StaticResource CoordTextBoxStyle}" Text="200" Width="35" ToolTip="HP Bar X End" Margin="2,0,0,0"/>
+                                        <TextBox x:Name="PartyMember1Y" Style="{StaticResource CoordTextBoxStyle}" Text="50" Width="30" ToolTip="HP Bar Y" Margin="2,0,0,0"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Orientation="Vertical" Margin="0,0,5,0">
+                                    <CheckBox x:Name="PartyMember2Enabled" Foreground="#9C27B0" Margin="0,0,0,2" ToolTip="Enable Member 2"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="2:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Margin="0,0,2,0"/>
+                                        <TextBox x:Name="PartyMember2Key" Style="{StaticResource CoordTextBoxStyle}" Text="W" Width="18" ToolTip="Member 2 key"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock Text="HP%:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="8" Margin="0,0,2,0"/>
+                                        <TextBox x:Name="PartyMember2Threshold" Style="{StaticResource CoordTextBoxStyle}" Text="50" Width="25" ToolTip="HP threshold %"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBox x:Name="PartyMember2XStart" Style="{StaticResource CoordTextBoxStyle}" Text="100" Width="35" ToolTip="HP Bar X Start"/>
+                                        <TextBox x:Name="PartyMember2XEnd" Style="{StaticResource CoordTextBoxStyle}" Text="200" Width="35" ToolTip="HP Bar X End" Margin="2,0,0,0"/>
+                                        <TextBox x:Name="PartyMember2Y" Style="{StaticResource CoordTextBoxStyle}" Text="70" Width="30" ToolTip="HP Bar Y" Margin="2,0,0,0"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2" Orientation="Vertical" Margin="0,0,5,0">
+                                    <CheckBox x:Name="PartyMember3Enabled" Foreground="#9C27B0" Margin="0,0,0,2" ToolTip="Enable Member 3"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="3:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Margin="0,0,2,0"/>
+                                        <TextBox x:Name="PartyMember3Key" Style="{StaticResource CoordTextBoxStyle}" Text="E" Width="18" ToolTip="Member 3 key"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock Text="HP%:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="8" Margin="0,0,2,0"/>
+                                        <TextBox x:Name="PartyMember3Threshold" Style="{StaticResource CoordTextBoxStyle}" Text="50" Width="25" ToolTip="HP threshold %"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBox x:Name="PartyMember3XStart" Style="{StaticResource CoordTextBoxStyle}" Text="100" Width="35" ToolTip="HP Bar X Start"/>
+                                        <TextBox x:Name="PartyMember3XEnd" Style="{StaticResource CoordTextBoxStyle}" Text="200" Width="35" ToolTip="HP Bar X End" Margin="2,0,0,0"/>
+                                        <TextBox x:Name="PartyMember3Y" Style="{StaticResource CoordTextBoxStyle}" Text="90" Width="30" ToolTip="HP Bar Y" Margin="2,0,0,0"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="3" Orientation="Vertical">
+                                    <CheckBox x:Name="PartyMember4Enabled" Foreground="#9C27B0" Margin="0,0,0,2" ToolTip="Enable Member 4"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="4:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Margin="0,0,2,0"/>
+                                        <TextBox x:Name="PartyMember4Key" Style="{StaticResource CoordTextBoxStyle}" Text="R" Width="18" ToolTip="Member 4 key"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock Text="HP%:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="8" Margin="0,0,2,0"/>
+                                        <TextBox x:Name="PartyMember4Threshold" Style="{StaticResource CoordTextBoxStyle}" Text="50" Width="25" ToolTip="HP threshold %"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBox x:Name="PartyMember4XStart" Style="{StaticResource CoordTextBoxStyle}" Text="100" Width="35" ToolTip="HP Bar X Start"/>
+                                        <TextBox x:Name="PartyMember4XEnd" Style="{StaticResource CoordTextBoxStyle}" Text="200" Width="35" ToolTip="HP Bar X End" Margin="2,0,0,0"/>
+                                        <TextBox x:Name="PartyMember4Y" Style="{StaticResource CoordTextBoxStyle}" Text="110" Width="30" ToolTip="HP Bar Y" Margin="2,0,0,0"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Grid>
-                        </Border>
 
-                        <!-- Party Members Container -->
-                        <ScrollViewer Height="214" VerticalScrollBarVisibility="Hidden">
-                            <StackPanel x:Name="PartyMembersContainer">
-                                <!-- Party Member 1 -->
-                                <Border Background="#1a1a1a" Padding="6" Margin="0,0,0,5">
-                                    <StackPanel>
-                                        <!-- Row 1: Member ID, Controls, Status -->
-                                        <Grid Margin="0,0,0,3">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Row Number -->
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Calibrate -->
-                                                <ColumnDefinition Width="40"/>
-                                                <!-- Enable -->
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Monitor -->
-                                                <ColumnDefinition Width="*"/>
-                                                <!-- Status -->
-                                            </Grid.ColumnDefinitions>
+                            <!-- Row 2: Members 5-8 -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                                            <!-- Row Number -->
-                                            <Border Grid.Column="0" Background="#333" BorderBrush="#505050" BorderThickness="1" CornerRadius="4">
-                                                <TextBlock Text="1" Foreground="#FFFFFF" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="10"/>
-                                            </Border>
-
-                                            <!-- Calibrate Button -->
-                                            <Button Grid.Column="1" Content="🎯" Background="#FF9800" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="CalibratePartyMember1_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Enable Button -->
-                                            <Button Grid.Column="2" x:Name="PartyMember1EnableBtn" Content="OFF" Background="#666666" Foreground="White" BorderThickness="0" Width="38" Height="25" Click="TogglePartyMember1Enable_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Monitor Button -->
-                                            <Button Grid.Column="3" x:Name="PartyMember1MonitorBtn" Content="▶" Background="#2196F3" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="TogglePartyMember1Monitor_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Status Label -->
-                                            <Border Grid.Column="4" Background="#2d2d2d" BorderBrush="#444" BorderThickness="1" CornerRadius="4" Margin="5,0,0,0">
-                                                <TextBlock x:Name="PartyMember1Status" Text="--% | OFF" Foreground="#888" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="9" Padding="2"/>
-                                            </Border>
-                                        </Grid>
-
-                                        <!-- Row 2: Keys and HP Threshold -->
-                                        <Grid Margin="0,0,0,3">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- User Key -->
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="User:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember1UserKey" Text="1" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#FF9800" TextAlignment="Center" FontSize="11" Width="30"/>
-                                            </StackPanel>
-
-                                            <!-- Skill Key -->
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="Skill:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember1SkillKey" Text="1" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#2196F3" TextAlignment="Center" FontSize="11" Width="30"/>
-                                            </StackPanel>
-
-                                            <!-- HP Threshold -->
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                                <TextBlock Text="HP%:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember1HpThreshold" Text="30" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#4CAF50" TextAlignment="Center" FontSize="11" Width="40"/>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <!-- Row 3: Coordinates -->
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- X1 Start -->
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="X1:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember1HpXStart" Text="1" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-
-                                            <!-- X2 End -->
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="X2:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember1HpXEnd" Text="90" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-
-                                            <!-- Y Coordinate -->
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                                <TextBlock Text="Y:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember1HpY" Text="5" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-                                        </Grid>
+                                <StackPanel Grid.Column="0" Orientation="Vertical" Margin="0,0,5,0">
+                                    <CheckBox x:Name="PartyMember5Enabled" Foreground="#9C27B0" Margin="0,0,0,2" ToolTip="Enable Member 5"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="5:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Margin="0,0,2,0"/>
+                                        <TextBox x:Name="PartyMember5Key" Style="{StaticResource CoordTextBoxStyle}" Text="T" Width="18" ToolTip="Member 5 key"/>
                                     </StackPanel>
-                                </Border>
-
-                                <!-- Party Member 2 -->
-                                <Border Background="#1a1a1a" Padding="6" Margin="0,0,0,5">
-                                    <StackPanel>
-                                        <!-- Row 1: Member ID, Controls, Status -->
-                                        <Grid Margin="0,0,0,3">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Row Number -->
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Calibrate -->
-                                                <ColumnDefinition Width="40"/>
-                                                <!-- Enable -->
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Monitor -->
-                                                <ColumnDefinition Width="*"/>
-                                                <!-- Status -->
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- Row Number -->
-                                            <Border Grid.Column="0" Background="#333" BorderBrush="#505050" BorderThickness="1" CornerRadius="4">
-                                                <TextBlock Text="2" Foreground="#FFFFFF" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="10"/>
-                                            </Border>
-
-                                            <!-- Calibrate Button -->
-                                            <Button Grid.Column="1" Content="🎯" Background="#FF9800" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="CalibratePartyMember2_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Enable Button -->
-                                            <Button Grid.Column="2" x:Name="PartyMember2EnableBtn" Content="OFF" Background="#666666" Foreground="White" BorderThickness="0" Width="38" Height="25" Click="TogglePartyMember2Enable_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Monitor Button -->
-                                            <Button Grid.Column="3" x:Name="PartyMember2MonitorBtn" Content="▶" Background="#2196F3" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="TogglePartyMember2Monitor_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Status Label -->
-                                            <Border Grid.Column="4" Background="#2d2d2d" BorderBrush="#444" BorderThickness="1" CornerRadius="4" Margin="5,0,0,0">
-                                                <TextBlock x:Name="PartyMember2Status" Text="--% | OFF" Foreground="#888" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="9" Padding="2"/>
-                                            </Border>
-                                        </Grid>
-
-                                        <!-- Row 2: Keys and HP Threshold -->
-                                        <Grid Margin="0,0,0,3">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- User Key -->
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="User:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember2UserKey" Text="2" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#FF9800" TextAlignment="Center" FontSize="11" Width="30"/>
-                                            </StackPanel>
-
-                                            <!-- Skill Key -->
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="Skill:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember2SkillKey" Text="2" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#2196F3" TextAlignment="Center" FontSize="11" Width="30"/>
-                                            </StackPanel>
-
-                                            <!-- HP Threshold -->
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                                <TextBlock Text="HP%:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember2HpThreshold" Text="30" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#4CAF50" TextAlignment="Center" FontSize="11" Width="40"/>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <!-- Row 3: Coordinates -->
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- X1 Start -->
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="X1:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember2HpXStart" Text="1" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-
-                                            <!-- X2 End -->
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="X2:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember2HpXEnd" Text="90" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-
-                                            <!-- Y Coordinate -->
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                                <TextBlock Text="Y:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember2HpY" Text="5" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-                                        </Grid>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock Text="HP%:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="8" Margin="0,0,2,0"/>
+                                        <TextBox x:Name="PartyMember5Threshold" Style="{StaticResource CoordTextBoxStyle}" Text="50" Width="25" ToolTip="HP threshold %"/>
                                     </StackPanel>
-                                </Border>
-
-                                <!-- Party Member 3 -->
-                                <Border Background="#1a1a1a" Padding="6" Margin="0,0,0,5">
-                                    <StackPanel>
-                                        <!-- Row 1: Member ID, Controls, Status -->
-                                        <Grid Margin="0,0,0,3">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Row Number -->
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Calibrate -->
-                                                <ColumnDefinition Width="40"/>
-                                                <!-- Enable -->
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Monitor -->
-                                                <ColumnDefinition Width="*"/>
-                                                <!-- Status -->
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- Row Number -->
-                                            <Border Grid.Column="0" Background="#333" BorderBrush="#505050" BorderThickness="1" CornerRadius="4">
-                                                <TextBlock Text="3" Foreground="#FFFFFF" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="10"/>
-                                            </Border>
-
-                                            <!-- Calibrate Button -->
-                                            <Button Grid.Column="1" Content="🎯" Background="#FF9800" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="CalibratePartyMember3_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Enable Button -->
-                                            <Button Grid.Column="2" x:Name="PartyMember3EnableBtn" Content="OFF" Background="#666666" Foreground="White" BorderThickness="0" Width="38" Height="25" Click="TogglePartyMember3Enable_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Monitor Button -->
-                                            <Button Grid.Column="3" x:Name="PartyMember3MonitorBtn" Content="▶" Background="#2196F3" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="TogglePartyMember3Monitor_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Status Label -->
-                                            <Border Grid.Column="4" Background="#2d2d2d" BorderBrush="#444" BorderThickness="1" CornerRadius="4" Margin="5,0,0,0">
-                                                <TextBlock x:Name="PartyMember3Status" Text="--% | OFF" Foreground="#888" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="9" Padding="2"/>
-                                            </Border>
-                                        </Grid>
-
-                                        <!-- Row 2: Keys and HP Threshold -->
-                                        <Grid Margin="0,0,0,3">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- User Key -->
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="User:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember3UserKey" Text="3" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#FF9800" TextAlignment="Center" FontSize="11" Width="30"/>
-                                            </StackPanel>
-
-                                            <!-- Skill Key -->
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="Skill:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember3SkillKey" Text="3" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#2196F3" TextAlignment="Center" FontSize="11" Width="30"/>
-                                            </StackPanel>
-
-                                            <!-- HP Threshold -->
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                                <TextBlock Text="HP%:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember3HpThreshold" Text="30" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#4CAF50" TextAlignment="Center" FontSize="11" Width="40"/>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <!-- Row 3: Coordinates -->
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- X1 Start -->
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="X1:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember3HpXStart" Text="1" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-
-                                            <!-- X2 End -->
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="X2:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember3HpXEnd" Text="90" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-
-                                            <!-- Y Coordinate -->
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                                <TextBlock Text="Y:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember3HpY" Text="5" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-                                        </Grid>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBox x:Name="PartyMember5XStart" Style="{StaticResource CoordTextBoxStyle}" Text="100" Width="35" ToolTip="HP Bar X Start"/>
+                                        <TextBox x:Name="PartyMember5XEnd" Style="{StaticResource CoordTextBoxStyle}" Text="200" Width="35" ToolTip="HP Bar X End" Margin="2,0,0,0"/>
+                                        <TextBox x:Name="PartyMember5Y" Style="{StaticResource CoordTextBoxStyle}" Text="130" Width="30" ToolTip="HP Bar Y" Margin="2,0,0,0"/>
                                     </StackPanel>
-                                </Border>
+                                </StackPanel>
 
-                                <!-- Party Member 4 -->
-                                <Border Background="#1a1a1a" Padding="6" Margin="0,0,0,5">
-                                    <StackPanel>
-                                        <!-- Row 1: Member ID, Controls, Status -->
-                                        <Grid Margin="0,0,0,3">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Row Number -->
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Calibrate -->
-                                                <ColumnDefinition Width="40"/>
-                                                <!-- Enable -->
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Monitor -->
-                                                <ColumnDefinition Width="*"/>
-                                                <!-- Status -->
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- Row Number -->
-                                            <Border Grid.Column="0" Background="#333" BorderBrush="#505050" BorderThickness="1" CornerRadius="4">
-                                                <TextBlock Text="4" Foreground="#FFFFFF" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="10"/>
-                                            </Border>
-
-                                            <!-- Calibrate Button -->
-                                            <Button Grid.Column="1" Content="🎯" Background="#FF9800" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="CalibratePartyMember4_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Enable Button -->
-                                            <Button Grid.Column="2" x:Name="PartyMember4EnableBtn" Content="OFF" Background="#666666" Foreground="White" BorderThickness="0" Width="38" Height="25" Click="TogglePartyMember4Enable_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Monitor Button -->
-                                            <Button Grid.Column="3" x:Name="PartyMember4MonitorBtn" Content="▶" Background="#2196F3" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="TogglePartyMember4Monitor_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Status Label -->
-                                            <Border Grid.Column="4" Background="#2d2d2d" BorderBrush="#444" BorderThickness="1" CornerRadius="4" Margin="5,0,0,0">
-                                                <TextBlock x:Name="PartyMember4Status" Text="--% | OFF" Foreground="#888" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="9" Padding="2"/>
-                                            </Border>
-                                        </Grid>
-
-                                        <!-- Row 2: Keys and HP Threshold -->
-                                        <Grid Margin="0,0,0,3">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- User Key -->
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="User:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember4UserKey" Text="4" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#FF9800" TextAlignment="Center" FontSize="11" Width="30"/>
-                                            </StackPanel>
-
-                                            <!-- Skill Key -->
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="Skill:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember4SkillKey" Text="4" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#2196F3" TextAlignment="Center" FontSize="11" Width="30"/>
-                                            </StackPanel>
-
-                                            <!-- HP Threshold -->
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                                <TextBlock Text="HP%:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember4HpThreshold" Text="30" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#4CAF50" TextAlignment="Center" FontSize="11" Width="40"/>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <!-- Row 3: Coordinates -->
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- X1 Start -->
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="X1:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember4HpXStart" Text="1" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-
-                                            <!-- X2 End -->
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="X2:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember4HpXEnd" Text="90" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-
-                                            <!-- Y Coordinate -->
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                                <TextBlock Text="Y:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember4HpY" Text="5" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-                                        </Grid>
+                                <StackPanel Grid.Column="1" Orientation="Vertical" Margin="0,0,5,0">
+                                    <CheckBox x:Name="PartyMember6Enabled" Foreground="#9C27B0" Margin="0,0,0,2" ToolTip="Enable Member 6"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="6:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Margin="0,0,2,0"/>
+                                        <TextBox x:Name="PartyMember6Key" Style="{StaticResource CoordTextBoxStyle}" Text="Y" Width="18" ToolTip="Member 6 key"/>
                                     </StackPanel>
-                                </Border>
-
-                                <!-- Party Member 5 -->
-                                <Border Background="#1a1a1a" Padding="6" Margin="0,0,0,5">
-                                    <StackPanel>
-                                        <!-- Row 1: Member ID, Controls, Status -->
-                                        <Grid Margin="0,0,0,3">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Row Number -->
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Calibrate -->
-                                                <ColumnDefinition Width="40"/>
-                                                <!-- Enable -->
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Monitor -->
-                                                <ColumnDefinition Width="*"/>
-                                                <!-- Status -->
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- Row Number -->
-                                            <Border Grid.Column="0" Background="#333" BorderBrush="#505050" BorderThickness="1" CornerRadius="4">
-                                                <TextBlock Text="5" Foreground="#FFFFFF" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="10"/>
-                                            </Border>
-
-                                            <!-- Calibrate Button -->
-                                            <Button Grid.Column="1" Content="🎯" Background="#FF9800" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="CalibratePartyMember5_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Enable Button -->
-                                            <Button Grid.Column="2" x:Name="PartyMember5EnableBtn" Content="OFF" Background="#666666" Foreground="White" BorderThickness="0" Width="38" Height="25" Click="TogglePartyMember5Enable_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Monitor Button -->
-                                            <Button Grid.Column="3" x:Name="PartyMember5MonitorBtn" Content="▶" Background="#2196F3" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="TogglePartyMember5Monitor_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Status Label -->
-                                            <Border Grid.Column="4" Background="#2d2d2d" BorderBrush="#444" BorderThickness="1" CornerRadius="4" Margin="5,0,0,0">
-                                                <TextBlock x:Name="PartyMember5Status" Text="--% | OFF" Foreground="#888" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="9" Padding="2"/>
-                                            </Border>
-                                        </Grid>
-
-                                        <!-- Row 2: Keys and HP Threshold -->
-                                        <Grid Margin="0,0,0,3">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- User Key -->
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="User:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember5UserKey" Text="5" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#FF9800" TextAlignment="Center" FontSize="11" Width="30"/>
-                                            </StackPanel>
-
-                                            <!-- Skill Key -->
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="Skill:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember5SkillKey" Text="5" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#2196F3" TextAlignment="Center" FontSize="11" Width="30"/>
-                                            </StackPanel>
-
-                                            <!-- HP Threshold -->
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                                <TextBlock Text="HP%:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember5HpThreshold" Text="30" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#4CAF50" TextAlignment="Center" FontSize="11" Width="40"/>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <!-- Row 3: Coordinates -->
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- X1 Start -->
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="X1:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember5HpXStart" Text="1" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-
-                                            <!-- X2 End -->
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="X2:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember5HpXEnd" Text="90" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-
-                                            <!-- Y Coordinate -->
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                                <TextBlock Text="Y:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember5HpY" Text="5" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-                                        </Grid>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock Text="HP%:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="8" Margin="0,0,2,0"/>
+                                        <TextBox x:Name="PartyMember6Threshold" Style="{StaticResource CoordTextBoxStyle}" Text="50" Width="25" ToolTip="HP threshold %"/>
                                     </StackPanel>
-                                </Border>
-
-                                <!-- Party Member 6 -->
-                                <Border Background="#1a1a1a" Padding="6" Margin="0,0,0,5">
-                                    <StackPanel>
-                                        <!-- Row 1: Member ID, Controls, Status -->
-                                        <Grid Margin="0,0,0,3">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Row Number -->
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Calibrate -->
-                                                <ColumnDefinition Width="40"/>
-                                                <!-- Enable -->
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Monitor -->
-                                                <ColumnDefinition Width="*"/>
-                                                <!-- Status -->
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- Row Number -->
-                                            <Border Grid.Column="0" Background="#333" BorderBrush="#505050" BorderThickness="1" CornerRadius="4">
-                                                <TextBlock Text="6" Foreground="#FFFFFF" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="10"/>
-                                            </Border>
-
-                                            <!-- Calibrate Button -->
-                                            <Button Grid.Column="1" Content="🎯" Background="#FF9800" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="CalibratePartyMember6_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Enable Button -->
-                                            <Button Grid.Column="2" x:Name="PartyMember6EnableBtn" Content="OFF" Background="#666666" Foreground="White" BorderThickness="0" Width="38" Height="25" Click="TogglePartyMember6Enable_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Monitor Button -->
-                                            <Button Grid.Column="3" x:Name="PartyMember6MonitorBtn" Content="▶" Background="#2196F3" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="TogglePartyMember6Monitor_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Status Label -->
-                                            <Border Grid.Column="4" Background="#2d2d2d" BorderBrush="#444" BorderThickness="1" CornerRadius="4" Margin="5,0,0,0">
-                                                <TextBlock x:Name="PartyMember6Status" Text="--% | OFF" Foreground="#888" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="9" Padding="2"/>
-                                            </Border>
-                                        </Grid>
-
-                                        <!-- Row 2: Keys and HP Threshold -->
-                                        <Grid Margin="0,0,0,3">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- User Key -->
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="User:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember6UserKey" Text="6" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#FF9800" TextAlignment="Center" FontSize="11" Width="30"/>
-                                            </StackPanel>
-
-                                            <!-- Skill Key -->
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="Skill:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember6SkillKey" Text="6" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#2196F3" TextAlignment="Center" FontSize="11" Width="30"/>
-                                            </StackPanel>
-
-                                            <!-- HP Threshold -->
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                                <TextBlock Text="HP%:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember6HpThreshold" Text="30" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#4CAF50" TextAlignment="Center" FontSize="11" Width="40"/>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <!-- Row 3: Coordinates -->
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- X1 Start -->
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="X1:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember6HpXStart" Text="1" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-
-                                            <!-- X2 End -->
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="X2:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember6HpXEnd" Text="90" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-
-                                            <!-- Y Coordinate -->
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                                <TextBlock Text="Y:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember6HpY" Text="5" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-                                        </Grid>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBox x:Name="PartyMember6XStart" Style="{StaticResource CoordTextBoxStyle}" Text="100" Width="35" ToolTip="HP Bar X Start"/>
+                                        <TextBox x:Name="PartyMember6XEnd" Style="{StaticResource CoordTextBoxStyle}" Text="200" Width="35" ToolTip="HP Bar X End" Margin="2,0,0,0"/>
+                                        <TextBox x:Name="PartyMember6Y" Style="{StaticResource CoordTextBoxStyle}" Text="150" Width="30" ToolTip="HP Bar Y" Margin="2,0,0,0"/>
                                     </StackPanel>
-                                </Border>
+                                </StackPanel>
 
-                                <!-- Party Member 7 -->
-                                <Border Background="#1a1a1a" Padding="6" Margin="0,0,0,5">
-                                    <StackPanel>
-                                        <!-- Row 1: Member ID, Controls, Status -->
-                                        <Grid Margin="0,0,0,3">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Row Number -->
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Calibrate -->
-                                                <ColumnDefinition Width="40"/>
-                                                <!-- Enable -->
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Monitor -->
-                                                <ColumnDefinition Width="*"/>
-                                                <!-- Status -->
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- Row Number -->
-                                            <Border Grid.Column="0" Background="#333" BorderBrush="#505050" BorderThickness="1" CornerRadius="4">
-                                                <TextBlock Text="7" Foreground="#FFFFFF" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="10"/>
-                                            </Border>
-
-                                            <!-- Calibrate Button -->
-                                            <Button Grid.Column="1" Content="🎯" Background="#FF9800" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="CalibratePartyMember7_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Enable Button -->
-                                            <Button Grid.Column="2" x:Name="PartyMember7EnableBtn" Content="OFF" Background="#666666" Foreground="White" BorderThickness="0" Width="38" Height="25" Click="TogglePartyMember7Enable_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Monitor Button -->
-                                            <Button Grid.Column="3" x:Name="PartyMember7MonitorBtn" Content="▶" Background="#2196F3" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="TogglePartyMember7Monitor_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Status Label -->
-                                            <Border Grid.Column="4" Background="#2d2d2d" BorderBrush="#444" BorderThickness="1" CornerRadius="4" Margin="5,0,0,0">
-                                                <TextBlock x:Name="PartyMember7Status" Text="--% | OFF" Foreground="#888" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="9" Padding="2"/>
-                                            </Border>
-                                        </Grid>
-
-                                        <!-- Row 2: Keys and HP Threshold -->
-                                        <Grid Margin="0,0,0,3">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- User Key -->
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="User:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember7UserKey" Text="7" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#FF9800" TextAlignment="Center" FontSize="11" Width="30"/>
-                                            </StackPanel>
-
-                                            <!-- Skill Key -->
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="Skill:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember7SkillKey" Text="7" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#2196F3" TextAlignment="Center" FontSize="11" Width="30"/>
-                                            </StackPanel>
-
-                                            <!-- HP Threshold -->
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                                <TextBlock Text="HP%:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember7HpThreshold" Text="30" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#4CAF50" TextAlignment="Center" FontSize="11" Width="40"/>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <!-- Row 3: Coordinates -->
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- X1 Start -->
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="X1:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember7HpXStart" Text="1" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-
-                                            <!-- X2 End -->
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="X2:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember7HpXEnd" Text="90" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-
-                                            <!-- Y Coordinate -->
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                                <TextBlock Text="Y:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember7HpY" Text="5" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-                                        </Grid>
+                                <StackPanel Grid.Column="2" Orientation="Vertical" Margin="0,0,5,0">
+                                    <CheckBox x:Name="PartyMember7Enabled" Foreground="#9C27B0" Margin="0,0,0,2" ToolTip="Enable Member 7"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="7:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Margin="0,0,2,0"/>
+                                        <TextBox x:Name="PartyMember7Key" Style="{StaticResource CoordTextBoxStyle}" Text="U" Width="18" ToolTip="Member 7 key"/>
                                     </StackPanel>
-                                </Border>
-
-                                <!-- Party Member 8 -->
-                                <Border Background="#1a1a1a" Padding="6" Margin="0,0,0,5">
-                                    <StackPanel>
-                                        <!-- Row 1: Member ID, Controls, Status -->
-                                        <Grid Margin="0,0,0,3">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Row Number -->
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Calibrate -->
-                                                <ColumnDefinition Width="40"/>
-                                                <!-- Enable -->
-                                                <ColumnDefinition Width="30"/>
-                                                <!-- Monitor -->
-                                                <ColumnDefinition Width="*"/>
-                                                <!-- Status -->
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- Row Number -->
-                                            <Border Grid.Column="0" Background="#333" BorderBrush="#505050" BorderThickness="1" CornerRadius="4">
-                                                <TextBlock Text="8" Foreground="#FFFFFF" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="10"/>
-                                            </Border>
-
-                                            <!-- Calibrate Button -->
-                                            <Button Grid.Column="1" Content="🎯" Background="#FF9800" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="CalibratePartyMember8_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Enable Button -->
-                                            <Button Grid.Column="2" x:Name="PartyMember8EnableBtn" Content="OFF" Background="#666666" Foreground="White" BorderThickness="0" Width="38" Height="25" Click="TogglePartyMember8Enable_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Monitor Button -->
-                                            <Button Grid.Column="3" x:Name="PartyMember8MonitorBtn" Content="▶" Background="#2196F3" Foreground="White" BorderThickness="0" Width="25" Height="25" Click="TogglePartyMember8Monitor_Click" Margin="3,0,0,0"/>
-
-                                            <!-- Status Label -->
-                                            <Border Grid.Column="4" Background="#2d2d2d" BorderBrush="#444" BorderThickness="1" CornerRadius="4" Margin="5,0,0,0">
-                                                <TextBlock x:Name="PartyMember8Status" Text="--% | OFF" Foreground="#888" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" FontSize="9" Padding="2"/>
-                                            </Border>
-                                        </Grid>
-
-                                        <!-- Row 2: Keys and HP Threshold -->
-                                        <Grid Margin="0,0,0,3">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- User Key -->
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="User:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember8UserKey" Text="8" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#FF9800" TextAlignment="Center" FontSize="11" Width="30"/>
-                                            </StackPanel>
-
-                                            <!-- Skill Key -->
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="Skill:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember8SkillKey" Text="8" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#2196F3" TextAlignment="Center" FontSize="11" Width="30"/>
-                                            </StackPanel>
-
-                                            <!-- HP Threshold -->
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                                <TextBlock Text="HP%:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="35"/>
-                                                <TextBox x:Name="PartyMember8HpThreshold" Text="30" Background="#1a1a1a" BorderBrush="#333" BorderThickness="1" Foreground="#4CAF50" TextAlignment="Center" FontSize="11" Width="40"/>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <!-- Row 3: Coordinates -->
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- X1 Start -->
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="X1:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember8HpXStart" Text="1" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-
-                                            <!-- X2 End -->
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
-                                                <TextBlock Text="X2:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember8HpXEnd" Text="90" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-
-                                            <!-- Y Coordinate -->
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                                <TextBlock Text="Y:" Foreground="#888" FontSize="9" VerticalAlignment="Center" Width="25"/>
-                                                <TextBox x:Name="PartyMember8HpY" Text="5" Background="#333" BorderBrush="#555" BorderThickness="1" Foreground="White" TextAlignment="Center" FontSize="10" Width="40"/>
-                                            </StackPanel>
-                                        </Grid>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock Text="HP%:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="8" Margin="0,0,2,0"/>
+                                        <TextBox x:Name="PartyMember7Threshold" Style="{StaticResource CoordTextBoxStyle}" Text="50" Width="25" ToolTip="HP threshold %"/>
                                     </StackPanel>
-                                </Border>
-                            </StackPanel>
-                        </ScrollViewer>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBox x:Name="PartyMember7XStart" Style="{StaticResource CoordTextBoxStyle}" Text="100" Width="35" ToolTip="HP Bar X Start"/>
+                                        <TextBox x:Name="PartyMember7XEnd" Style="{StaticResource CoordTextBoxStyle}" Text="200" Width="35" ToolTip="HP Bar X End" Margin="2,0,0,0"/>
+                                        <TextBox x:Name="PartyMember7Y" Style="{StaticResource CoordTextBoxStyle}" Text="170" Width="30" ToolTip="HP Bar Y" Margin="2,0,0,0"/>
+                                    </StackPanel>
+                                </StackPanel>
 
-                        <!-- Hidden Legacy Controls for Backward Compatibility -->
-                        <StackPanel Visibility="Collapsed">
-                            <!-- MultiHp1 Legacy Controls -->
-                            <CheckBox x:Name="MultiHp1Enabled" IsChecked="False"/>
-                            <TextBox x:Name="MultiHp1StartX" Text="1"/>
-                            <TextBox x:Name="MultiHp1EndX" Text="90"/>
-                            <TextBox x:Name="MultiHp1Y" Text="5"/>
-                            <TextBox x:Name="MultiHp1Threshold" Text="30"/>
-                            <TextBox x:Name="MultiHp1ClickX" Text="376"/>
-                            <TextBox x:Name="MultiHp1ClickY" Text="236"/>
-                            <TextBox x:Name="MultiHp1Key" Text="1"/>
-                            <TextBlock x:Name="MultiHp1Status" Text="Waiting..."/>
-                            <TextBlock x:Name="MultiHp1Percentage" Text="100%"/>
-                            <Rectangle x:Name="MultiHp1ColorBar" Fill="#000000"/>
-
-                            <!-- MultiHp2 Legacy Controls -->
-                            <CheckBox x:Name="MultiHp2Enabled" IsChecked="False"/>
-                            <TextBox x:Name="MultiHp2StartX" Text="1"/>
-                            <TextBox x:Name="MultiHp2EndX" Text="90"/>
-                            <TextBox x:Name="MultiHp2Y" Text="5"/>
-                            <TextBox x:Name="MultiHp2Threshold" Text="30"/>
-                            <TextBox x:Name="MultiHp2ClickX" Text="376"/>
-                            <TextBox x:Name="MultiHp2ClickY" Text="236"/>
-                            <TextBox x:Name="MultiHp2Key" Text="2"/>
-                            <TextBlock x:Name="MultiHp2Status" Text="Waiting..."/>
-                            <TextBlock x:Name="MultiHp2Percentage" Text="100%"/>
-                            <Rectangle x:Name="MultiHp2ColorBar" Fill="#000000"/>
-
-                            <!-- MultiHp3 Legacy Controls -->
-                            <CheckBox x:Name="MultiHp3Enabled" IsChecked="False"/>
-                            <TextBox x:Name="MultiHp3StartX" Text="1"/>
-                            <TextBox x:Name="MultiHp3EndX" Text="90"/>
-                            <TextBox x:Name="MultiHp3Y" Text="5"/>
-                            <TextBox x:Name="MultiHp3Threshold" Text="30"/>
-                            <TextBox x:Name="MultiHp3ClickX" Text="376"/>
-                            <TextBox x:Name="MultiHp3ClickY" Text="236"/>
-                            <TextBox x:Name="MultiHp3Key" Text="3"/>
-                            <TextBlock x:Name="MultiHp3Status" Text="Waiting..."/>
-                            <TextBlock x:Name="MultiHp3Percentage" Text="100%"/>
-                            <Rectangle x:Name="MultiHp3ColorBar" Fill="#000000"/>
-
-                            <!-- MultiHp4 Legacy Controls -->
-                            <CheckBox x:Name="MultiHp4Enabled" IsChecked="False"/>
-                            <TextBox x:Name="MultiHp4StartX" Text="1"/>
-                            <TextBox x:Name="MultiHp4EndX" Text="90"/>
-                            <TextBox x:Name="MultiHp4Y" Text="5"/>
-                            <TextBox x:Name="MultiHp4Threshold" Text="30"/>
-                            <TextBox x:Name="MultiHp4ClickX" Text="376"/>
-                            <TextBox x:Name="MultiHp4ClickY" Text="236"/>
-                            <TextBox x:Name="MultiHp4Key" Text="4"/>
-                            <TextBlock x:Name="MultiHp4Status" Text="Waiting..."/>
-                            <TextBlock x:Name="MultiHp4Percentage" Text="100%"/>
-                            <Rectangle x:Name="MultiHp4ColorBar" Fill="#000000"/>
-
-                            <!-- MultiHp5 Legacy Controls -->
-                            <CheckBox x:Name="MultiHp5Enabled" IsChecked="False"/>
-                            <TextBox x:Name="MultiHp5StartX" Text="1"/>
-                            <TextBox x:Name="MultiHp5EndX" Text="90"/>
-                            <TextBox x:Name="MultiHp5Y" Text="5"/>
-                            <TextBox x:Name="MultiHp5Threshold" Text="30"/>
-                            <TextBox x:Name="MultiHp5ClickX" Text="376"/>
-                            <TextBox x:Name="MultiHp5ClickY" Text="236"/>
-                            <TextBox x:Name="MultiHp5Key" Text="5"/>
-                            <TextBlock x:Name="MultiHp5Status" Text="Waiting..."/>
-                            <TextBlock x:Name="MultiHp5Percentage" Text="100%"/>
-                            <Rectangle x:Name="MultiHp5ColorBar" Fill="#000000"/>
-
-                            <!-- MultiHp6 Legacy Controls -->
-                            <CheckBox x:Name="MultiHp6Enabled" IsChecked="False"/>
-                            <TextBox x:Name="MultiHp6StartX" Text="1"/>
-                            <TextBox x:Name="MultiHp6EndX" Text="90"/>
-                            <TextBox x:Name="MultiHp6Y" Text="5"/>
-                            <TextBox x:Name="MultiHp6Threshold" Text="30"/>
-                            <TextBox x:Name="MultiHp6ClickX" Text="376"/>
-                            <TextBox x:Name="MultiHp6ClickY" Text="236"/>
-                            <TextBox x:Name="MultiHp6Key" Text="6"/>
-                            <TextBlock x:Name="MultiHp6Status" Text="Waiting..."/>
-                            <TextBlock x:Name="MultiHp6Percentage" Text="100%"/>
-                            <Rectangle x:Name="MultiHp6ColorBar" Fill="#000000"/>
-
-                            <!-- MultiHp7 Legacy Controls -->
-                            <CheckBox x:Name="MultiHp7Enabled" IsChecked="False"/>
-                            <TextBox x:Name="MultiHp7StartX" Text="1"/>
-                            <TextBox x:Name="MultiHp7EndX" Text="90"/>
-                            <TextBox x:Name="MultiHp7Y" Text="5"/>
-                            <TextBox x:Name="MultiHp7Threshold" Text="30"/>
-                            <TextBox x:Name="MultiHp7ClickX" Text="376"/>
-                            <TextBox x:Name="MultiHp7ClickY" Text="236"/>
-                            <TextBox x:Name="MultiHp7Key" Text="7"/>
-                            <TextBlock x:Name="MultiHp7Status" Text="Waiting..."/>
-                            <TextBlock x:Name="MultiHp7Percentage" Text="100%"/>
-                            <Rectangle x:Name="MultiHp7ColorBar" Fill="#000000"/>
-
-                            <!-- MultiHp8 Legacy Controls -->
-                            <CheckBox x:Name="MultiHp8Enabled" IsChecked="False"/>
-                            <TextBox x:Name="MultiHp8StartX" Text="1"/>
-                            <TextBox x:Name="MultiHp8EndX" Text="90"/>
-                            <TextBox x:Name="MultiHp8Y" Text="5"/>
-                            <TextBox x:Name="MultiHp8Threshold" Text="30"/>
-                            <TextBox x:Name="MultiHp8ClickX" Text="376"/>
-                            <TextBox x:Name="MultiHp8ClickY" Text="236"/>
-                            <TextBox x:Name="MultiHp8Key" Text="8"/>
-                            <TextBlock x:Name="MultiHp8Status" Text="Waiting..."/>
-                            <TextBlock x:Name="MultiHp8Percentage" Text="100%"/>
-                            <Rectangle x:Name="MultiHp8ColorBar" Fill="#000000"/>
+                                <StackPanel Grid.Column="3" Orientation="Vertical">
+                                    <CheckBox x:Name="PartyMember8Enabled" Foreground="#9C27B0" Margin="0,0,0,2" ToolTip="Enable Member 8"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="8:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="9" Margin="0,0,2,0"/>
+                                        <TextBox x:Name="PartyMember8Key" Style="{StaticResource CoordTextBoxStyle}" Text="I" Width="18" ToolTip="Member 8 key"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock Text="HP%:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" FontSize="8" Margin="0,0,2,0"/>
+                                        <TextBox x:Name="PartyMember8Threshold" Style="{StaticResource CoordTextBoxStyle}" Text="50" Width="25" ToolTip="HP threshold %"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBox x:Name="PartyMember8XStart" Style="{StaticResource CoordTextBoxStyle}" Text="100" Width="35" ToolTip="HP Bar X Start"/>
+                                        <TextBox x:Name="PartyMember8XEnd" Style="{StaticResource CoordTextBoxStyle}" Text="200" Width="35" ToolTip="HP Bar X End" Margin="2,0,0,0"/>
+                                        <TextBox x:Name="PartyMember8Y" Style="{StaticResource CoordTextBoxStyle}" Text="190" Width="30" ToolTip="HP Bar Y" Margin="2,0,0,0"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
                         </StackPanel>
+                    </Border>
 
-                    </StackPanel>
-                </ScrollViewer>
+                    <!-- Help Text -->
+                    <Border Background="#1a1a1a" CornerRadius="3" Padding="8" Margin="0,5,0,0">
+                        <StackPanel>
+                            <TextBlock Text="🧙 Party Heal Usage:" Style="{StaticResource LabelStyle}" FontSize="9" Foreground="#9C27B0" Margin="0,0,0,3"/>
+                            <TextBlock Style="{StaticResource ValueStyle}" FontSize="8" Foreground="#aaaaaa" TextWrapping="Wrap">
+                                • Configure HP bar coordinates for each party member
+                                • Set HP threshold percentage (when to heal)  
+                                • System monitors party member HP bars continuously
+                                • When member HP drops below threshold: Select member → Cast heal
+                                • Lower HP members get priority (automatic triage)
+                                • Works independently per client window
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
             </TabItem>
 
             <TabItem Header="⚙️ Settings" Width="80">

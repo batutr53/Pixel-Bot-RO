@@ -61,27 +61,36 @@ public class WindowsMessageClickProvider : IClickProvider
 
         try
         {
+            Console.WriteLine($"[WindowsMessageClickProvider] 🔑 SendKeyAsync: key='{key}' hwnd=0x{hwnd:X8}");
+            
             var virtualKey = GetVirtualKeyCode(key.ToLower());
             if (virtualKey == 0)
             {
                 _logger.LogWarning("Unknown key: {Key}", key);
+                Console.WriteLine($"[WindowsMessageClickProvider] ❌ Unknown key: {key}");
                 return false;
             }
 
+            Console.WriteLine($"[WindowsMessageClickProvider] ✅ Key '{key}' mapped to VK={virtualKey:X2}");
+
             // Focus the window first
+            Console.WriteLine($"[WindowsMessageClickProvider] 🎯 Setting foreground window 0x{hwnd:X8}");
             SetForegroundWindow(hwnd);
             await Task.Delay(50);
 
             // Send key down
             var lParam = MakeLParam(1, virtualKey, 0, 0, 0, 0);
+            Console.WriteLine($"[WindowsMessageClickProvider] ⬇️ Sending WM_KEYDOWN VK={virtualKey:X2} to 0x{hwnd:X8}");
             SendMessage(hwnd, WM_KEYDOWN, (IntPtr)virtualKey, lParam);
             
             await Task.Delay(10);
             
             // Send key up
             lParam = MakeLParam(1, virtualKey, 0, 0, 0, 1);
+            Console.WriteLine($"[WindowsMessageClickProvider] ⬆️ Sending WM_KEYUP VK={virtualKey:X2} to 0x{hwnd:X8}");
             SendMessage(hwnd, WM_KEYUP, (IntPtr)virtualKey, lParam);
 
+            Console.WriteLine($"[WindowsMessageClickProvider] ✅ Successfully sent key '{key}' to window 0x{hwnd:X8}");
             _logger.LogDebug("Sent key '{Key}' to window {Hwnd}", key, hwnd);
             return true;
         }

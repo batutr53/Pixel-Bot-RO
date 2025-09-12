@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Threading;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.ComponentModel;
 using Microsoft.Win32;
 using PixelAutomation.Core.Models;
 using PixelAutomation.Tool.Overlay.WPF.Services;
@@ -10,6 +11,9 @@ using PixelAutomation.Tool.Overlay.WPF.Controls;
 using PixelAutomation.Tool.Overlay.WPF.Models;
 using Vanara.PInvoke;
 using System.Diagnostics;
+using PixelAutomation.Core.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace PixelAutomation.Tool.Overlay.WPF;
 
@@ -25,6 +29,7 @@ public partial class MainWindow : Window
     private bool _masterAttackRunning = false;
     private bool _masterHealRunning = false;
     private bool _panicModeActive = false;
+    
     
     // Public access to overlay canvas for client cards
     public System.Windows.Controls.Canvas GetOverlayCanvas() => OverlayCanvas;
@@ -43,6 +48,9 @@ public partial class MainWindow : Window
         };
         _updateTimer.Tick += UpdateTimer_Tick;
         _updateTimer.Start();
+        
+        // Auto-save configuration on window closing
+        this.Closing += MainWindow_Closing;
         
         InitializeClientCards();
         InitializeTextBoxes();
@@ -1072,6 +1080,7 @@ public partial class MainWindow : Window
         ToggleMasterHeal();
     }
 
+
     private void ToggleMasterAttack()
     {
         // Check if any client has a selected window
@@ -1242,19 +1251,9 @@ public partial class MainWindow : Window
     {
         try
         {
-            // Check if card has any enabled party members
-            var enabledMembers = card.ViewModel.MultiHpClients.Where(c => c.Enabled).ToList();
-            if (!enabledMembers.Any())
-            {
-                return false; // No enabled members
-            }
-            
-            // Use reflection to call StartMultiHpSystem method
-            var method = typeof(ClientCard).GetMethod("StartMultiHpSystem", 
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            method?.Invoke(card, null);
-            
-            return true;
+            // MultiHp system has been removed - always return false for now
+            // TODO: Replace with equivalent non-MultiHp heal logic if needed
+            return false;
         }
         catch (Exception ex)
         {
@@ -1267,10 +1266,8 @@ public partial class MainWindow : Window
     {
         try
         {
-            // Use reflection to call StopMultiHpSystem method
-            var method = typeof(ClientCard).GetMethod("StopMultiHpSystem", 
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            method?.Invoke(card, null);
+            // MultiHp system has been removed - no action needed for now
+            // TODO: Replace with equivalent non-MultiHp heal logic if needed
         }
         catch (Exception ex)
         {
@@ -1318,6 +1315,21 @@ public partial class MainWindow : Window
         //             System.Windows.Media.Color.FromRgb(156, 39, 176)); // Purple #9C27B0
         //     }
         // });
+    }
+    
+    private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+        try
+        {
+            // Auto-save current configuration when closing
+            var config = BuildConfigFromClientCards();
+            _configManager.SaveConfiguration("config.json", config);
+            Console.WriteLine("[MainWindow] ✅ Configuration auto-saved on exit");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[MainWindow] ❌ Error auto-saving configuration: {ex.Message}");
+        }
     }
 
     #endregion

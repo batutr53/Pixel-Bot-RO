@@ -2,11 +2,19 @@ using System.Windows;
 using Vanara.PInvoke;
 using System.Runtime.InteropServices;
 using PixelAutomation.Tool.Overlay.WPF.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using PixelAutomation.Core.Interfaces;
+using PixelAutomation.Core.Services;
+using PixelAutomation.Core.Implementations;
+using PixelAutomation.Capture.Win.Backends;
+using Core.Services;
 
 namespace PixelAutomation.Tool.Overlay.WPF;
 
 public partial class App : Application
 {
+    public static IServiceProvider ServiceProvider { get; private set; } = null!;
     [DllImport("kernel32.dll")]
     private static extern bool AllocConsole();
     
@@ -30,6 +38,9 @@ public partial class App : Application
         };
 
         base.OnStartup(e);
+        
+        // Configure dependency injection
+        ConfigureServices();
         
         // Konsol penceresi aç
         try
@@ -90,7 +101,7 @@ public partial class App : Application
             if (Current.MainWindow == null)
             {
                 Console.WriteLine("📋 Main window not found, creating manually...");
-                var mainWindow = new MainWindow();
+                var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
                 Current.MainWindow = mainWindow;
                 mainWindow.Show();
                 Console.WriteLine("✅ Main window created and shown successfully!");
@@ -103,6 +114,47 @@ public partial class App : Application
         }
     }
     
+    private void ConfigureServices()
+    {
+        var services = new ServiceCollection();
+        
+        // Logging
+        services.AddLogging(builder =>
+        {
+            builder.AddConsole();
+            builder.SetMinimumLevel(LogLevel.Debug);
+        });
+        
+        // Core services
+        services.AddSingleton<BoundedTaskQueue>(provider => 
+            new BoundedTaskQueue(maxConcurrency: 4, maxQueueSize: 1000));
+        
+        // Capture backend - prioritize available backends
+        services.AddSingleton<ICaptureBackend>(provider =>
+        {
+            var backends = new ICaptureBackend[]
+            {
+                new WindowsGraphicsCaptureBackend(),
+                new PrintWindowBackend(),
+                new GetPixelBackend()
+            };
+            
+            return backends.FirstOrDefault(b => b.IsAvailable) ?? backends.Last();
+        });
+        
+        // Click provider
+        services.AddSingleton<IClickProvider, WindowsMessageClickProvider>();
+        
+        // PartyHeal services
+        services.AddSingleton<IPartyHealService, PartyHealService>();
+        services.AddTransient<PixelAutomation.Tool.Overlay.WPF.ViewModels.PartyHealViewModel>();
+        
+        // Main window
+        services.AddTransient<MainWindow>();
+        
+        ServiceProvider = services.BuildServiceProvider();
+    }
+
     protected override void OnExit(ExitEventArgs e)
     {
         FreeConsole();

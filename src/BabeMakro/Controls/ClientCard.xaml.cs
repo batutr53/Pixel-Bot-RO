@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using System.Drawing;
 using PixelAutomation.Capture.Win;
+using PixelAutomation.Capture.Win.Backends;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Collections.Concurrent;
@@ -28,6 +29,9 @@ public partial class ClientCard : UserControl, IDisposable
 {
     public int ClientId { get; set; }
     public ClientViewModel ViewModel { get; set; }
+    
+    // Event for notifying when window changes
+    public event EventHandler<IntPtr>? WindowChanged;
     
     private CoordinatePicker? _coordinatePicker;
     // private bool _isRunning = false; // Unused field removed
@@ -65,6 +69,11 @@ public partial class ClientCard : UserControl, IDisposable
     private volatile bool _attackRunning = false;
     private readonly List<DispatcherTimer> _skillTimers = new();
     
+    // MultiHp System (removed but keeping fields for compilation)
+    private volatile bool _multiHpRunning = false;
+    private volatile int _currentMultiHpIndex = 0;
+    private DispatcherTimer? _multiHpTimer;
+    
     // Buff/AC System
     private DispatcherTimer? _buffAcCycleTimer;
     private volatile bool _buffAcRunning = false;
@@ -74,9 +83,9 @@ public partial class ClientCard : UserControl, IDisposable
     private readonly List<DispatcherTimer> _activeBuffAcTimers = new();
     
     // Party Heal System
-    private DispatcherTimer? _multiHpTimer;
-    private volatile bool _multiHpRunning = false;
-    private volatile int _currentMultiHpIndex = 0; // Current HP client being checked
+    private IPartyHealService? _partyHealService;
+    private volatile bool _partyHealRunning = false;
+    
     
     // Performance Optimization - Using Bounded Task Queue to prevent memory exhaustion
     private readonly SemaphoreSlim _operationSemaphore = new(1, 1);
@@ -125,7 +134,7 @@ public partial class ClientCard : UserControl, IDisposable
         SetupBabeBotUI();
         SetupAttackSystem();
         SetupBuffAcSystem();
-        SetupMultiHpUI();
+        InitializePartyHealSystem();
         InitializePerformanceOptimizations();
         InitializeCaptchaSolver();
     }
@@ -460,6 +469,9 @@ public partial class ClientCard : UserControl, IDisposable
         if (hwnd != IntPtr.Zero)
         {
             ViewModel.TargetHwnd = hwnd;
+            
+            // Notify PartyHeal about window change
+            WindowChanged?.Invoke(this, hwnd);
             ViewModel.WindowTitle = WindowHelper.GetWindowTitle(hwnd);
             WindowTitleText.Text = $"{ViewModel.WindowTitle} - 0x{hwnd:X8}";
             StatusIndicator.Fill = new SolidColorBrush(Colors.LimeGreen);
@@ -1863,10 +1875,7 @@ public partial class ClientCard : UserControl, IDisposable
                 if (enabledControl != null) values[$"MultiHp{i}Enabled"] = enabledControl.IsChecked ?? false;
             }
             
-            // Multi HP System Settings
-            values["MultiHpEnabled"] = MultiHpEnabled.IsChecked ?? false;
-            values["AnimationDelay"] = AnimationDelay.Text;
-            values["MultiHpCheckInterval"] = MultiHpCheckInterval.Text;
+            // Multi HP System Settings - REMOVED
             
             // Python-style HP/MP Settings
             values["PythonHpUseCoordinate"] = PythonHpUseCoordinate.IsChecked ?? false;
@@ -1930,15 +1939,21 @@ public partial class ClientCard : UserControl, IDisposable
             values["AcAnimInput"] = AcAnimInput.Text;
             values["CycleIntervalInput"] = CycleIntervalInput.Text;
             
-            // Party HP System
+            // Party Heal System
+            values["PartyHealSystemEnabled"] = PartyHealSystemEnabled.IsChecked ?? false;
+            values["PartyHealSkillKey"] = PartyHealSkillKey.Text;
+            values["PartyHealPollInterval"] = PartyHealPollInterval.Text;
+            values["PartyHealBaselineColor"] = PartyHealBaselineColor.Text;
+            
+            // Party Members
             for (int i = 1; i <= 8; i++)
             {
-                values[$"PartyMember{i}UserKey"] = ((TextBox)FindName($"PartyMember{i}UserKey"))?.Text ?? "";
-                values[$"PartyMember{i}SkillKey"] = ((TextBox)FindName($"PartyMember{i}SkillKey"))?.Text ?? "";
-                values[$"PartyMember{i}HpThreshold"] = ((TextBox)FindName($"PartyMember{i}HpThreshold"))?.Text ?? "";
-                values[$"PartyMember{i}HpXStart"] = ((TextBox)FindName($"PartyMember{i}HpXStart"))?.Text ?? "";
-                values[$"PartyMember{i}HpXEnd"] = ((TextBox)FindName($"PartyMember{i}HpXEnd"))?.Text ?? "";
-                values[$"PartyMember{i}HpY"] = ((TextBox)FindName($"PartyMember{i}HpY"))?.Text ?? "";
+                values[$"PartyMember{i}Enabled"] = ((CheckBox)FindName($"PartyMember{i}Enabled"))?.IsChecked ?? false;
+                values[$"PartyMember{i}Key"] = ((TextBox)FindName($"PartyMember{i}Key"))?.Text ?? "";
+                values[$"PartyMember{i}Threshold"] = ((TextBox)FindName($"PartyMember{i}Threshold"))?.Text ?? "";
+                values[$"PartyMember{i}XStart"] = ((TextBox)FindName($"PartyMember{i}XStart"))?.Text ?? "";
+                values[$"PartyMember{i}XEnd"] = ((TextBox)FindName($"PartyMember{i}XEnd"))?.Text ?? "";
+                values[$"PartyMember{i}Y"] = ((TextBox)FindName($"PartyMember{i}Y"))?.Text ?? "";
             }
             
             // Settings - Anti-Captcha System
@@ -2088,9 +2103,7 @@ public partial class ClientCard : UserControl, IDisposable
             }
             
             // Multi HP System Settings
-            if (values.TryGetValue("MultiHpEnabled", out var multiHpEnabled)) MultiHpEnabled.IsChecked = ConvertToBool(multiHpEnabled);
-            if (values.TryGetValue("AnimationDelay", out var animationDelay)) AnimationDelay.Text = animationDelay.ToString();
-            if (values.TryGetValue("MultiHpCheckInterval", out var multiHpCheckInterval)) MultiHpCheckInterval.Text = multiHpCheckInterval.ToString();
+            // Multi HP references removed
             
             // Python-style HP/MP Settings
             if (values.TryGetValue("PythonHpUseCoordinate", out var pythonHpUseCoordinate)) PythonHpUseCoordinate.IsChecked = ConvertToBool(pythonHpUseCoordinate);
@@ -2182,21 +2195,31 @@ public partial class ClientCard : UserControl, IDisposable
             if (values.TryGetValue("AcAnimInput", out var acAnimInput)) AcAnimInput.Text = ConvertToString(acAnimInput);
             if (values.TryGetValue("CycleIntervalInput", out var cycleIntervalInput)) CycleIntervalInput.Text = ConvertToString(cycleIntervalInput);
             
-            // Party HP System
+            // Party Heal System - Global Settings
+            if (values.TryGetValue("PartyHealSystemEnabled", out var partyHealSystemEnabled)) 
+                PartyHealSystemEnabled.IsChecked = ConvertToBool(partyHealSystemEnabled);
+            if (values.TryGetValue("PartyHealSkillKey", out var partyHealSkillKey)) 
+                PartyHealSkillKey.Text = ConvertToString(partyHealSkillKey);
+            if (values.TryGetValue("PartyHealPollInterval", out var partyHealPollInterval)) 
+                PartyHealPollInterval.Text = ConvertToString(partyHealPollInterval);
+            if (values.TryGetValue("PartyHealBaselineColor", out var partyHealBaselineColor)) 
+                PartyHealBaselineColor.Text = ConvertToString(partyHealBaselineColor);
+                
+            // Party Heal System - Members
             for (int i = 1; i <= 8; i++)
             {
-                if (values.TryGetValue($"PartyMember{i}UserKey", out var userKey)) 
-                    ((TextBox)FindName($"PartyMember{i}UserKey")).Text = ConvertToString(userKey);
-                if (values.TryGetValue($"PartyMember{i}SkillKey", out var skillKey)) 
-                    ((TextBox)FindName($"PartyMember{i}SkillKey")).Text = ConvertToString(skillKey);
-                if (values.TryGetValue($"PartyMember{i}HpThreshold", out var hpThreshold)) 
-                    ((TextBox)FindName($"PartyMember{i}HpThreshold")).Text = ConvertToString(hpThreshold);
-                if (values.TryGetValue($"PartyMember{i}HpXStart", out var hpXStart)) 
-                    ((TextBox)FindName($"PartyMember{i}HpXStart")).Text = ConvertToString(hpXStart);
-                if (values.TryGetValue($"PartyMember{i}HpXEnd", out var hpXEnd)) 
-                    ((TextBox)FindName($"PartyMember{i}HpXEnd")).Text = ConvertToString(hpXEnd);
-                if (values.TryGetValue($"PartyMember{i}HpY", out var partyHpY)) 
-                    ((TextBox)FindName($"PartyMember{i}HpY")).Text = ConvertToString(partyHpY);
+                if (values.TryGetValue($"PartyMember{i}Enabled", out var enabled)) 
+                    ((CheckBox)FindName($"PartyMember{i}Enabled"))!.IsChecked = ConvertToBool(enabled);
+                if (values.TryGetValue($"PartyMember{i}Key", out var key)) 
+                    ((TextBox)FindName($"PartyMember{i}Key"))!.Text = ConvertToString(key);
+                if (values.TryGetValue($"PartyMember{i}Threshold", out var threshold)) 
+                    ((TextBox)FindName($"PartyMember{i}Threshold"))!.Text = ConvertToString(threshold);
+                if (values.TryGetValue($"PartyMember{i}XStart", out var xStart)) 
+                    ((TextBox)FindName($"PartyMember{i}XStart"))!.Text = ConvertToString(xStart);
+                if (values.TryGetValue($"PartyMember{i}XEnd", out var xEnd)) 
+                    ((TextBox)FindName($"PartyMember{i}XEnd"))!.Text = ConvertToString(xEnd);
+                if (values.TryGetValue($"PartyMember{i}Y", out var y)) 
+                    ((TextBox)FindName($"PartyMember{i}Y"))!.Text = ConvertToString(y);
             }
             
             // Settings - Anti-Captcha System
@@ -2237,7 +2260,7 @@ public partial class ClientCard : UserControl, IDisposable
         }
     }
     
-    private void StartClient_Click(object sender, RoutedEventArgs e)
+    private async void StartClient_Click(object sender, RoutedEventArgs e)
     {
         if (ViewModel.TargetHwnd == IntPtr.Zero)
         {
@@ -2283,16 +2306,14 @@ public partial class ClientCard : UserControl, IDisposable
             Console.WriteLine($"[{ViewModel.ClientName}] 🤖 Anti-Captcha System auto-started");
         }
         
-        // Auto-start Multi-HP System (Party Heal System) if enabled
-        if (MultiHpEnabled.IsChecked == true)
+        // Auto-start PartyHeal System if enabled
+        if (PartyHealSystemEnabled.IsChecked == true)
         {
-            var enabledMembers = ViewModel.MultiHpClients.Where(c => c.Enabled).ToList();
-            if (enabledMembers.Any())
-            {
-                StartMultiHpSystem();
-                Console.WriteLine($"[{ViewModel.ClientName}] 🎭 Party Heal System auto-started");
-            }
+            await StartPartyHealAsync();
+            Console.WriteLine($"[{ViewModel.ClientName}] 🧙 PartyHeal System auto-started");
         }
+        
+        // Multi-HP System auto-start removed
         
         // Auto-enable Party Heal monitoring for all active members
         for (int i = 1; i <= 8; i++)
@@ -2319,7 +2340,7 @@ public partial class ClientCard : UserControl, IDisposable
         Console.WriteLine($"[{ViewModel.ClientName}] START: MP Enabled={ViewModel.MpTrigger.Enabled}, Coords=({ViewModel.MpTrigger.X},{ViewModel.MpTrigger.Y}), Tolerance={ViewModel.MpProbe.Tolerance}");
     }
 
-    private void StopClient_Click(object sender, RoutedEventArgs e)
+    private async void StopClient_Click(object sender, RoutedEventArgs e)
     {
         // _isRunning = false; // Removed - using ViewModel.IsRunning instead
         ViewModel.IsRunning = false;
@@ -2378,19 +2399,21 @@ public partial class ClientCard : UserControl, IDisposable
             }
         }
         
-        // Auto-stop Multi-HP System (Party Heal System) if enabled
-        if (MultiHpEnabled.IsChecked == true && _multiHpRunning)
+        // Auto-stop PartyHeal System if running
+        if (_partyHealRunning)
         {
             try
             {
-                StopMultiHpSystem();
-                Console.WriteLine($"[{ViewModel.ClientName}] 🎭 Party Heal System auto-stopped");
+                await StopPartyHealAsync();
+                Console.WriteLine($"[{ViewModel.ClientName}] 🧙 PartyHeal System auto-stopped");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[{ViewModel.ClientName}] Error stopping Party Heal System: {ex.Message}");
+                Console.WriteLine($"[{ViewModel.ClientName}] Error stopping PartyHeal System: {ex.Message}");
             }
         }
+        
+        // Multi-HP System auto-stop removed
         
         // Auto-disable Party Heal monitoring for all active members
         for (int i = 1; i <= 8; i++)
@@ -5682,9 +5705,7 @@ public partial class ClientCard : UserControl, IDisposable
         _currentBuffAcMemberIndex = 0;
         
         // Pause other systems
-        PauseHealForBuffAc();
         PauseAttackForBuffAc();
-        PausePartyHealForBuffAc();
         
         // Setup cycle timer
         var cycleInterval = ViewModel.BuffAcSettings.CycleIntervalSeconds * 1000;
@@ -5726,9 +5747,7 @@ public partial class ClientCard : UserControl, IDisposable
         }
         
         // Resume other systems
-        ResumeHealAfterBuffAc();
         ResumeAttackAfterBuffAc();
-        ResumePartyHealAfterBuffAc();
         
         StartBuffAcButton.IsEnabled = true;
         StopBuffAcButton.IsEnabled = false;
@@ -5760,8 +5779,7 @@ public partial class ClientCard : UserControl, IDisposable
         Console.WriteLine($"[{ViewModel.ClientName}] 🎭 Starting buff/AC cycle #{ViewModel.BuffAcSettings.CycleCount}...");
         BuffAcStatusText.Text = $"Status: Cycling #{ViewModel.BuffAcSettings.CycleCount} - {_buffAcEnabledMembers.Count} members";
         
-        // Pause heal system during cycle
-        PauseHealForBuffAc();
+        // Pause heal system during cycle - removed
         
         // CORRECT FLOW: Process each member individually
         _currentBuffAcMemberIndex = 0;
@@ -5924,32 +5942,11 @@ public partial class ClientCard : UserControl, IDisposable
         }
         BuffAcStatusText.Text = $"Status: Active - Next cycle in {ViewModel.BuffAcSettings.CycleIntervalSeconds}s";
         
-        // Resume heal systems after cycle
-        ResumeHealAfterBuffAc();
-        ResumePartyHealAfterBuffAc();
+        // Resume heal systems after cycle - removed
         
         Console.WriteLine($"[{ViewModel.ClientName}] ✅ Buff/AC cycle #{ViewModel.BuffAcSettings.CycleCount} completed");
     }
     
-    private void PauseHealForBuffAc()
-    {
-        if (_multiHpRunning)
-        {
-            Console.WriteLine($"[{ViewModel.ClientName}] ⏸️ Pausing heal system for buff/AC cycle");
-            StopMultiHpSystem();
-        }
-    }
-    
-    private void ResumeHealAfterBuffAc()
-    {
-        // Resume heal system if it was enabled
-        var enabledMembers = ViewModel.MultiHpClients.Where(c => c.Enabled).ToList();
-        if (enabledMembers.Any())
-        {
-            Console.WriteLine($"[{ViewModel.ClientName}] ▶️ Resuming heal system after buff/AC cycle");
-            StartMultiHpSystem();
-        }
-    }
     
     private void PauseAttackForBuffAc()
     {
@@ -5971,414 +5968,27 @@ public partial class ClientCard : UserControl, IDisposable
         }
     }
     
-    private bool _multiHpPausedForBuffAc = false;
-    
-    private void PausePartyHealForBuffAc()
-    {
-        if (_multiHpRunning)
-        {
-            Console.WriteLine($"[{ViewModel.ClientName}] ⏸️ Pausing Party Heal system for buff/AC cycle");
-            _multiHpPausedForBuffAc = true;
-            StopMultiHpSystem();
-        }
-    }
-    
-    private void ResumePartyHealAfterBuffAc()
-    {
-        // Resume Party Heal system if it was enabled and paused for buff/AC
-        if (_multiHpPausedForBuffAc)
-        {
-            var enabledClients = ViewModel.MultiHpClients.Where(c => c.Enabled).ToList();
-            if (enabledClients.Any())
-            {
-                Console.WriteLine($"[{ViewModel.ClientName}] ▶️ Resuming Party Heal system after buff/AC cycle");
-                StartMultiHpSystem();
-            }
-            _multiHpPausedForBuffAc = false;
-        }
-    }
 
     #endregion
 
-    #region Party Heal System
+    // Party Heal System completely removed
 
-    private void SetupMultiHpUI()
-    {
-        // Animation delay handler
-        AnimationDelay.TextChanged += (s, e) =>
-        {
-            if (int.TryParse(AnimationDelay.Text, out int delay))
-                ViewModel.AnimationDelay = delay;
-        };
 
-        // Check interval handler
-        MultiHpCheckInterval.TextChanged += (s, e) =>
-        {
-            if (int.TryParse(MultiHpCheckInterval.Text, out int interval))
-                ViewModel.MultiHpCheckInterval = interval;
-        };
 
-        // Enable/disable handler
-        MultiHpEnabled.Checked += (s, e) =>
-        {
-            ViewModel.MultiHpEnabled = true;
-            Console.WriteLine($"[{ViewModel.ClientName}] 🎭 Party Heal monitoring ENABLED");
-        };
 
-        MultiHpEnabled.Unchecked += (s, e) =>
-        {
-            ViewModel.MultiHpEnabled = false;
-            Console.WriteLine($"[{ViewModel.ClientName}] 🎭 Party Heal monitoring DISABLED");
-        };
 
-        // Setup event handlers for all 8 clients
-        SetupMultiHpClientHandlers();
-    }
 
-    private void SetupMultiHpClientHandlers()
-    {
-        // HP Client 1
-        MultiHp1StartX.TextChanged += (s, e) => UpdateMultiHpClient(0, "StartX", MultiHp1StartX.Text);
-        MultiHp1EndX.TextChanged += (s, e) => UpdateMultiHpClient(0, "EndX", MultiHp1EndX.Text);
-        MultiHp1Y.TextChanged += (s, e) => UpdateMultiHpClient(0, "Y", MultiHp1Y.Text);
-        MultiHp1ClickX.TextChanged += (s, e) => UpdateMultiHpClient(0, "ClickX", MultiHp1ClickX.Text);
-        MultiHp1ClickY.TextChanged += (s, e) => UpdateMultiHpClient(0, "ClickY", MultiHp1ClickY.Text);
-        MultiHp1Threshold.TextChanged += (s, e) => UpdateMultiHpClientTextBox(0, "Threshold", MultiHp1Threshold);
-        MultiHp1Key.TextChanged += (s, e) => UpdateMultiHpClientTextBox(0, "Key", MultiHp1Key);
-        MultiHp1Enabled.Checked += (s, e) => ViewModel.MultiHpClients[0].Enabled = true;
-        MultiHp1Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[0].Enabled = false;
+    // SimplePartyHealTick method removed
 
-        // HP Client 2
-        MultiHp2StartX.TextChanged += (s, e) => UpdateMultiHpClient(1, "StartX", MultiHp2StartX.Text);
-        MultiHp2EndX.TextChanged += (s, e) => UpdateMultiHpClient(1, "EndX", MultiHp2EndX.Text);
-        MultiHp2Y.TextChanged += (s, e) => UpdateMultiHpClient(1, "Y", MultiHp2Y.Text);
-        MultiHp2ClickX.TextChanged += (s, e) => UpdateMultiHpClient(1, "ClickX", MultiHp2ClickX.Text);
-        MultiHp2ClickY.TextChanged += (s, e) => UpdateMultiHpClient(1, "ClickY", MultiHp2ClickY.Text);
-        MultiHp2Threshold.TextChanged += (s, e) => UpdateMultiHpClientTextBox(1, "Threshold", MultiHp2Threshold);
-        MultiHp2Key.TextChanged += (s, e) => UpdateMultiHpClientTextBox(1, "Key", MultiHp2Key);
-        MultiHp2Enabled.Checked += (s, e) => ViewModel.MultiHpClients[1].Enabled = true;
-        MultiHp2Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[1].Enabled = false;
-
-        // HP Client 3
-        MultiHp3StartX.TextChanged += (s, e) => UpdateMultiHpClient(2, "StartX", MultiHp3StartX.Text);
-        MultiHp3EndX.TextChanged += (s, e) => UpdateMultiHpClient(2, "EndX", MultiHp3EndX.Text);
-        MultiHp3Y.TextChanged += (s, e) => UpdateMultiHpClient(2, "Y", MultiHp3Y.Text);
-        MultiHp3ClickX.TextChanged += (s, e) => UpdateMultiHpClient(2, "ClickX", MultiHp3ClickX.Text);
-        MultiHp3ClickY.TextChanged += (s, e) => UpdateMultiHpClient(2, "ClickY", MultiHp3ClickY.Text);
-        MultiHp3Threshold.TextChanged += (s, e) => UpdateMultiHpClientTextBox(2, "Threshold", MultiHp3Threshold);
-        MultiHp3Key.TextChanged += (s, e) => UpdateMultiHpClientTextBox(2, "Key", MultiHp3Key);
-        MultiHp3Enabled.Checked += (s, e) => ViewModel.MultiHpClients[2].Enabled = true;
-        MultiHp3Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[2].Enabled = false;
-
-        // HP Client 4
-        MultiHp4StartX.TextChanged += (s, e) => UpdateMultiHpClient(3, "StartX", MultiHp4StartX.Text);
-        MultiHp4EndX.TextChanged += (s, e) => UpdateMultiHpClient(3, "EndX", MultiHp4EndX.Text);
-        MultiHp4Y.TextChanged += (s, e) => UpdateMultiHpClient(3, "Y", MultiHp4Y.Text);
-        MultiHp4ClickX.TextChanged += (s, e) => UpdateMultiHpClient(3, "ClickX", MultiHp4ClickX.Text);
-        MultiHp4ClickY.TextChanged += (s, e) => UpdateMultiHpClient(3, "ClickY", MultiHp4ClickY.Text);
-        MultiHp4Threshold.TextChanged += (s, e) => UpdateMultiHpClientTextBox(3, "Threshold", MultiHp4Threshold);
-        MultiHp4Key.TextChanged += (s, e) => UpdateMultiHpClientTextBox(3, "Key", MultiHp4Key);
-        MultiHp4Enabled.Checked += (s, e) => ViewModel.MultiHpClients[3].Enabled = true;
-        MultiHp4Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[3].Enabled = false;
-
-        // HP Client 5
-        MultiHp5StartX.TextChanged += (s, e) => UpdateMultiHpClient(4, "StartX", MultiHp5StartX.Text);
-        MultiHp5EndX.TextChanged += (s, e) => UpdateMultiHpClient(4, "EndX", MultiHp5EndX.Text);
-        MultiHp5Y.TextChanged += (s, e) => UpdateMultiHpClient(4, "Y", MultiHp5Y.Text);
-        MultiHp5ClickX.TextChanged += (s, e) => UpdateMultiHpClient(4, "ClickX", MultiHp5ClickX.Text);
-        MultiHp5ClickY.TextChanged += (s, e) => UpdateMultiHpClient(4, "ClickY", MultiHp5ClickY.Text);
-        MultiHp5Threshold.TextChanged += (s, e) => UpdateMultiHpClientTextBox(4, "Threshold", MultiHp5Threshold);
-        MultiHp5Key.TextChanged += (s, e) => UpdateMultiHpClientTextBox(4, "Key", MultiHp5Key);
-        MultiHp5Enabled.Checked += (s, e) => ViewModel.MultiHpClients[4].Enabled = true;
-        MultiHp5Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[4].Enabled = false;
-
-        // HP Client 6
-        MultiHp6StartX.TextChanged += (s, e) => UpdateMultiHpClient(5, "StartX", MultiHp6StartX.Text);
-        MultiHp6EndX.TextChanged += (s, e) => UpdateMultiHpClient(5, "EndX", MultiHp6EndX.Text);
-        MultiHp6Y.TextChanged += (s, e) => UpdateMultiHpClient(5, "Y", MultiHp6Y.Text);
-        MultiHp6ClickX.TextChanged += (s, e) => UpdateMultiHpClient(5, "ClickX", MultiHp6ClickX.Text);
-        MultiHp6ClickY.TextChanged += (s, e) => UpdateMultiHpClient(5, "ClickY", MultiHp6ClickY.Text);
-        MultiHp6Threshold.TextChanged += (s, e) => UpdateMultiHpClientTextBox(5, "Threshold", MultiHp6Threshold);
-        MultiHp6Key.TextChanged += (s, e) => UpdateMultiHpClientTextBox(5, "Key", MultiHp6Key);
-        MultiHp6Enabled.Checked += (s, e) => ViewModel.MultiHpClients[5].Enabled = true;
-        MultiHp6Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[5].Enabled = false;
-
-        // HP Client 7
-        MultiHp7StartX.TextChanged += (s, e) => UpdateMultiHpClient(6, "StartX", MultiHp7StartX.Text);
-        MultiHp7EndX.TextChanged += (s, e) => UpdateMultiHpClient(6, "EndX", MultiHp7EndX.Text);
-        MultiHp7Y.TextChanged += (s, e) => UpdateMultiHpClient(6, "Y", MultiHp7Y.Text);
-        MultiHp7ClickX.TextChanged += (s, e) => UpdateMultiHpClient(6, "ClickX", MultiHp7ClickX.Text);
-        MultiHp7ClickY.TextChanged += (s, e) => UpdateMultiHpClient(6, "ClickY", MultiHp7ClickY.Text);
-        MultiHp7Threshold.TextChanged += (s, e) => UpdateMultiHpClientTextBox(6, "Threshold", MultiHp7Threshold);
-        MultiHp7Key.TextChanged += (s, e) => UpdateMultiHpClientTextBox(6, "Key", MultiHp7Key);
-        MultiHp7Enabled.Checked += (s, e) => ViewModel.MultiHpClients[6].Enabled = true;
-        MultiHp7Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[6].Enabled = false;
-
-        // HP Client 8
-        MultiHp8StartX.TextChanged += (s, e) => UpdateMultiHpClient(7, "StartX", MultiHp8StartX.Text);
-        MultiHp8EndX.TextChanged += (s, e) => UpdateMultiHpClient(7, "EndX", MultiHp8EndX.Text);
-        MultiHp8Y.TextChanged += (s, e) => UpdateMultiHpClient(7, "Y", MultiHp8Y.Text);
-        MultiHp8ClickX.TextChanged += (s, e) => UpdateMultiHpClient(7, "ClickX", MultiHp8ClickX.Text);
-        MultiHp8ClickY.TextChanged += (s, e) => UpdateMultiHpClient(7, "ClickY", MultiHp8ClickY.Text);
-        MultiHp8Threshold.TextChanged += (s, e) => UpdateMultiHpClientTextBox(7, "Threshold", MultiHp8Threshold);
-        MultiHp8Key.TextChanged += (s, e) => UpdateMultiHpClientTextBox(7, "Key", MultiHp8Key);
-        MultiHp8Enabled.Checked += (s, e) => ViewModel.MultiHpClients[7].Enabled = true;
-        MultiHp8Enabled.Unchecked += (s, e) => ViewModel.MultiHpClients[7].Enabled = false;
-    }
-
-    private void UpdateMultiHpClient(int clientIndex, string property, string value)
-    {
-        try
-        {
-            if (clientIndex < 0 || clientIndex >= ViewModel.MultiHpClients.Count) return;
-
-            var client = ViewModel.MultiHpClients[clientIndex];
-            
-            switch (property)
-            {
-                case "StartX":
-                    if (int.TryParse(value, out int startX)) client.StartX = startX;
-                    break;
-                case "EndX":
-                    if (int.TryParse(value, out int endX)) client.EndX = endX;
-                    break;
-                case "Y":
-                    if (int.TryParse(value, out int y)) client.Y = y;
-                    break;
-                case "ClickX":
-                    if (int.TryParse(value, out int clickX)) client.ClickX = clickX;
-                    break;
-                case "ClickY":
-                    if (int.TryParse(value, out int clickY)) client.ClickY = clickY;
-                    break;
-            }
-        }
-        catch { /* Ignore parsing errors */ }
-    }
-
-    private void UpdateMultiHpClientTextBox(int clientIndex, string property, TextBox textBox)
-    {
-        try
-        {
-            if (clientIndex < 0 || clientIndex >= ViewModel.MultiHpClients.Count) return;
-            if (string.IsNullOrEmpty(textBox.Text)) return;
-
-            var client = ViewModel.MultiHpClients[clientIndex];
-            
-            switch (property)
-            {
-                case "Threshold":
-                    if (int.TryParse(textBox.Text, out int threshold))
-                        client.ThresholdPercentage = threshold;
-                    break;
-                case "Key":
-                    client.SkillKey = textBox.Text;
-                    break;
-            }
-        }
-        catch { /* Ignore parsing errors */ }
-    }
-
-    private void StartMultiHpSystem()
-    {
-        Console.WriteLine($"[PartyHeal-{ClientId}] === BASIT PARTY HEAL BAŞLATIYOR ===");
-
-        if (_multiHpRunning)
-        {
-            Console.WriteLine($"[PartyHeal-{ClientId}] Zaten çalışıyor!");
-            return;
-        }
-
-        if (ViewModel.TargetHwnd == IntPtr.Zero)
-        {
-            MessageBox.Show("Önce pencere seç!", "Hata");
-            return;
-        }
-
-        var enabledClients = ViewModel.MultiHpClients.Where(c => c.Enabled).ToList();
-        if (!enabledClients.Any())
-        {
-            MessageBox.Show("Önce party member enable et!", "Hata");
-            return;
-        }
-
-        Console.WriteLine($"[PartyHeal-{ClientId}] {enabledClients.Count} enabled member bulundu");
-        foreach (var client in enabledClients)
-        {
-            Console.WriteLine($"[PartyHeal-{ClientId}] Client {client.ClientIndex}: Threshold={client.ThresholdPercentage}%, SelectKey='{client.UserSelectionKey}', SkillKey='{client.SkillKey}'");
-        }
-
-        _multiHpRunning = true;
-        _currentMultiHpIndex = 0;
-
-        // BASIT DispatcherTimer kullan - karmaşık master timer değil!
-        _multiHpTimer = new System.Windows.Threading.DispatcherTimer();
-        _multiHpTimer.Interval = TimeSpan.FromMilliseconds(ViewModel.MultiHpCheckInterval);
-        _multiHpTimer.Tick += SimplePartyHealTick;
-        _multiHpTimer.Start();
-
-        StartMultiHpButton.IsEnabled = false;
-        StopMultiHpButton.IsEnabled = true;
-
-        Console.WriteLine($"[PartyHeal-{ClientId}] ✅ BASIT TIMER BAŞLATILDI - {ViewModel.MultiHpCheckInterval}ms interval");
-    }
-
-    private void StopMultiHpSystem()
-    {
-        _multiHpRunning = false;
-        _multiHpTimer?.Stop();
-        _multiHpTimer = null;
-
-        StartMultiHpButton.IsEnabled = true;
-        StopMultiHpButton.IsEnabled = false;
-
-        // Reset all client statuses
-        foreach (var client in ViewModel.MultiHpClients)
-        {
-            client.Status = "Waiting...";
-            client.IsWaitingForAnimation = false;
-        }
-
-        UpdateMultiHpStatusDisplay();
-
-        Console.WriteLine($"[PartyHeal-{ClientId}] 🎭 BASIT PARTY HEAL DURDU");
-    }
-
-    private async void SimplePartyHealTick(object? sender, EventArgs e)
-    {
-        try 
-        {
-            if (!_multiHpRunning || ViewModel.TargetHwnd == IntPtr.Zero)
-                return;
-
-            // Enabled client'ları bul
-            var enabledClients = ViewModel.MultiHpClients.Where(c => c.Enabled).ToList();
-            if (!enabledClients.Any())
-                return;
-
-            Console.WriteLine($"[PartyHeal-{ClientId}] TICK - {enabledClients.Count} member kontrol ediliyor...");
-
-            // Her enabled client'ın HP'sini kontrol et
-            foreach (var client in enabledClients)
-            {
-                // Seçilen koordinattan renk oku
-                var currentColor = ColorSampler.GetColorAt(ViewModel.TargetHwnd, client.MonitorX, client.Y);
-                
-                // Eğer kalibre edilmemişse, şu anki rengi %100 HP olarak kaydet
-                if (client.ReferenceColors.Count == 0)
-                {
-                    client.ReferenceColors[100] = currentColor;
-                    Console.WriteLine($"[PartyHeal-{ClientId}] Client {client.ClientIndex} AUTO-CALIBRATED: RGB({currentColor.R},{currentColor.G},{currentColor.B}) = 100% HP");
-                }
-
-                // %100 HP rengiyle karşılaştır - SAFETY CHECK
-                if (!client.ReferenceColors.ContainsKey(100))
-                {
-                    Console.WriteLine($"[PartyHeal-{ClientId}] ❌ Client {client.ClientIndex} - No 100% HP reference found in dictionary!");
-                    continue;
-                }
-                
-                var fullHpColor = client.ReferenceColors[100];
-                // Renk değişim hassasiyeti - Gürültüyü ignore et  
-                bool colorChanged = Math.Abs(currentColor.R - fullHpColor.R) > 15 || 
-                                  Math.Abs(currentColor.G - fullHpColor.G) > 15 || 
-                                  Math.Abs(currentColor.B - fullHpColor.B) > 15;
-
-                // Renk değişti = HP düştü
-                double estimatedHp = colorChanged ? 50.0 : 100.0; // Basit: değişti = ~50%, değişmedi = 100%
-                
-                // RGB farkını hesapla
-                int rDiff = Math.Abs(currentColor.R - fullHpColor.R);
-                int gDiff = Math.Abs(currentColor.G - fullHpColor.G);
-                int bDiff = Math.Abs(currentColor.B - fullHpColor.B);
-                
-                Console.WriteLine($"[PartyHeal-{ClientId}] Client {client.ClientIndex} - Current: RGB({currentColor.R},{currentColor.G},{currentColor.B}) vs Full: RGB({fullHpColor.R},{fullHpColor.G},{fullHpColor.B}) -> Diff: R={rDiff} G={gDiff} B={bDiff} -> Changed: {colorChanged} -> HP: ~{estimatedHp:F0}%");
-
-                // HP düştü ve threshold altında mı?
-                if (colorChanged && estimatedHp <= client.ThresholdPercentage)
-                {
-                    // Cooldown kontrol et
-                    var now = DateTime.Now;
-                    if ((now - client.LastExecution).TotalMilliseconds < 5000) // 5 saniye cooldown - daha uzun
-                        continue;
-
-                    Console.WriteLine($"[PartyHeal-{ClientId}] 🚨 Client {client.ClientIndex} HP DÜŞÜK! {estimatedHp:F1}% - HEAL BAŞLATIYOR!");
-
-                    // Member seç
-                    SendKeyPress(client.UserSelectionKey);
-                    await Task.Delay(50);
-
-                    // Skill bas
-                    SendKeyPress(client.SkillKey);
-                    
-                    client.LastExecution = now;
-                    client.ExecutionCount++;
-
-                    Console.WriteLine($"[PartyHeal-{ClientId}] ✅ Client {client.ClientIndex} healed! Keys: '{client.UserSelectionKey}' + '{client.SkillKey}'");
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[PartyHeal-{ClientId}] ❌ TICK ERROR: {ex.Message}");
-        }
-    }
-
-    private async void MultiHpTimer_Tick(object? sender, EventArgs e)
-    {
-        Console.WriteLine($"[PartyHeal-Timer-{ClientId}] === TIMER TICK TRIGGERED === (Time: {DateTime.Now:HH:mm:ss.fff})");
-        Console.WriteLine($"[PartyHeal-Timer-{ClientId}] Running: {_multiHpRunning}, MultiHpEnabled: {ViewModel.MultiHpEnabled}, TargetHwnd: {ViewModel.TargetHwnd != IntPtr.Zero}");
-
-        // Check enabled clients count
-        var enabledCount = ViewModel.MultiHpClients?.Count(c => c.Enabled) ?? 0;
-        Console.WriteLine($"[PartyHeal-Timer-{ClientId}] Enabled clients count: {enabledCount}");
-
-        if (!_multiHpRunning || !ViewModel.MultiHpEnabled || ViewModel.TargetHwnd == IntPtr.Zero)
-        {
-            Console.WriteLine($"[PartyHeal-Timer-{ClientId}] ❌ Timer tick conditions not met - RETURNING");
-            Console.WriteLine($"[PartyHeal-Timer-{ClientId}] _multiHpRunning: {_multiHpRunning}");
-            Console.WriteLine($"[PartyHeal-Timer-{ClientId}] ViewModel.MultiHpEnabled: {ViewModel.MultiHpEnabled}");
-            Console.WriteLine($"[PartyHeal-Timer-{ClientId}] ViewModel.TargetHwnd != IntPtr.Zero: {ViewModel.TargetHwnd != IntPtr.Zero}");
-            return;
-        }
-
-        // Use semaphore to prevent overlapping operations
-        if (!await _operationSemaphore.WaitAsync(0, _cancellationTokenSource.Token))
-        {
-            Console.WriteLine($"[PartyHeal-Timer-{ClientId}] ⏳ Semaphore busy, skipping this tick");
-            return;
-        }
-
-        try
-        {
-            Console.WriteLine($"[PartyHeal-Timer-{ClientId}] ✅ Enqueueing HP processing task to queue (Enabled clients: {enabledCount})");
-            // Queue HP processing as background task with high priority
-            bool enqueued = _boundedTaskQueue.TryEnqueue(
-                () => ProcessMultiHpClientsAsync(),
-                TaskPriority.High,
-                "ProcessMultiHpClients",
-                "PartyHealSystem",
-                "multi_hp_check" // Coalescing key to prevent overlapping HP checks
-            );
-            Console.WriteLine($"[PartyHeal-Timer-{ClientId}] Task enqueued successfully: {enqueued}");
-            
-            if (!enqueued)
-            {
-                Console.WriteLine($"[PartyHeal-Timer-{ClientId}] ❌ FAILED TO ENQUEUE TASK - QUEUE MIGHT BE FULL!");
-            }
-        }
-        finally
-        {
-            _operationSemaphore.Release();
-        }
-    }
+    // MultiHpTimer_Tick method removed
 
     private async Task ProcessMultiHpClientsAsync()
     {
         try
         {
             // Check if multi HP system is enabled for this client
-            if (!ViewModel.MultiHpEnabled)
+            // MultiHp system removed - return empty list
+            if (true) // Always disabled now
             {
                 Console.WriteLine($"[PartyHeal-{ClientId}] Multi HP system disabled");
                 return;
@@ -6389,10 +5999,8 @@ public partial class ClientCard : UserControl, IDisposable
             {
                 lock (_lockObject)
                 {
-                    return ViewModel.MultiHpClients
-                        .Select((client, index) => new { Client = client, Index = index })
-                        .Where(x => x.Client.Enabled && !x.Client.IsWaitingForAnimation)
-                        .ToList();
+                    // MultiHpClients removed - return empty list
+                    return new List<dynamic>();
                 }
             }, _cancellationTokenSource.Token);
 
@@ -6420,7 +6028,7 @@ public partial class ClientCard : UserControl, IDisposable
             }
 
             // Process HP check in parallel for better performance
-            await ProcessClientHPAsync(client, clientIndex);
+            // await ProcessClientHPAsync(client, clientIndex); // Method removed
         }
         catch (OperationCanceledException)
         {
@@ -6433,231 +6041,13 @@ public partial class ClientCard : UserControl, IDisposable
     }
 
 
-    private async Task<bool> CheckClientHp(MultiHpClientViewModel client, int clientIndex)
-    {
-        try
-        {
-            if (!client.ReferenceColors.Any())
-            {
-                client.Status = "Need Calibration";
-                UpdateClientStatusDisplay(clientIndex);
-                Console.WriteLine($"[PartyHeal-{ClientId}] Client {clientIndex} needs calibration - no reference colors");
-                return false;
-            }
-
-            // Use semaphore to prevent overlapping color sampling operations
-            if (!await _operationSemaphore.WaitAsync(100, _cancellationTokenSource.Token))
-            {
-                client.Status = "Busy";
-                UpdateClientStatusDisplay(clientIndex);
-                return false; // Skip if another operation is running
-            }
-
-            try
-            {
-                // Party Heal needs real-time HP data, NO CACHE for accurate detection
-                var monitorX = client.MonitorX;
-                Color? currentColor = null;
-                
-                Console.WriteLine($"[PartyHeal-{ClientId}] Monitoring Client {clientIndex} at position ({monitorX}, {client.Y})");
-                
-                // Always use FastSampler for real-time color detection
-                _fastSampler?.CaptureWindow(ViewModel.TargetHwnd);
-                currentColor = _fastSampler?.GetColorAt(monitorX, client.Y);
-                
-                if (currentColor == null)
-                {
-                    client.Status = "Read Error";
-                    UpdateClientStatusDisplay(clientIndex);
-                    Console.WriteLine($"[PartyHeal-{ClientId}] Color read error for Client {clientIndex}");
-                    return false;
-                }
-
-                client.CurrentColor = currentColor.Value;
-                Console.WriteLine($"[PartyHeal-{ClientId}] Client {clientIndex} current color: RGB({currentColor.Value.R},{currentColor.Value.G},{currentColor.Value.B})");
-
-                // Calculate HP percentage using BabeBot method
-                var percentage = CalculateHpPercentage(client, currentColor.Value);
-                client.Percentage = percentage;
-                
-                // Update status
-                client.Status = $"{percentage:F0}%";
-                UpdateClientStatusDisplay(clientIndex);
-
-                Console.WriteLine($"[PartyHeal-{ClientId}] Client {clientIndex} HP: {percentage:F1}% (Threshold: {client.ThresholdPercentage}%)");
-
-                // Check if HP is below threshold
-                bool isLow = percentage <= client.ThresholdPercentage;
-                
-                if (isLow && !client.IsTriggered)
-                {
-                    client.IsTriggered = true;
-                    client.Status = "HP LOW!";
-                    UpdateClientStatusDisplay(clientIndex);
-                    Console.WriteLine($"[PartyHeal-{ClientId}] CLIENT {clientIndex} HP LOW! {percentage:F1}% <= {client.ThresholdPercentage}% - TRIGGERING HEAL");
-                    return true;
-                }
-                else if (percentage > client.ThresholdPercentage + 10) // Add hysteresis
-                {
-                    if (client.IsTriggered)
-                    {
-                        client.IsTriggered = false;
-                        Console.WriteLine($"[PartyHeal-{ClientId}] Client {clientIndex} HP recovered: {percentage:F1}% - resetting trigger");
-                    }
-                }
-
-                return false;
-            }
-            finally
-            {
-                _operationSemaphore.Release();
-            }
-        }
-        catch (Exception ex)
-        {
-            client.Status = $"Error: {ex.Message}";
-            UpdateClientStatusDisplay(clientIndex);
-            Console.WriteLine($"[PartyHeal-{ClientId}] CheckClientHp error for Client {clientIndex}: {ex.Message}");
-            return false;
-        }
-    }
+    // CheckClientHp method removed
     
-    private async Task ProcessClientHPAsync(MultiHpClientViewModel client, int clientIndex)
-    {
-        try
-        {
-            // Check HP for this client using async method with proper synchronization
-            bool hpLow = await CheckClientHp(client, clientIndex);
-            
-            if (hpLow)
-            {
-                // HP is low, execute action on UI thread
-                await Dispatcher.InvokeAsync(() => ExecuteMultiHpAction(client, clientIndex));
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            // Task was cancelled, exit gracefully
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[{ClientId}] ProcessClientHPAsync error: {ex.Message}");
-        }
-    }
+    // ProcessClientHPAsync method removed
 
-    private double CalculateHpPercentage(MultiHpClientViewModel client, System.Drawing.Color currentColor)
-    {
-        if (client.ReferenceColors.Count == 0)
-        {
-            Console.WriteLine($"[PartyHeal-Calc-{ClientId}] ⚠️ No reference colors! Assuming 100% HP");
-            return 100.0; // Eğer kalibre edilmemişse, 100% varsay
-        }
+    // CalculateHpPercentage method removed
 
-        // Use BabeBot's percentage calculation method with BETTER TOLERANCE
-        double bestPercentage = 100.0;
-        double bestDistance = double.MaxValue;
-        System.Drawing.Color bestReferenceColor = System.Drawing.Color.Black;
-
-        foreach (var reference in client.ReferenceColors)
-        {
-            var distance = Math.Sqrt(
-                Math.Pow(currentColor.R - reference.Value.R, 2) +
-                Math.Pow(currentColor.G - reference.Value.G, 2) +
-                Math.Pow(currentColor.B - reference.Value.B, 2));
-
-            if (distance < bestDistance)
-            {
-                bestDistance = distance;
-                bestPercentage = reference.Key;
-                bestReferenceColor = reference.Value;
-            }
-        }
-
-        // YALNIZCA threshold yakınında iken detay log - spam'i azalt
-        bool isNearThreshold = bestPercentage <= client.ThresholdPercentage + 10;
-        if (isNearThreshold)
-        {
-            Console.WriteLine($"[PartyHeal-Calc-{ClientId}] ⚠️ NEAR THRESHOLD! Current: RGB({currentColor.R},{currentColor.G},{currentColor.B}) -> Best match: {bestPercentage}% RGB({bestReferenceColor.R},{bestReferenceColor.G},{bestReferenceColor.B}) (distance: {bestDistance:F2})");
-        }
-        
-        // Eğer renk çok farklıysa (distance > 100), muhtemelen yanlış okuma - 100% varsay
-        if (bestDistance > 100)
-        {
-            Console.WriteLine($"[PartyHeal-Calc-{ClientId}] 🤔 Color distance too high ({bestDistance:F2}) - might be wrong reading, assuming 100%");
-            return 100.0;
-        }
-        
-        return bestPercentage;
-    }
-
-    private async void ExecuteMultiHpAction(MultiHpClientViewModel client, int clientIndex)
-    {
-        try
-        {
-            Console.WriteLine($"[PartyHeal-Action-{ClientId}] === EXECUTING HEAL ACTION FOR CLIENT {clientIndex} ===");
-            Console.WriteLine($"[PartyHeal-Action-{ClientId}] Client {clientIndex} HP: {client.Percentage:F1}% (Threshold: {client.ThresholdPercentage}%)");
-            Console.WriteLine($"[PartyHeal-Action-{ClientId}] Selection Key: '{client.UserSelectionKey}', Heal Key: '{client.SkillKey}'");
-
-            // Check cooldown
-            var now = DateTime.Now;
-            var cooldownRemaining = ViewModel.AnimationDelay - (now - client.LastExecution).TotalMilliseconds;
-            if (cooldownRemaining > 0)
-            {
-                client.Status = "Cooling down...";
-                UpdateClientStatusDisplay(clientIndex);
-                Console.WriteLine($"[PartyHeal-Action-{ClientId}] Client {clientIndex} still in cooldown: {cooldownRemaining:F0}ms remaining");
-                return;
-            }
-
-            client.Status = "Healing...";
-            client.IsWaitingForAnimation = true;
-            UpdateClientStatusDisplay(clientIndex);
-
-            Console.WriteLine($"[PartyHeal-Action-{ClientId}] Starting key sequence for Client {clientIndex}...");
-
-            // Execute two-phase heal action
-            await Task.Run(() =>
-            {
-                try
-                {
-                    Console.WriteLine($"[PartyHeal-Action-{ClientId}] Phase 1: Sending selection key '{client.UserSelectionKey}'");
-                    // Phase 1: Send party member selection key
-                    PerformBackgroundKeyPress(client.UserSelectionKey, $"PARTY-SELECT-{client.ClientIndex}");
-                    Thread.Sleep(50); // Small delay between key presses
-
-                    Console.WriteLine($"[PartyHeal-Action-{ClientId}] Phase 2: Sending heal key '{client.SkillKey}'");
-                    // Phase 2: Send heal skill key
-                    PerformBackgroundKeyPress(client.SkillKey, $"PARTY-HEAL-{client.ClientIndex}");
-                    
-                    Console.WriteLine($"[PartyHeal-Action-{ClientId}] ✅ Successfully sent key sequence: '{client.UserSelectionKey}' + '{client.SkillKey}' for Client {clientIndex}");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[PartyHeal-Action-{ClientId}] ❌ Key sequence error for Client {clientIndex}: {ex.Message}");
-                }
-            });
-
-            client.LastExecution = now;
-            client.ExecutionCount++;
-
-            Console.WriteLine($"[PartyHeal-Action-{ClientId}] Waiting for animation delay: {ViewModel.AnimationDelay}ms");
-            // Wait for animation delay
-            await Task.Delay(ViewModel.AnimationDelay);
-
-            client.IsWaitingForAnimation = false;
-            client.Status = "Ready";
-            UpdateClientStatusDisplay(clientIndex);
-
-            Console.WriteLine($"[PartyHeal-Action-{ClientId}] ✅ Client {clientIndex} action completed, total executions: {client.ExecutionCount}");
-        }
-        catch (Exception ex)
-        {
-            client.Status = "Action Error";
-            client.IsWaitingForAnimation = false;
-            UpdateClientStatusDisplay(clientIndex);
-            Console.WriteLine($"[PartyHeal-Action-{ClientId}] ❌ Critical error executing action for Client {clientIndex}: {ex.Message}");
-        }
-    }
+    // ExecuteMultiHpAction method removed
 
     private void SendKeyPress(string key)
     {
@@ -6720,9 +6110,12 @@ public partial class ClientCard : UserControl, IDisposable
 
     private async Task CalibrateMultiHpClient(int clientIndex)
     {
-        if (clientIndex < 0 || clientIndex >= ViewModel.MultiHpClients.Count) return;
+        // MultiHpClients removed - entire method disabled
+        return;
         
-        var client = ViewModel.MultiHpClients[clientIndex];
+        /*
+        // Original method commented out - MultiHpClients removed
+        // var client = ViewModel.MultiHpClients[clientIndex]; // MultiHpClients removed
         
         if (ViewModel.TargetHwnd == IntPtr.Zero)
         {
@@ -6816,13 +6209,17 @@ public partial class ClientCard : UserControl, IDisposable
             UpdateClientStatusDisplay(clientIndex);
             Console.WriteLine($"[{ViewModel.ClientName}] ⚔️ Calibration error for Party Member {client.ClientIndex}: {ex.Message}");
         }
+        */
     }
 
     private void PickMultiHpClientClick(int clientIndex)
     {
-        if (clientIndex < 0 || clientIndex >= ViewModel.MultiHpClients.Count) return;
+        // MultiHpClients removed - entire method disabled
+        return;
         
-        var client = ViewModel.MultiHpClients[clientIndex];
+        /*
+        // Original method commented out - MultiHpClients removed
+        // var client = ViewModel.MultiHpClients[clientIndex]; // MultiHpClients removed
         
         _coordinatePicker = new CoordinatePicker(ViewModel.TargetHwnd, ViewModel.ClientName);
         _coordinatePicker.CoordinatePicked += (x, y) =>
@@ -6834,10 +6231,16 @@ public partial class ClientCard : UserControl, IDisposable
             Console.WriteLine($"[{ViewModel.ClientName}] ⚔️ Party Member {client.ClientIndex} click position set to ({x}, {y})");
         };
         _coordinatePicker.Show();
+        */
     }
 
     private void UpdateMultiHpClientTextBox(int clientIndex, string property, string value)
     {
+        // MultiHp UI controls removed - method disabled
+        return;
+        
+        /*
+        // Original method commented out - UI controls removed
         switch (clientIndex)
         {
             case 0:
@@ -6873,6 +6276,7 @@ public partial class ClientCard : UserControl, IDisposable
                 else if (property == "ClickY") MultiHp8ClickY.Text = value;
                 break;
         }
+        */
     }
 
     private void UpdateClientStatusDisplay(int clientIndex)
@@ -6887,11 +6291,12 @@ public partial class ClientCard : UserControl, IDisposable
     {
         try
         {
-            for (int i = 0; i < ViewModel.MultiHpClients.Count; i++)
-            {
-                var client = ViewModel.MultiHpClients[i];
-                UpdateSingleClientDisplay(i, client);
-            }
+            // MultiHpClients removed - no longer update display
+            // for (int i = 0; i < ViewModel.MultiHpClients.Count; i++)
+            // {
+            //     var client = ViewModel.MultiHpClients[i];
+            //     UpdateSingleClientDisplay(i, client);
+            // }
         }
         catch (Exception ex)
         {
@@ -6899,186 +6304,8 @@ public partial class ClientCard : UserControl, IDisposable
         }
     }
 
-    private void UpdateSingleClientDisplay(int clientIndex, MultiHpClientViewModel client)
-    {
-        var statusText = GetStatusTextBlock(clientIndex);
-        var percentageText = GetPercentageTextBlock(clientIndex);
-        var colorBar = GetColorBarRectangle(clientIndex);
+    // UpdateSingleClientDisplay method removed
 
-        if (statusText != null)
-            statusText.Text = client.Status;
-
-        if (percentageText != null)
-            percentageText.Text = $"{client.Percentage:F0}%";
-
-        if (colorBar != null)
-        {
-            colorBar.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(
-                client.CurrentColor.R,
-                client.CurrentColor.G,
-                client.CurrentColor.B));
-        }
-    }
-
-    private TextBlock? GetStatusTextBlock(int clientIndex) => clientIndex switch
-    {
-        0 => MultiHp1Status,
-        1 => MultiHp2Status,
-        2 => MultiHp3Status,
-        3 => MultiHp4Status,
-        4 => MultiHp5Status,
-        5 => MultiHp6Status,
-        6 => MultiHp7Status,
-        7 => MultiHp8Status,
-        _ => null
-    };
-
-    private TextBlock? GetPercentageTextBlock(int clientIndex) => clientIndex switch
-    {
-        0 => MultiHp1Percentage,
-        1 => MultiHp2Percentage,
-        2 => MultiHp3Percentage,
-        3 => MultiHp4Percentage,
-        4 => MultiHp5Percentage,
-        5 => MultiHp6Percentage,
-        6 => MultiHp7Percentage,
-        7 => MultiHp8Percentage,
-        _ => null
-    };
-
-    private System.Windows.Shapes.Rectangle? GetColorBarRectangle(int clientIndex) => clientIndex switch
-    {
-        0 => MultiHp1ColorBar,
-        1 => MultiHp2ColorBar,
-        2 => MultiHp3ColorBar,
-        3 => MultiHp4ColorBar,
-        4 => MultiHp5ColorBar,
-        5 => MultiHp6ColorBar,
-        6 => MultiHp7ColorBar,
-        7 => MultiHp8ColorBar,
-        _ => null
-    };
-
-    #endregion
-
-    #region Party Heal Event Handlers
-
-
-
-
-
-    // Calibrate methods for each HP client (async handlers for thread-safe color sampling)
-    private async void CalibrateMultiHp1_Click(object sender, RoutedEventArgs e) => await CalibrateMultiHpClient(0);
-    private async void CalibrateMultiHp2_Click(object sender, RoutedEventArgs e) => await CalibrateMultiHpClient(1);
-    private async void CalibrateMultiHp3_Click(object sender, RoutedEventArgs e) => await CalibrateMultiHpClient(2);
-    private async void CalibrateMultiHp4_Click(object sender, RoutedEventArgs e) => await CalibrateMultiHpClient(3);
-    private async void CalibrateMultiHp5_Click(object sender, RoutedEventArgs e) => await CalibrateMultiHpClient(4);
-    private async void CalibrateMultiHp6_Click(object sender, RoutedEventArgs e) => await CalibrateMultiHpClient(5);
-    private async void CalibrateMultiHp7_Click(object sender, RoutedEventArgs e) => await CalibrateMultiHpClient(6);
-    private async void CalibrateMultiHp8_Click(object sender, RoutedEventArgs e) => await CalibrateMultiHpClient(7);
-
-    // Pick click position methods for each HP client
-    private void PickMultiHp1Click_Click(object sender, RoutedEventArgs e) => PickMultiHpClientClick(0);
-    private void PickMultiHp2Click_Click(object sender, RoutedEventArgs e) => PickMultiHpClientClick(1);
-    private void PickMultiHp3Click_Click(object sender, RoutedEventArgs e) => PickMultiHpClientClick(2);
-    private void PickMultiHp4Click_Click(object sender, RoutedEventArgs e) => PickMultiHpClientClick(3);
-    private void PickMultiHp5Click_Click(object sender, RoutedEventArgs e) => PickMultiHpClientClick(4);
-    private void PickMultiHp6Click_Click(object sender, RoutedEventArgs e) => PickMultiHpClientClick(5);
-    private void PickMultiHp7Click_Click(object sender, RoutedEventArgs e) => PickMultiHpClientClick(6);
-    private void PickMultiHp8Click_Click(object sender, RoutedEventArgs e) => PickMultiHpClientClick(7);
-
-    // Master Control Methods
-    private void CalibrateAllPartyMembers()
-    {
-        if (ViewModel?.TargetHwnd == null || ViewModel.TargetHwnd == IntPtr.Zero)
-        {
-            MessageBox.Show("Please select a window first to calibrate party members!", "No Window Selected", MessageBoxButton.OK, MessageBoxImage.Warning);
-            return;
-        }
-
-        Console.WriteLine($"[{ViewModel.ClientName}] 🎯 Calibrating all party members...");
-        
-        int calibratedCount = 0;
-        for (int i = 0; i < ViewModel.MultiHpClients.Count; i++)
-        {
-            var client = ViewModel.MultiHpClients[i];
-            if (client.Enabled)
-            {
-                CalibrateMultiHpClient(i);
-                calibratedCount++;
-            }
-        }
-
-        // Update button appearance
-        if (calibratedCount > 0)
-        {
-            CalibrateAllPartyButton.Content = "✅ All Calibrated";
-            CalibrateAllPartyButton.Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(76, 175, 80)); // #4CAF50
-            
-            // Reset to original after 3 seconds
-            var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
-            timer.Tick += (s, e) =>
-            {
-                CalibrateAllPartyButton.Content = "🎯 Calibrate All";
-                CalibrateAllPartyButton.ClearValue(Button.BackgroundProperty);
-                timer.Stop();
-            };
-            timer.Start();
-            
-            Console.WriteLine($"[{ViewModel.ClientName}] ✅ Calibrated {calibratedCount} enabled party members");
-        }
-        else
-        {
-            MessageBox.Show("No party members enabled for calibration!", "No Enabled Members", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-    }
-
-    private void ToggleEnableAllPartyMembers()
-    {
-        var anyEnabled = ViewModel.MultiHpClients.Any(c => c.Enabled);
-        
-        if (anyEnabled)
-        {
-            // Disable all
-            for (int i = 0; i < ViewModel.MultiHpClients.Count; i++)
-            {
-                ViewModel.MultiHpClients[i].Enabled = false;
-                GetEnabledCheckBox(i)?.SetCurrentValue(System.Windows.Controls.Primitives.ToggleButton.IsCheckedProperty, false);
-            }
-            
-            EnableAllPartyButton.Content = "🔄 Enable All";
-            EnableAllPartyButton.Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(33, 150, 243)); // #2196F3
-            Console.WriteLine($"[{ViewModel.ClientName}] ❌ All party members disabled");
-        }
-        else
-        {
-            // Enable all
-            for (int i = 0; i < ViewModel.MultiHpClients.Count; i++)
-            {
-                ViewModel.MultiHpClients[i].Enabled = true;
-                GetEnabledCheckBox(i)?.SetCurrentValue(System.Windows.Controls.Primitives.ToggleButton.IsCheckedProperty, true);
-            }
-            
-            EnableAllPartyButton.Content = "❌ Disable All";
-            EnableAllPartyButton.Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(244, 67, 54)); // #F44336
-            Console.WriteLine($"[{ViewModel.ClientName}] ✅ All party members enabled");
-        }
-    }
-
-    private CheckBox? GetEnabledCheckBox(int clientIndex) => clientIndex switch
-    {
-        0 => MultiHp1Enabled,
-        1 => MultiHp2Enabled,
-        2 => MultiHp3Enabled,
-        3 => MultiHp4Enabled,
-        4 => MultiHp5Enabled,
-        5 => MultiHp6Enabled,
-        6 => MultiHp7Enabled,
-        7 => MultiHp8Enabled,
-        _ => null
-    };
-
-    #endregion
 
     #region Attack/Skills Event Handlers
 
@@ -7151,6 +6378,229 @@ public partial class ClientCard : UserControl, IDisposable
         StopBuffAcSystem();
     }
 
+    #endregion
+    
+    #region Party Heal System
+    
+    private void InitializePartyHealSystem()
+    {
+        try
+        {
+            // Initialize service with proper backends and parameters
+            var logger = new ConsoleLogger<PartyHealService>();
+            var clickLogger = new ConsoleLogger<WindowsMessageClickProvider>();
+            var captureBackend = new PrintWindowBackend(); // Use PrintWindow backend (WGC is placeholder)
+            var clickProvider = new WindowsMessageClickProvider(clickLogger);
+            var taskQueue = new BoundedTaskQueue(maxQueueSize: 100, maxConcurrency: 2);
+            
+            _partyHealService = new PartyHealService(logger, captureBackend, clickProvider, taskQueue);
+            
+            // Setup UI event handlers for PartyHeal tab
+            SetupPartyHealEventHandlers();
+            
+            Console.WriteLine($"[{ClientId}] ✅ PartyHeal system initialized successfully");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ClientId}] ❌ Failed to initialize PartyHeal system: {ex.Message}");
+        }
+    }
+    
+    private void SetupPartyHealEventHandlers()
+    {
+        // PartyHeal system enable/disable handlers
+        PartyHealSystemEnabled.Checked += async (s, e) => await StartPartyHealAsync();
+        PartyHealSystemEnabled.Unchecked += async (s, e) => await StopPartyHealAsync();
+        
+        // Global PartyHeal settings handlers
+        PartyHealSkillKey.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyHealPollInterval.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyHealBaselineColor.TextChanged += (s, e) => UpdatePartyHealSettings();
+        
+        // Member settings handlers
+        PartyMember1Key.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember1Threshold.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember1XStart.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember1XEnd.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember1Y.TextChanged += (s, e) => UpdatePartyHealSettings();
+        
+        PartyMember2Key.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember2Threshold.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember2XStart.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember2XEnd.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember2Y.TextChanged += (s, e) => UpdatePartyHealSettings();
+        
+        PartyMember3Key.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember3Threshold.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember3XStart.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember3XEnd.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember3Y.TextChanged += (s, e) => UpdatePartyHealSettings();
+        
+        PartyMember4Key.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember4Threshold.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember4XStart.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember4XEnd.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember4Y.TextChanged += (s, e) => UpdatePartyHealSettings();
+        
+        PartyMember5Key.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember5Threshold.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember5XStart.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember5XEnd.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember5Y.TextChanged += (s, e) => UpdatePartyHealSettings();
+        
+        PartyMember6Key.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember6Threshold.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember6XStart.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember6XEnd.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember6Y.TextChanged += (s, e) => UpdatePartyHealSettings();
+        
+        PartyMember7Key.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember7Threshold.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember7XStart.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember7XEnd.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember7Y.TextChanged += (s, e) => UpdatePartyHealSettings();
+        
+        PartyMember8Key.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember8Threshold.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember8XStart.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember8XEnd.TextChanged += (s, e) => UpdatePartyHealSettings();
+        PartyMember8Y.TextChanged += (s, e) => UpdatePartyHealSettings();
+        
+        // Checkbox handlers  
+        PartyMember1Enabled.Checked += (s, e) => UpdatePartyHealSettings();
+        PartyMember1Enabled.Unchecked += (s, e) => UpdatePartyHealSettings();
+        PartyMember2Enabled.Checked += (s, e) => UpdatePartyHealSettings();
+        PartyMember2Enabled.Unchecked += (s, e) => UpdatePartyHealSettings();
+        PartyMember3Enabled.Checked += (s, e) => UpdatePartyHealSettings();
+        PartyMember3Enabled.Unchecked += (s, e) => UpdatePartyHealSettings();
+        PartyMember4Enabled.Checked += (s, e) => UpdatePartyHealSettings();
+        PartyMember4Enabled.Unchecked += (s, e) => UpdatePartyHealSettings();
+        PartyMember5Enabled.Checked += (s, e) => UpdatePartyHealSettings();
+        PartyMember5Enabled.Unchecked += (s, e) => UpdatePartyHealSettings();
+        PartyMember6Enabled.Checked += (s, e) => UpdatePartyHealSettings();
+        PartyMember6Enabled.Unchecked += (s, e) => UpdatePartyHealSettings();
+        PartyMember7Enabled.Checked += (s, e) => UpdatePartyHealSettings();
+        PartyMember7Enabled.Unchecked += (s, e) => UpdatePartyHealSettings();
+        PartyMember8Enabled.Checked += (s, e) => UpdatePartyHealSettings();
+        PartyMember8Enabled.Unchecked += (s, e) => UpdatePartyHealSettings();
+    }
+    
+    private void UpdatePartyHealSettings()
+    {
+        if (_partyHealService == null) return;
+        
+        try
+        {
+            var config = _partyHealService.Configuration;
+            
+            // Update global settings
+            config.Global.SkillKey = PartyHealSkillKey.Text;
+            
+            if (int.TryParse(PartyHealPollInterval.Text, out int pollInterval))
+                config.Global.PollIntervalMs = pollInterval;
+                
+            // Parse HP color
+            try
+            {
+                var colorHex = PartyHealBaselineColor.Text.TrimStart('#');
+                var color = System.Drawing.ColorTranslator.FromHtml("#" + colorHex);
+                config.Global.BaselineColor = color;
+            }
+            catch
+            {
+                // Keep existing color if parsing fails
+            }
+            
+            // Update member configurations
+            UpdateMemberConfig(0, PartyMember1Enabled, PartyMember1Key, PartyMember1Threshold, PartyMember1XStart, PartyMember1XEnd, PartyMember1Y);
+            UpdateMemberConfig(1, PartyMember2Enabled, PartyMember2Key, PartyMember2Threshold, PartyMember2XStart, PartyMember2XEnd, PartyMember2Y);
+            UpdateMemberConfig(2, PartyMember3Enabled, PartyMember3Key, PartyMember3Threshold, PartyMember3XStart, PartyMember3XEnd, PartyMember3Y);
+            UpdateMemberConfig(3, PartyMember4Enabled, PartyMember4Key, PartyMember4Threshold, PartyMember4XStart, PartyMember4XEnd, PartyMember4Y);
+            UpdateMemberConfig(4, PartyMember5Enabled, PartyMember5Key, PartyMember5Threshold, PartyMember5XStart, PartyMember5XEnd, PartyMember5Y);
+            UpdateMemberConfig(5, PartyMember6Enabled, PartyMember6Key, PartyMember6Threshold, PartyMember6XStart, PartyMember6XEnd, PartyMember6Y);
+            UpdateMemberConfig(6, PartyMember7Enabled, PartyMember7Key, PartyMember7Threshold, PartyMember7XStart, PartyMember7XEnd, PartyMember7Y);
+            UpdateMemberConfig(7, PartyMember8Enabled, PartyMember8Key, PartyMember8Threshold, PartyMember8XStart, PartyMember8XEnd, PartyMember8Y);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ClientId}] Error updating PartyHeal settings: {ex.Message}");
+        }
+    }
+    
+    private void UpdateMemberConfig(int index, CheckBox enableCb, TextBox keyCb, TextBox thresholdCb, TextBox xStartCb, TextBox xEndCb, TextBox yCb)
+    {
+        if (_partyHealService == null || index >= _partyHealService.Configuration.Members.Count) return;
+        
+        var member = _partyHealService.Configuration.Members[index];
+        
+        member.Enabled = enableCb.IsChecked == true;
+        member.SelectKey = keyCb.Text;
+        
+        if (int.TryParse(thresholdCb.Text, out int threshold))
+            member.ThresholdPercent = threshold;
+            
+        if (int.TryParse(xStartCb.Text, out int xStart))
+            member.XStart = xStart;
+            
+        if (int.TryParse(xEndCb.Text, out int xEnd))
+            member.XStop = xEnd;
+            
+        if (int.TryParse(yCb.Text, out int y))
+            member.Y = y;
+    }
+    
+    private async Task StartPartyHealAsync()
+    {
+        if (_partyHealService == null || _partyHealRunning) return;
+        
+        if (ViewModel.TargetHwnd == IntPtr.Zero)
+        {
+            MessageBox.Show("Please select a window first!", "No Window Selected", MessageBoxButton.OK, MessageBoxImage.Warning);
+            PartyHealSystemEnabled.IsChecked = false; // Reset checkbox
+            return;
+        }
+        
+        try
+        {
+            // Update settings from UI first
+            UpdatePartyHealSettings();
+            
+            // Set target window for PartyHeal service
+            _partyHealService.SetTargetWindow(ViewModel.TargetHwnd);
+            
+            // Set key press callback to use ClientCard's SendKeyPress method
+            _partyHealService.SetKeyPressCallback(SendKeyPress);
+            
+            await _partyHealService.StartAsync();
+            _partyHealRunning = true;
+            
+            Console.WriteLine($"[{ClientId}] ✅ PartyHeal system started for window 0x{ViewModel.TargetHwnd:X8}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ClientId}] ❌ Failed to start PartyHeal: {ex.Message}");
+            MessageBox.Show($"Failed to start PartyHeal: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            PartyHealSystemEnabled.IsChecked = false; // Reset checkbox on error
+        }
+    }
+    
+    private async Task StopPartyHealAsync()
+    {
+        if (_partyHealService == null || !_partyHealRunning) return;
+        
+        try
+        {
+            await _partyHealService.StopAsync();
+            _partyHealRunning = false;
+            
+            Console.WriteLine($"[{ClientId}] ⏹️ PartyHeal system stopped");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ClientId}] ❌ Failed to stop PartyHeal: {ex.Message}");
+        }
+    }
+    
     #endregion
 
     #region Anti-Captcha Event Handlers
@@ -8043,7 +7493,8 @@ public partial class ClientCard : UserControl, IDisposable
             }
 
             // Check if any clients are enabled
-            var enabledClients = ViewModel.MultiHpClients.Where(c => c.Enabled).ToList();
+            // var enabledClients = ViewModel.MultiHpClients.Where(c => c.Enabled).ToList(); // MultiHpClients removed
+            var enabledClients = new List<dynamic>(); // Empty list since MultiHpClients removed
             if (!enabledClients.Any())
             {
                 MessageBox.Show("Please enable at least one party member!", "No Party Members", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -8058,20 +7509,20 @@ public partial class ClientCard : UserControl, IDisposable
             }
 
             // Enable multi HP system
-            MultiHpEnabled.IsChecked = true;
-            ViewModel.MultiHpEnabled = true;
+            // MultiHpEnabled.IsChecked = true; // UI control removed
+            // ViewModel.MultiHpEnabled = true; // MultiHp system removed
             
             // Update buttons first to prevent UI freezing
-            StartMultiHpButton.IsEnabled = false;
-            StopMultiHpButton.IsEnabled = true;
-            StartMultiHpButton.Content = "Starting...";
+            // StartMultiHpButton.IsEnabled = false; // UI control removed
+            // StopMultiHpButton.IsEnabled = true; // UI control removed
+            // StartMultiHpButton.Content = "Starting..."; // UI control removed
             
             // Start the monitoring system on background thread
             await Task.Run(() => 
             {
                 try 
                 {
-                    Dispatcher.Invoke(() => StartMultiHpSystem());
+                    // Dispatcher.Invoke(() => StartMultiHpSystem()); // Method removed
                 }
                 catch (Exception ex)
                 {
@@ -8080,15 +7531,15 @@ public partial class ClientCard : UserControl, IDisposable
             });
             
             // Reset button content
-            StartMultiHpButton.Content = new StackPanel 
-            { 
-                Orientation = Orientation.Horizontal,
-                Children = 
-                {
-                    new TextBlock { Text = "▶", FontSize = 14, Margin = new Thickness(0,0,5,0) },
-                    new TextBlock { Text = "START" }
-                }
-            };
+            // StartMultiHpButton.Content = new StackPanel // UI control removed
+            // { 
+            //     Orientation = Orientation.Horizontal,
+            //     Children = 
+            //     {
+            //         new TextBlock { Text = "▶", FontSize = 14, Margin = new Thickness(0,0,5,0) },
+            //         new TextBlock { Text = "START" }
+            //     }
+            // };
             
             Console.WriteLine($"[PartyHeal-{ClientId}] ✅ PARTY HEAL SYSTEM STARTED SUCCESSFULLY!");
         }
@@ -8106,14 +7557,14 @@ public partial class ClientCard : UserControl, IDisposable
             Console.WriteLine($"[PartyHeal-{ClientId}] === STOPPING PARTY HEAL SYSTEM ===");
             
             // Disable multi HP system
-            MultiHpEnabled.IsChecked = false;
-            ViewModel.MultiHpEnabled = false;
+            // MultiHpEnabled.IsChecked = false; // UI control removed
+            // ViewModel.MultiHpEnabled = false; // MultiHp system removed
             
             // Stop the monitoring system
-            StopMultiHpSystem();
+            // StopMultiHpSystem(); // Method removed
             
-            StartMultiHpButton.IsEnabled = true;
-            StopMultiHpButton.IsEnabled = false;
+            // StartMultiHpButton.IsEnabled = true; // UI control removed
+            // StopMultiHpButton.IsEnabled = false; // UI control removed
             
             Console.WriteLine($"[PartyHeal-{ClientId}] ✅ PARTY HEAL SYSTEM STOPPED!");
         }
@@ -8131,7 +7582,8 @@ public partial class ClientCard : UserControl, IDisposable
             return;
         }
 
-        var enabledClients = ViewModel.MultiHpClients.Where(c => c.Enabled).ToList();
+        // var enabledClients = ViewModel.MultiHpClients.Where(c => c.Enabled).ToList(); // MultiHpClients removed
+        var enabledClients = new List<dynamic>(); // Empty list since MultiHpClients removed
         if (!enabledClients.Any())
         {
             MessageBox.Show("Please enable at least one party member first!", "No Party Members", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -8351,8 +7803,8 @@ public partial class ClientCard : UserControl, IDisposable
                 else
                 {
                     // Disable monitoring in model when stopping
-                    var client = ViewModel.MultiHpClients[memberIndex - 1];
-                    client.Enabled = false;
+                    // var client = ViewModel.MultiHpClients[memberIndex - 1]; // MultiHpClients removed
+                    // client.Enabled = false; // client removed
                 }
                 
                 Console.WriteLine($"[{ViewModel.ClientName}] Party member {memberIndex} monitor {(isMonitoring ? "stopped" : "started")}");
@@ -8493,9 +7945,13 @@ public partial class ClientCard : UserControl, IDisposable
     
     private void CalibrateHpBar(int memberIndex, System.Drawing.Bitmap bmp, int startX, int endX, int y)
     {
+        // MultiHpClients removed - entire method disabled
+        return;
+        
+        /*
         try
         {
-            var client = ViewModel.MultiHpClients[memberIndex - 1];
+            // var client = ViewModel.MultiHpClients[memberIndex - 1]; // MultiHpClients removed
             
             Console.WriteLine($"[{ViewModel.ClientName}] 🎭 Party Member {memberIndex} HP Calibration started...");
             
@@ -8533,6 +7989,7 @@ public partial class ClientCard : UserControl, IDisposable
         {
             Console.WriteLine($"[{ViewModel.ClientName}] Error calibrating HP bar for party member {memberIndex}: {ex.Message}");
         }
+        */
     }
 
     #endregion
@@ -8544,9 +8001,13 @@ public partial class ClientCard : UserControl, IDisposable
 
     private void UpdatePartyMemberModelFromUI(int memberIndex)
     {
+        // MultiHpClients removed - entire method disabled
+        return;
+        
+        /*
         try
         {
-            var client = ViewModel.MultiHpClients[memberIndex - 1];
+            // var client = ViewModel.MultiHpClients[memberIndex - 1]; // MultiHpClients removed
             
             // Get UI controls
             var userKeyControl = FindName($"PartyMember{memberIndex}UserKey") as TextBox;
@@ -8584,6 +8045,7 @@ public partial class ClientCard : UserControl, IDisposable
         {
             Console.WriteLine($"[{ViewModel.ClientName}] Error updating party member {memberIndex} model: {ex.Message}");
         }
+        */
     }
 
     #region IDisposable Implementation
@@ -8614,6 +8076,7 @@ public partial class ClientCard : UserControl, IDisposable
                     DisposeBackgroundTasks();
                     DisposeSemaphores();
                     DisposeCaptchaResources();
+                    DisposePartyHealService();
                     DisposeFastSampler();
                 }
                 catch (Exception ex)
@@ -8755,6 +8218,24 @@ public partial class ClientCard : UserControl, IDisposable
         catch (Exception ex)
         {
             Console.WriteLine($"[{ViewModel.ClientName}] Error disposing CAPTCHA solver: {ex.Message}");
+        }
+    }
+    
+    /// <summary>
+    /// Disposes PartyHeal-related resources.
+    /// </summary>
+    private void DisposePartyHealService()
+    {
+        try
+        {
+            _partyHealService?.Dispose();
+            _partyHealService = null;
+            _partyHealRunning = false;
+            Console.WriteLine($"[{ClientId}] ✅ PartyHeal service disposed");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] Error disposing PartyHeal service: {ex.Message}");
         }
     }
 

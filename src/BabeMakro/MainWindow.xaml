@@ -168,6 +168,7 @@
                 </Style>
             </TabControl.Resources>
             
+            
             <!-- Client tabs with simple numbers -->
             <TabItem Header="1" x:Name="Client1Tab"/>
             <TabItem Header="2" x:Name="Client2Tab"/>
