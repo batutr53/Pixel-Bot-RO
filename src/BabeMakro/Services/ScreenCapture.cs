@@ -12,11 +12,23 @@ public static class ScreenCapture
     {
         try
         {
-            if (hwnd == IntPtr.Zero) return null;
+            Console.WriteLine($"[ScreenCapture] CaptureWindow called: HWND=0x{hwnd:X8}, Region=({x},{y},{width},{height})");
+            
+            if (hwnd == IntPtr.Zero)
+            {
+                Console.WriteLine($"[ScreenCapture] Invalid window handle (Zero)");
+                return null;
+            }
 
             // Get window DC
             var hdcSrc = GetWindowDC(hwnd);
-            if (hdcSrc == IntPtr.Zero) return null;
+            if (hdcSrc == IntPtr.Zero)
+            {
+                Console.WriteLine($"[ScreenCapture] Failed to get window DC for handle 0x{hwnd:X8}");
+                return null;
+            }
+            
+            Console.WriteLine($"[ScreenCapture] Window DC obtained successfully: 0x{hdcSrc:X8}");
 
             try
             {
@@ -30,6 +42,7 @@ public static class ScreenCapture
 
                 // Convert to managed bitmap
                 var bitmap = Image.FromHbitmap(hBitmap.DangerousGetHandle());
+                Console.WriteLine($"[ScreenCapture] Bitmap created successfully: {bitmap.Width}x{bitmap.Height}");
 
                 // Cleanup
                 SelectObject(hdcDest, hOld);

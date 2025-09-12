@@ -99,40 +99,10 @@ public static class ImageProcessor
     
     public static bool HasDistinctiveColorsParallel(Bitmap bitmap, int threshold = 50)
     {
-        try
-        {
-            var globalColorCount = new ConcurrentDictionary<Color, int>();
-            var totalPixels = bitmap.Width * bitmap.Height;
-            
-            var partitioner = Partitioner.Create(0, bitmap.Height, Math.Max(1, bitmap.Height / Environment.ProcessorCount));
-            
-            Parallel.ForEach(partitioner, partition =>
-            {
-                var localColors = new Dictionary<Color, int>();
-                
-                for (int y = partition.Item1; y < partition.Item2; y++)
-                {
-                    for (int x = 0; x < bitmap.Width; x++)
-                    {
-                        var pixel = bitmap.GetPixel(x, y);
-                        localColors[pixel] = localColors.GetValueOrDefault(pixel, 0) + 1;
-                    }
-                }
-                
-                // Merge local results into global dictionary
-                foreach (var kvp in localColors)
-                {
-                    globalColorCount.AddOrUpdate(kvp.Key, kvp.Value, (key, oldValue) => oldValue + kvp.Value);
-                }
-            });
-            
-            // Check if we have diverse colors (not just solid background)
-            return globalColorCount.Count > threshold && globalColorCount.Values.Max() < totalPixels * 0.8;
-        }
-        catch
-        {
-            return false;
-        }
+        // IMPORTANT: Bitmap.GetPixel is NOT thread-safe!
+        // Multiple threads accessing the same bitmap causes "Object is currently in use elsewhere" error
+        // Redirect to sequential version for stability
+        return HasDistinctiveColorsSequential(bitmap, threshold);
     }
 
     private static Bitmap ToGrayscale(Bitmap original)

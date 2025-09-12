@@ -2285,12 +2285,7 @@ public partial class ClientCard : UserControl, IDisposable
         ViewModel.BabeBotMp.Enabled = true;
         StartBabeBotMonitoring();
         
-        // Auto-start Attack System if enabled
-        if (AttackSystemEnabled.IsChecked == true)
-        {
-            StartAttackSystem();
-            Console.WriteLine($"[{ViewModel.ClientName}] ⚔️ Attack System auto-started");
-        }
+        // Auto-start Attack System removed - user must manually start attack system
         
         // Auto-start Buff/AC System if enabled
         if (BuffAcSystemEnabled.IsChecked == true)
@@ -6923,6 +6918,8 @@ public partial class ClientCard : UserControl, IDisposable
         var w = int.TryParse(CaptchaWidth.Text, out var wVal) ? wVal : 300;
         var h = int.TryParse(CaptchaHeight.Text, out var hVal) ? hVal : 100;
         
+        Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] GetCaptchaConfig: X={x}, Y={y}, W={w}, H={h}");
+        
         return new CaptchaConfig
         {
             CaptchaArea = new System.Drawing.Rectangle(x, y, w, h),
@@ -7152,6 +7149,7 @@ public partial class ClientCard : UserControl, IDisposable
                 return;
             }
 
+            Console.WriteLine($"[{ViewModel.ClientName}] Preview button clicked. Window handle: 0x{ViewModel.TargetHwnd:X8}");
             var config = GetCaptchaConfig();
             
             // Create preview window
@@ -7192,6 +7190,7 @@ public partial class ClientCard : UserControl, IDisposable
             stackPanel.Children.Add(ocrResultText);
 
             // Capture and show image
+            Console.WriteLine($"[{ViewModel.ClientName}] Initial preview capture attempt...");
             var bitmap = ScreenCapture.CaptureWindow(ViewModel.TargetHwnd, 
                 config.CaptchaArea.X, config.CaptchaArea.Y, 
                 config.CaptchaArea.Width, config.CaptchaArea.Height);
@@ -7200,6 +7199,7 @@ public partial class ClientCard : UserControl, IDisposable
 
             if (bitmap != null)
             {
+                Console.WriteLine($"[{ViewModel.ClientName}] Initial bitmap captured: {bitmap.Width}x{bitmap.Height}");
                 using (bitmap)
                 {
                     var imageSource = ConvertBitmapToImageSource(bitmap);
@@ -7248,7 +7248,7 @@ public partial class ClientCard : UserControl, IDisposable
                 if (previewWindow.IsVisible)
                 {
                     var newConfig = GetCaptchaConfig();
-                    infoText.Text = $"Captcha Area: {newConfig.CaptchaArea.X},{newConfig.CaptchaArea.Y} ({newConfig.CaptchaArea.Width}x{newConfig.CaptchaArea.Height})";
+                    infoText.Text = $"Captcha Area: X={newConfig.CaptchaArea.X}, Y={newConfig.CaptchaArea.Y}, Size={newConfig.CaptchaArea.Width}x{newConfig.CaptchaArea.Height}";
                     
                     var newBitmap = ScreenCapture.CaptureWindow(ViewModel.TargetHwnd,
                         newConfig.CaptchaArea.X, newConfig.CaptchaArea.Y,
@@ -7256,6 +7256,7 @@ public partial class ClientCard : UserControl, IDisposable
                     
                     if (newBitmap != null && stackPanel.Children.Count > 2 && stackPanel.Children[2] is System.Windows.Controls.Image img)
                     {
+                        Console.WriteLine($"[{ViewModel.ClientName}] Preview bitmap captured successfully. Size: {newBitmap.Width}x{newBitmap.Height}");
                         using (newBitmap)
                         {
                             img.Source = ConvertBitmapToImageSource(newBitmap);
