@@ -126,7 +126,7 @@ public partial class ClientCard : UserControl, IDisposable
             NearbyPixelThreshold = 3 // Group nearby pixels for better cache efficiency
         };
         
-        Console.WriteLine($"[{ClientId}] 🚀 PERFORMANCE OPTIMIZATION: Color sampling cache initialized - expect 70-90% reduction in Win32 API calls");
+        // Color sampling cache initialized - expect 70-90% reduction in Win32 API calls
         
         // Initialize master timer system for better performance
         InitializeMasterTimer();
@@ -159,7 +159,7 @@ public partial class ClientCard : UserControl, IDisposable
             // Start periodic GC optimization
             _ = Task.Run(PeriodicGCOptimization, _cancellationTokenSource.Token);
             
-            Console.WriteLine($"[{ClientId}] 🚀 Performance optimizations enabled: High priority, {Environment.ProcessorCount} cores, Low latency GC");
+            // Performance optimizations enabled
         }
         catch (Exception ex)
         {
@@ -185,7 +185,7 @@ public partial class ClientCard : UserControl, IDisposable
                 enabled: true,
                 priority: 1); // Low priority for reporting
             
-            Console.WriteLine($"[{ClientId}] 🕐 Master timer system initialized - Single timer replaces ~15 individual timers");
+            // Master timer system initialized - Single timer replaces ~15 individual timers
         }
         catch (Exception ex)
         {
@@ -197,23 +197,16 @@ public partial class ClientCard : UserControl, IDisposable
     {
         try
         {
-            // Create a simple console logger for the solver
-            var logger = new ConsoleLogger<TesseractCaptchaSolver>();
+            // Use singleton Tesseract service to avoid multiple initializations
+            _captchaSolver = await TesseractSingletonService.Instance.GetSolverAsync();
             
-            // Initialize the Tesseract captcha solver
-            _captchaSolver = new TesseractCaptchaSolver(logger);
-            
-            // Initialize asynchronously 
-            bool initialized = await _captchaSolver.InitializeAsync();
-            
-            if (initialized)
+            if (_captchaSolver != null)
             {
-                Console.WriteLine($"[{ClientId}] ✅ Tesseract OCR initialized successfully");
+                // Using shared Tesseract OCR instance
             }
             else
             {
-                Console.WriteLine($"[{ClientId}] ⚠️ Tesseract OCR initialization failed - CAPTCHA solving disabled");
-                _captchaSolver?.Dispose();
+                Console.WriteLine($"[{ClientId}] ⚠️ Tesseract OCR not available - CAPTCHA solving disabled");
                 _captchaSolver = null;
             }
         }

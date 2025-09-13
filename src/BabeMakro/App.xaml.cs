@@ -56,21 +56,8 @@ public partial class App : Application
             MessageBox.Show($"Console initialization error: {ex.Message}", "Warning");
         }
         
-        // Initialize optimized image processing
-        try
-        {
-            Console.WriteLine("🚀 Initializing parallel image processing optimizations...");
-            ImageProcessorInitializer.InitializeOptimizedProcessing();
-            Console.WriteLine("✅ Image processing optimizations enabled successfully!");
-            Console.WriteLine();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"⚠️ Failed to initialize image processing optimizations: {ex.Message}");
-            Console.WriteLine("Falling back to compatible mode...");
-            ImageProcessorInitializer.InitializeCompatibleMode();
-            Console.WriteLine();
-        }
+        // Initialize optimized image processing (singleton)
+        ImageProcessorSingleton.Initialize();
         
         // Initialize performance monitoring
         try
