@@ -8,7 +8,7 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         Background="#1e1e1e">
-    
+
     <Window.Resources>
         <Style x:Key="ClientCardStyle" TargetType="Border">
             <Setter Property="Background" Value="#2d2d30"/>
@@ -18,19 +18,19 @@
             <Setter Property="Margin" Value="5"/>
             <Setter Property="Padding" Value="10"/>
         </Style>
-        
+
         <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
             <Setter Property="Foreground" Value="#ffffff"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="FontSize" Value="14"/>
         </Style>
-        
+
         <Style x:Key="InfoTextStyle" TargetType="TextBlock">
             <Setter Property="Foreground" Value="#cccccc"/>
             <Setter Property="FontFamily" Value="Consolas"/>
             <Setter Property="FontSize" Value="11"/>
         </Style>
-        
+
         <Style x:Key="CoordinateTextBoxStyle" TargetType="TextBox">
             <Setter Property="Width" Value="50"/>
             <Setter Property="Height" Value="25"/>
@@ -41,7 +41,7 @@
             <Setter Property="FontFamily" Value="Consolas"/>
             <Setter Property="TextAlignment" Value="Center"/>
         </Style>
-        
+
         <Style x:Key="ActionButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="#0e639c"/>
             <Setter Property="Foreground" Value="#ffffff"/>
@@ -56,14 +56,14 @@
             </Style.Triggers>
         </Style>
     </Window.Resources>
-    
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
+
         <!-- Header Panel -->
         <Border Grid.Row="0" Background="#252526" BorderBrush="#3f3f46" BorderThickness="0,0,0,1" Padding="15,10">
             <Grid>
@@ -71,7 +71,7 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                
+
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                     <!-- BabeMakro Logo Area -->
                     <Border Background="#ff1493" CornerRadius="15" Padding="8,4" Margin="0,0,15,0">
@@ -89,13 +89,13 @@
                     <TextBox x:Name="ClickModeTextBox" Width="140" Height="25" Text="message" Style="{StaticResource CoordinateTextBoxStyle}"/>
                     -->
                 </StackPanel>
-                
+
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
                     <!-- Only show essential controls -->
                     <Button Content="💾 Save" Style="{StaticResource ActionButtonStyle}" Click="SaveConfig_Click" Margin="0,0,5,0"/>
                     <Button Content="📁 Load" Style="{StaticResource ActionButtonStyle}" Click="LoadConfig_Click" Margin="0,0,10,0"/>
                     <Button x:Name="PanicToggleButton" Content="🚀 PANIC START" Background="#28a745" Style="{StaticResource ActionButtonStyle}" Click="PanicToggle_Click" Margin="0,0,5,0"/>
-                    
+
                     <!-- Hidden controls -->
                     <!--
                     <Border Background="#FF5722" CornerRadius="3" Padding="2" Margin="0,0,5,0">
@@ -110,7 +110,7 @@
                 </StackPanel>
             </Grid>
         </Border>
-        
+
         <!-- Main Content - Tab-based Client Layout -->
         <TabControl x:Name="ClientTabControl" Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="10" TabStripPlacement="Left">
             <TabControl.Resources>
@@ -130,7 +130,7 @@
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="TabItem">
-                                <Border x:Name="Border" 
+                                <Border x:Name="Border"
                                         Background="{TemplateBinding Background}"
                                         BorderBrush="{TemplateBinding BorderBrush}"
                                         BorderThickness="{TemplateBinding BorderThickness}"
@@ -167,8 +167,8 @@
                     </Style.Triggers>
                 </Style>
             </TabControl.Resources>
-            
-            
+
+
             <!-- Client tabs with simple numbers -->
             <TabItem Header="1" x:Name="Client1Tab"/>
             <TabItem Header="2" x:Name="Client2Tab"/>
@@ -179,7 +179,7 @@
             <TabItem Header="7" x:Name="Client7Tab"/>
             <TabItem Header="8" x:Name="Client8Tab"/>
         </TabControl>
-        
+
         <!-- Status Bar -->
         <Border Grid.Row="2" Background="#007acc" BorderBrush="#1e1e1e" BorderThickness="0,1,0,0" Padding="15,8">
             <Grid>
@@ -187,7 +187,7 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                
+
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                     <TextBlock x:Name="StatusText" Text="Ready" Foreground="White" VerticalAlignment="Center" Margin="0,0,20,0"/>
                     <TextBlock Text="Connected Clients:" Foreground="White" VerticalAlignment="Center" Margin="0,0,5,0"/>
@@ -197,14 +197,14 @@
                     <TextBlock Text="Total Clicks:" Foreground="White" VerticalAlignment="Center" Margin="0,0,5,0"/>
                     <TextBlock x:Name="TotalClicksText" Text="0" Foreground="#90EE90" VerticalAlignment="Center" FontWeight="Bold"/>
                 </StackPanel>
-                
+
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
                     <TextBlock Text="🔥 Active Workers:" Foreground="White" VerticalAlignment="Center" Margin="0,0,5,0"/>
                     <TextBlock x:Name="ActiveWorkersText" Text="0" Foreground="#FFD700" VerticalAlignment="Center" FontWeight="Bold"/>
                 </StackPanel>
             </Grid>
         </Border>
-        
+
         <!-- Overlay Canvas (when in overlay mode) -->
         <Canvas x:Name="OverlayCanvas" Grid.RowSpan="3" Background="Transparent" Visibility="Collapsed" IsHitTestVisible="False"/>
     </Grid>

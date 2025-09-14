@@ -872,9 +872,9 @@ public partial class ClientCard : UserControl, IDisposable
         // DON'T update ExpectedColor here! It should only be set when picking coordinate
         // This method is only for syncing to other clients
         
-        // Sync HP color to all other clients
-        var mainWindow = Application.Current.MainWindow as MainWindow;
-        mainWindow?.SyncHpColorToAllClients(color, this);
+        // Sync HP color to all other clients - DISABLED FOR NEW LOGIN SYSTEM
+        // // var mainWindow = Application.Current.MainWindow as MainWindow; // DISABLED FOR NEW LOGIN SYSTEM
+        // // mainWindow?.SyncHpColorToAllClients(color, this);
     }
 
     private void UpdateMpColor(System.Drawing.Color color)
@@ -883,8 +883,8 @@ public partial class ClientCard : UserControl, IDisposable
         // This method is only for syncing to other clients
         
         // Sync MP color to all other clients
-        var mainWindow = Application.Current.MainWindow as MainWindow;
-        mainWindow?.SyncMpColorToAllClients(color, this);
+        // var mainWindow = Application.Current.MainWindow as MainWindow; // DISABLED FOR NEW LOGIN SYSTEM
+        // mainWindow?.SyncMpColorToAllClients(color, this);
     }
     
     public void SetHpColorFromSync(System.Drawing.Color color)
@@ -3362,7 +3362,7 @@ public partial class ClientCard : UserControl, IDisposable
         try
         {
             // Get selected click mode from main window (UI control is hidden, use default)
-            var mainWindow = Application.Current.MainWindow as MainWindow;
+            // var mainWindow = Application.Current.MainWindow as MainWindow; // DISABLED FOR NEW LOGIN SYSTEM
             var clickMode = "message"; // Default since ClickModeTextBox is hidden
             
             // Debug what was selected
@@ -4449,8 +4449,9 @@ public partial class ClientCard : UserControl, IDisposable
     // Helper method to get overlay canvas
     private System.Windows.Controls.Canvas? GetOverlayCanvas()
     {
-        var mainWindow = Application.Current.MainWindow as MainWindow;
-        return mainWindow?.GetOverlayCanvas();
+        // var mainWindow = Application.Current.MainWindow as MainWindow; // DISABLED FOR NEW LOGIN SYSTEM
+        // return mainWindow?.GetOverlayCanvas(); // DISABLED FOR NEW LOGIN SYSTEM
+        return null;
     }
     
     // Public methods to show/hide shapes in overlay mode
@@ -4547,17 +4548,17 @@ public partial class ClientCard : UserControl, IDisposable
         // Show overlay shapes for manual positioning
         ShowOverlayShapesEnhanced();
         
-        // Also enable overlay mode in main window if not already enabled
-        var mainWindow = Application.Current.MainWindow as MainWindow;
-        if (mainWindow != null)
-        {
-            // Check if overlay mode is already active
-            var overlayCheckBox = mainWindow.FindName("OverlayModeCheckBox") as CheckBox;
-            if (overlayCheckBox != null && overlayCheckBox.IsChecked != true)
-            {
-                overlayCheckBox.IsChecked = true; // This will trigger overlay mode
-            }
-        }
+        // Also enable overlay mode in main window if not already enabled - DISABLED FOR NEW LOGIN SYSTEM
+        // var mainWindow = Application.Current.MainWindow as MainWindow; // DISABLED FOR NEW LOGIN SYSTEM
+        // if (mainWindow != null)
+        // {
+        //     // Check if overlay mode is already active
+        //     var overlayCheckBox = mainWindow.FindName("OverlayModeCheckBox") as CheckBox;
+        //     if (overlayCheckBox != null && overlayCheckBox.IsChecked != true)
+        //     {
+        //         overlayCheckBox.IsChecked = true; // This will trigger overlay mode
+        //     }
+        // }
         
         Console.WriteLine($"[{ViewModel.ClientName}] 🎯 DRAGGABLE SHAPES ACTIVATED!");
         Console.WriteLine($"[{ViewModel.ClientName}] ❤️ RED CIRCLE = HP monitoring point - drag to HP bar");
@@ -7021,8 +7022,6 @@ public partial class ClientCard : UserControl, IDisposable
 
             using (bitmap)
             {
-                var processedBitmap = ImageProcessor.ProcessImage(bitmap, config.ProcessingOptions);
-                
                 // Check if captcha solver is available
                 if (_captchaSolver == null || !_captchaSolver.IsAvailable)
                 {
@@ -7030,24 +7029,38 @@ public partial class ClientCard : UserControl, IDisposable
                     return ("", 0.0);
                 }
 
+                // Check minimum bitmap dimensions for Tesseract
+                if (bitmap.Width < 10 || bitmap.Height < 10)
+                {
+                    Console.WriteLine($"[{ViewModel.ClientName}] Bitmap too small for OCR: {bitmap.Width}x{bitmap.Height}");
+                    return ("", 0.0);
+                }
+
                 try
                 {
-                    // Create captcha options based on config
-                    var captchaOptions = new CaptchaOptions
+                    // Create minimal processing options - user says image is already clear, no processing needed
+                    var minimalOptions = new CaptchaOptions
                     {
-                        ProcessingMode = CaptchaProcessingMode.Enhanced,
+                        ProcessingMode = CaptchaProcessingMode.Original, // No processing, use original image
                         PsmMode = TesseractPageSegmentationMode.SingleWord,
-                        UseGrayscale = true,
-                        UseHistogramEqualization = true,
-                        ContrastFactor = 3.5,
-                        SharpnessFactor = 3.0,
-                        BrightnessFactor = 1.3,
-                        ScaleFactor = 4
+                        UseGrayscale = false,  // Don't convert to grayscale
+                        UseHistogramEqualization = false,  // No histogram equalization
+                        ContrastFactor = 1.0,  // No contrast adjustment
+                        SharpnessFactor = 1.0,  // No sharpening
+                        BrightnessFactor = 1.0,  // No brightness adjustment
+                        ScaleFactor = 1  // No scaling
                     };
 
-                    // Use the real OCR solver to extract text
-                    var extractedText = await _captchaSolver.SolveCaptchaAsync(processedBitmap, captchaOptions);
-                    
+                    // Create a safe copy of the bitmap with RGB24 format for Tesseract compatibility
+                    using var bitmapCopy = new System.Drawing.Bitmap(bitmap.Width, bitmap.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                    using (var g = System.Drawing.Graphics.FromImage(bitmapCopy))
+                    {
+                        g.DrawImage(bitmap, 0, 0, bitmap.Width, bitmap.Height);
+                    }
+
+                    // Use the real OCR solver to extract text from bitmap copy
+                    var extractedText = await _captchaSolver.SolveCaptchaAsync(bitmapCopy, minimalOptions);
+
                     if (!string.IsNullOrWhiteSpace(extractedText))
                     {
                         // Calculate confidence based on text characteristics
@@ -7114,21 +7127,148 @@ public partial class ClientCard : UserControl, IDisposable
             if (ViewModel?.TargetHwnd == null || ViewModel.TargetHwnd == IntPtr.Zero)
                 return;
 
+            var captchaAreaCenter = new Point(
+                config.CaptchaArea.X + config.CaptchaArea.Width / 2,
+                config.CaptchaArea.Y + config.CaptchaArea.Height / 2
+            );
             var textLocation = config.TextBoxLocation;
             var submitLocation = config.SubmitButtonLocation;
 
+            Console.WriteLine($"[{ViewModel.ClientName}] CAPTCHA Submit Flow Started:");
+            Console.WriteLine($"[{ViewModel.ClientName}] 1. Clicking CAPTCHA area center: ({captchaAreaCenter.X}, {captchaAreaCenter.Y})");
+
+            // 1. CAPTCHA alanının ortasına tıkla (CAPTCHA'yı aktif hale getir)
+            MouseClick.Click(ViewModel.TargetHwnd, captchaAreaCenter.X, captchaAreaCenter.Y);
+            await Task.Delay(500);
+
+            Console.WriteLine($"[{ViewModel.ClientName}] 2. Clicking text box: ({textLocation.X}, {textLocation.Y})");
+
+            // 2. Textbox'a tıkla
             MouseClick.Click(ViewModel.TargetHwnd, textLocation.X, textLocation.Y);
             await Task.Delay(500);
-            
-            KeyboardInput.SendText(ViewModel.TargetHwnd, answer);
+
+            // Extract number from parentheses if present - e.g., "(28)" -> "28"
+            var cleanAnswer = ExtractNumberFromParentheses(answer);
+            Console.WriteLine($"[{ViewModel.ClientName}] 3. Typing answer: '{cleanAnswer}' (Original: '{answer}')");
+
+            // 3. Cevabı yaz
+            KeyboardInput.SendText(ViewModel.TargetHwnd, cleanAnswer);
             await Task.Delay(500);
-            
+
+            Console.WriteLine($"[{ViewModel.ClientName}] 4. Double-clicking submit button: ({submitLocation.X}, {submitLocation.Y})");
+
+            // 4. Submit button'a 2 kez tıkla
+            MouseClick.Click(ViewModel.TargetHwnd, submitLocation.X, submitLocation.Y);
+            await Task.Delay(300); // İki tık arasında kısa bekleme
             MouseClick.Click(ViewModel.TargetHwnd, submitLocation.X, submitLocation.Y);
             await Task.Delay(500);
+
+            Console.WriteLine($"[{ViewModel.ClientName}] ✅ CAPTCHA Submit Flow Completed!");
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[{ViewModel.ClientName}] Answer submission error: {ex.Message}");
+        }
+    }
+
+    private string ExtractNumberFromParentheses(string input)
+    {
+        if (string.IsNullOrEmpty(input))
+            return "";
+
+        Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] Processing input: '{input}'");
+
+        // First, aggressively clean the input - remove ALL non-digit, non-parentheses characters
+        var cleaned = System.Text.RegularExpressions.Regex.Replace(input, @"[^0-9\(\)]", "");
+        Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] Cleaned input: '{input}' -> '{cleaned}'");
+
+        // Look for pattern like "(28)" or "(134)" and extract just the number
+        var match = System.Text.RegularExpressions.Regex.Match(cleaned, @"\((\d+)\)");
+        if (match.Success)
+        {
+            var number = match.Groups[1].Value;
+            Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] Extracted number '{number}' from parentheses in '{cleaned}'");
+            return number;
+        }
+
+        // If no parentheses found, look for any number in the cleaned string
+        var numberMatch = System.Text.RegularExpressions.Regex.Match(cleaned, @"\d+");
+        if (numberMatch.Success)
+        {
+            var number = numberMatch.Value;
+            Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] Extracted number '{number}' from '{cleaned}' (no parentheses)");
+            return number;
+        }
+
+        // Return empty string if no numbers found - never return original with non-numeric characters
+        Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] No numbers found in '{input}', returning empty string");
+        return "";
+    }
+
+    private CaptchaOptions GetCurrentUIOptions()
+    {
+        return new CaptchaOptions
+        {
+            ProcessingMode = CaptchaProcessingMode.Enhanced,
+            PsmMode = TesseractPageSegmentationMode.SingleWord,
+            UseGrayscale = CaptchaGrayscale.IsChecked ?? false,
+            UseHistogramEqualization = CaptchaHistogram.IsChecked ?? false,
+            ContrastFactor = double.TryParse(CaptchaContrast.Text, out var contrast) ? contrast : 1.0,
+            SharpnessFactor = double.TryParse(CaptchaSharpness.Text, out var sharpness) ? sharpness : 1.0,
+            BrightnessFactor = 1.0,
+            ScaleFactor = int.TryParse(CaptchaScale.Text, out var scale) ? scale : 1
+        };
+    }
+
+    public void LoadCaptchaSettings(Dictionary<string, object>? captchaSettings)
+    {
+        if (captchaSettings == null)
+            return;
+
+        try
+        {
+            Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] Loading CAPTCHA settings...");
+
+            if (captchaSettings.TryGetValue("Enabled", out var enabled))
+                CaptchaEnabled.IsChecked = Convert.ToBoolean(enabled);
+
+            if (captchaSettings.TryGetValue("X", out var x))
+                CaptchaX.Text = x.ToString();
+            if (captchaSettings.TryGetValue("Y", out var y))
+                CaptchaY.Text = y.ToString();
+            if (captchaSettings.TryGetValue("Width", out var w))
+                CaptchaWidth.Text = w.ToString();
+            if (captchaSettings.TryGetValue("Height", out var h))
+                CaptchaHeight.Text = h.ToString();
+
+            if (captchaSettings.TryGetValue("TextX", out var tx))
+                CaptchaTextX.Text = tx.ToString();
+            if (captchaSettings.TryGetValue("TextY", out var ty))
+                CaptchaTextY.Text = ty.ToString();
+            if (captchaSettings.TryGetValue("ButtonX", out var bx))
+                CaptchaButtonX.Text = bx.ToString();
+            if (captchaSettings.TryGetValue("ButtonY", out var by))
+                CaptchaButtonY.Text = by.ToString();
+
+            if (captchaSettings.TryGetValue("Interval", out var interval))
+                CaptchaInterval.Text = interval.ToString();
+            if (captchaSettings.TryGetValue("Contrast", out var contrast))
+                CaptchaContrast.Text = contrast.ToString();
+            if (captchaSettings.TryGetValue("Sharpness", out var sharpness))
+                CaptchaSharpness.Text = sharpness.ToString();
+            if (captchaSettings.TryGetValue("Scale", out var scale))
+                CaptchaScale.Text = scale.ToString();
+
+            if (captchaSettings.TryGetValue("Grayscale", out var grayscale))
+                CaptchaGrayscale.IsChecked = Convert.ToBoolean(grayscale);
+            if (captchaSettings.TryGetValue("Histogram", out var histogram))
+                CaptchaHistogram.IsChecked = Convert.ToBoolean(histogram);
+
+            Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] CAPTCHA settings loaded successfully");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] Error loading CAPTCHA settings: {ex.Message}");
         }
     }
 
@@ -7205,9 +7345,10 @@ public partial class ClientCard : UserControl, IDisposable
                     stackPanel.Children.Add(imageControl);
 
                     // Process OCR immediately for initial image
+                    var uiOptions = GetCurrentUIOptions(); // Get UI values on UI thread
                     Task.Run(async () =>
                     {
-                        var ocrResult = await ProcessOCRForPreview(bitmap, config);
+                        var ocrResult = await ProcessOCRForPreview(bitmap, config, uiOptions);
                         await Dispatcher.InvokeAsync(() =>
                         {
                             ocrResultText.Text = $"OCR Result: [{ocrResult.Text}] (Confidence: {ocrResult.Confidence:F1}%)";
@@ -7250,24 +7391,50 @@ public partial class ClientCard : UserControl, IDisposable
                     if (newBitmap != null && stackPanel.Children.Count > 2 && stackPanel.Children[2] is System.Windows.Controls.Image img)
                     {
                         Console.WriteLine($"[{ViewModel.ClientName}] Preview bitmap captured successfully. Size: {newBitmap.Width}x{newBitmap.Height}");
+
+                        // Create a thread-safe copy of the bitmap for OCR processing
+                        System.Drawing.Bitmap bitmapCopy = null;
+                        try
+                        {
+                            bitmapCopy = new System.Drawing.Bitmap(newBitmap.Width, newBitmap.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                            using (var g = System.Drawing.Graphics.FromImage(bitmapCopy))
+                            {
+                                g.DrawImage(newBitmap, 0, 0, newBitmap.Width, newBitmap.Height);
+                            }
+                            Console.WriteLine($"[{ViewModel.ClientName}] Thread-safe bitmap copy created for OCR: {bitmapCopy.Width}x{bitmapCopy.Height}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[{ViewModel.ClientName}] Error creating bitmap copy: {ex.Message}");
+                            bitmapCopy?.Dispose();
+                            bitmapCopy = null;
+                        }
+
                         using (newBitmap)
                         {
                             img.Source = ConvertBitmapToImageSource(newBitmap);
-                            
-                            // Update OCR result live (run in background to avoid blocking UI)
+                        }
+
+                        // Update OCR result live using the safe bitmap copy
+                        if (bitmapCopy != null)
+                        {
                             Task.Run(async () =>
                             {
                                 try
                                 {
-                                    var ocrResult = await ProcessOCRForPreview(newBitmap, newConfig);
-                                    await Dispatcher.InvokeAsync(() =>
+                                    var currentUIOptions = await Dispatcher.InvokeAsync(() => GetCurrentUIOptions()); // Get UI values safely
+                                    using (bitmapCopy) // Dispose the copy when done
                                     {
-                                        if (previewWindow.IsVisible)
+                                        var ocrResult = await ProcessOCRForPreview(bitmapCopy, newConfig, currentUIOptions);
+                                        await Dispatcher.InvokeAsync(() =>
                                         {
-                                            ocrResultText.Text = $"OCR Result: [{ocrResult.Text}] (Confidence: {ocrResult.Confidence:F1}%)";
-                                            ocrResultText.Foreground = ocrResult.Confidence >= 70 ? System.Windows.Media.Brushes.LimeGreen : System.Windows.Media.Brushes.Orange;
-                                        }
-                                    });
+                                            if (previewWindow.IsVisible)
+                                            {
+                                                ocrResultText.Text = $"OCR Result: [{ocrResult.Text}] (Confidence: {ocrResult.Confidence:F1}%)";
+                                                ocrResultText.Foreground = ocrResult.Confidence >= 70 ? System.Windows.Media.Brushes.LimeGreen : System.Windows.Media.Brushes.Orange;
+                                            }
+                                        });
+                                    }
                                 }
                                 catch (Exception ex)
                                 {
@@ -7338,24 +7505,47 @@ public partial class ClientCard : UserControl, IDisposable
                     }
 
                     bool hasCaptcha;
-                    using (bitmap)
+                    System.Drawing.Bitmap bitmapCopy = null;
+
+                    try
                     {
-                        // Step 2: Test captcha detection
-                        Console.WriteLine($"[{ViewModel.ClientName}] Step 2: Testing captcha detection...");
-                        hasCaptcha = ImageProcessor.HasDistinctiveColors(bitmap, 50);
-                        Console.WriteLine($"[{ViewModel.ClientName}] Captcha detected: {hasCaptcha}");
+                        // Create thread-safe copy for OCR processing
+                        bitmapCopy = new System.Drawing.Bitmap(bitmap.Width, bitmap.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                        using (var g = System.Drawing.Graphics.FromImage(bitmapCopy))
+                        {
+                            g.DrawImage(bitmap, 0, 0, bitmap.Width, bitmap.Height);
+                        }
+                        Console.WriteLine($"[{ViewModel.ClientName}] Created bitmap copy for OCR test: {bitmapCopy.Width}x{bitmapCopy.Height}");
+
+                        using (bitmap)
+                        {
+                            // Step 2: Test captcha detection
+                            Console.WriteLine($"[{ViewModel.ClientName}] Step 2: Testing captcha detection...");
+                            hasCaptcha = ImageProcessor.HasDistinctiveColors(bitmap, 50);
+                            Console.WriteLine($"[{ViewModel.ClientName}] Captcha detected: {hasCaptcha}");
+                        }
+
+                        // Step 3: Test OCR (real processing) using the safe copy
+                        Console.WriteLine($"[{ViewModel.ClientName}] Step 3: Testing OCR processing...");
+                        var testUIOptions = await Dispatcher.InvokeAsync(() => GetCurrentUIOptions()); // Get UI values safely
+                        using (bitmapCopy)
+                        {
+                            var ocrResult = await ProcessOCRForPreview(bitmapCopy, config, testUIOptions);
+                            Console.WriteLine($"[{ViewModel.ClientName}] OCR Result: '{ocrResult.Text}' (Confidence: {ocrResult.Confidence:F1}%)");
+
+                            // Step 4: Test input simulation (dry run)
+                            Console.WriteLine($"[{ViewModel.ClientName}] Step 4: Testing input coordinates...");
+                            Console.WriteLine($"[{ViewModel.ClientName}] Text input would click at: ({config.TextBoxLocation.X}, {config.TextBoxLocation.Y})");
+                            Console.WriteLine($"[{ViewModel.ClientName}] Submit button would click at: ({config.SubmitButtonLocation.X}, {config.SubmitButtonLocation.Y})");
+                            Console.WriteLine($"[{ViewModel.ClientName}] Text to type: '{ocrResult.Text}'");
+                        }
+                        bitmapCopy = null; // Prevent double disposal
                     }
-
-                    // Step 3: Test OCR (real processing)
-                    Console.WriteLine($"[{ViewModel.ClientName}] Step 3: Testing OCR processing...");
-                    var ocrResult = await ProcessOCRForPreview(bitmap, config);
-                    Console.WriteLine($"[{ViewModel.ClientName}] OCR Result: '{ocrResult.Text}' (Confidence: {ocrResult.Confidence:F1}%)");
-
-                    // Step 4: Test input simulation (dry run)
-                    Console.WriteLine($"[{ViewModel.ClientName}] Step 4: Testing input coordinates...");
-                    Console.WriteLine($"[{ViewModel.ClientName}] Text input would click at: ({config.TextBoxLocation.X}, {config.TextBoxLocation.Y})");
-                    Console.WriteLine($"[{ViewModel.ClientName}] Submit button would click at: ({config.SubmitButtonLocation.X}, {config.SubmitButtonLocation.Y})");
-                    Console.WriteLine($"[{ViewModel.ClientName}] Text to type: '{ocrResult.Text}'");
+                    catch (Exception ex)
+                    {
+                        bitmapCopy?.Dispose();
+                        throw; // Re-throw the exception to be handled by outer catch
+                    }
 
                     await Dispatcher.InvokeAsync(() =>
                     {
@@ -7405,41 +7595,91 @@ public partial class ClientCard : UserControl, IDisposable
         }
     }
 
-    private async Task<(string Text, double Confidence)> ProcessOCRForPreview(System.Drawing.Bitmap originalBitmap, CaptchaConfig config)
+    private async Task<(string Text, double Confidence)> ProcessOCRForPreview(System.Drawing.Bitmap originalBitmap, CaptchaConfig config, CaptchaOptions uiOptions)
     {
         try
         {
-            // Create a copy for processing
-            using var processedBitmap = ImageProcessor.ProcessImage(originalBitmap, config.ProcessingOptions);
-            
-            // Simple OCR simulation with more realistic text extraction
-            await Task.Delay(500); // Simulate processing time
-            
-            // Analyze image for text-like patterns
-            var hasText = ImageProcessor.HasDistinctiveColors(processedBitmap, 30);
-            
-            if (hasText)
+            // Use real OCR with minimal processing for clean/clear images as per user request
+            // User stated: "görselde hiç bir keskinleştirme contrast scale vs gibi şeeyler olmayacak direkt olarak görsel zaten net"
+
+            if (_captchaSolver == null || !_captchaSolver.IsAvailable)
             {
-                // Generate more realistic captcha-like text
-                var possibleChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-                var random = new Random();
-                var length = random.Next(4, 7); // 4-6 character captcha
-                var text = new string(Enumerable.Range(0, length)
-                    .Select(_ => possibleChars[random.Next(possibleChars.Length)])
-                    .ToArray());
-                
-                // Simulate confidence based on image quality
-                var confidence = AnalyzeImageQuality(processedBitmap);
-                
-                return (text, confidence);
+                Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] CAPTCHA solver not available for preview");
+                return ("OCR Not Available", 0.0);
             }
-            
-            return ("", 0.0);
+
+            // Validate bitmap before accessing properties to prevent "Parameter is not valid" error
+            if (originalBitmap == null)
+            {
+                Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] Original bitmap is null");
+                return ("Bitmap is null", 0.0);
+            }
+
+            // Check if bitmap is disposed by testing access to properties in try/catch
+            int width, height;
+            System.Drawing.Imaging.PixelFormat pixelFormat;
+            try
+            {
+                width = originalBitmap.Width;
+                height = originalBitmap.Height;
+                pixelFormat = originalBitmap.PixelFormat;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] Cannot access bitmap properties: {ex.Message}");
+                return ("Bitmap invalid or disposed", 0.0);
+            }
+
+            // Check minimum bitmap dimensions for Tesseract
+            if (width < 10 || height < 10)
+            {
+                Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] Bitmap too small for OCR: {width}x{height}");
+                return ("Bitmap too small", 0.0);
+            }
+
+            // UI options are passed as parameter to avoid threading issues
+            Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] Preview OCR with settings: Contrast={uiOptions.ContrastFactor}, Sharpness={uiOptions.SharpnessFactor}, Scale={uiOptions.ScaleFactor}, Grayscale={uiOptions.UseGrayscale}, Histogram={uiOptions.UseHistogramEqualization}");
+
+            // Create a safe copy of the bitmap with RGB24 format for Tesseract compatibility
+            Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] Creating bitmap copy from original: {width}x{height}, PixelFormat: {pixelFormat}");
+
+            try
+            {
+                using var bitmapCopy = new System.Drawing.Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                using (var g = System.Drawing.Graphics.FromImage(bitmapCopy))
+                {
+                    g.DrawImage(originalBitmap, 0, 0, width, height);
+                }
+                Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] Bitmap copy created successfully: {bitmapCopy.Width}x{bitmapCopy.Height}, PixelFormat: {bitmapCopy.PixelFormat}");
+
+                // Use the real OCR solver to extract text from bitmap copy
+                Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] Calling SolveCaptchaAsync with bitmap copy...");
+                var extractedText = await _captchaSolver.SolveCaptchaAsync(bitmapCopy, uiOptions);
+                Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] SolveCaptchaAsync completed. Result: '{extractedText}'");
+
+                if (!string.IsNullOrWhiteSpace(extractedText))
+                {
+                    Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] Preview OCR extracted: '{extractedText}'");
+                    return (extractedText.Trim(), 85.0); // Return high confidence for preview
+                }
+                else
+                {
+                    Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] Preview OCR returned empty result");
+                    return ("No text detected", 0.0);
+                }
+            }
+            catch (Exception bitmapEx)
+            {
+                Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] Bitmap processing error in preview: {bitmapEx.Message}");
+                Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] Stack trace: {bitmapEx.StackTrace}");
+                throw; // Re-throw to be caught by outer catch
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"OCR Processing error: {ex.Message}");
-            return ("ERROR", 0.0);
+            Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] Preview OCR Processing error: {ex.Message}");
+            Console.WriteLine($"[{ViewModel?.ClientName ?? "Unknown"}] Full stack trace: {ex.StackTrace}");
+            return ($"OCR Error: {ex.Message}", 0.0);
         }
     }
 

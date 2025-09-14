@@ -1,6 +1,7 @@
-<Application x:Class="PixelAutomation.Tool.Overlay.WPF.App"
+<Application x:Class="BabeMakro.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
         <ResourceDictionary>
             <SolidColorBrush x:Key="OverlayBackground" Color="#01000000"/>

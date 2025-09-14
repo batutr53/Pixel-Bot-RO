@@ -146,8 +146,11 @@ public class TesseractCaptchaSolver : ICaptchaSolver
     {
         try
         {
-            var enhanced = new Bitmap(image.Width * options.ScaleFactor, 
-                                    image.Height * options.ScaleFactor);
+            // Ensure scale factor is at least 1 to prevent invalid bitmap dimensions
+            var scaleFactor = Math.Max(1, options.ScaleFactor);
+
+            var enhanced = new Bitmap(image.Width * scaleFactor,
+                                    image.Height * scaleFactor);
 
             using (var g = Graphics.FromImage(enhanced))
             {
@@ -189,12 +192,44 @@ public class TesseractCaptchaSolver : ICaptchaSolver
             // Save image to temporary file
             tempImagePath = Path.GetTempFileName() + ".png";
             tempOutputPath = Path.GetTempFileName();
-            
-            image.Save(tempImagePath, ImageFormat.Png);
+
+            // Create a properly formatted bitmap for PNG saving to avoid "Parameter is not valid" errors
+            Console.WriteLine($"[TesseractCaptchaSolver] Preparing image for OCR: {image.Width}x{image.Height}, PixelFormat: {image.PixelFormat}");
+
+            try
+            {
+                using var properBitmap = new Bitmap(image.Width, image.Height, PixelFormat.Format24bppRgb);
+                using (var g = Graphics.FromImage(properBitmap))
+                {
+                    g.DrawImage(image, 0, 0, image.Width, image.Height);
+                }
+                Console.WriteLine($"[TesseractCaptchaSolver] Created proper bitmap: {properBitmap.Width}x{properBitmap.Height}, PixelFormat: {properBitmap.PixelFormat}");
+
+                properBitmap.Save(tempImagePath, ImageFormat.Png);
+                Console.WriteLine($"[TesseractCaptchaSolver] Successfully saved bitmap to: {tempImagePath}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[TesseractCaptchaSolver] Error in bitmap processing: {ex.Message}");
+                Console.WriteLine($"[TesseractCaptchaSolver] Stack trace: {ex.StackTrace}");
+
+                // Fallback: try saving original bitmap directly
+                try
+                {
+                    Console.WriteLine($"[TesseractCaptchaSolver] Trying fallback: save original bitmap directly");
+                    image.Save(tempImagePath, ImageFormat.Png);
+                    Console.WriteLine($"[TesseractCaptchaSolver] Fallback successful");
+                }
+                catch (Exception fallbackEx)
+                {
+                    Console.WriteLine($"[TesseractCaptchaSolver] Fallback also failed: {fallbackEx.Message}");
+                    throw new InvalidOperationException($"Both bitmap processing methods failed: {ex.Message} | {fallbackEx.Message}", ex);
+                }
+            }
 
             // Build Tesseract command
             var psmMode = (int)options.PsmMode;
-            var args = $"\"{tempImagePath}\" \"{tempOutputPath}\" --psm {psmMode} -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+            var args = $"\"{tempImagePath}\" \"{tempOutputPath}\" --psm {psmMode} -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz().,- ";
 
             var result = await RunTesseractAsync(args, null);
             
@@ -239,12 +274,33 @@ public class TesseractCaptchaSolver : ICaptchaSolver
         if (string.IsNullOrEmpty(text))
             return "";
 
-        // Remove whitespace and newlines
+        // Remove whitespace and newlines first
         text = text.Trim().Replace("\n", "").Replace("\r", "");
-        
-        // Remove common OCR errors/noise
-        text = Regex.Replace(text, @"[^\w\d]", "");
-        
+
+        // CAPTCHA specific cleaning - keep only digits, parentheses, and basic math symbols
+        // Remove common OCR noise characters like 'aa', 'an', 'nn', etc.
+        text = Regex.Replace(text, @"[^0-9\(\)\+\-\=\s]", "");
+
+        // Remove standalone letters that are common OCR errors
+        text = Regex.Replace(text, @"\b[a-zA-Z]{1,2}\b", "");
+
+        // Clean up multiple spaces and trim
+        text = Regex.Replace(text, @"\s+", " ").Trim();
+
+        // If the result contains parentheses with numbers, extract that pattern
+        var match = Regex.Match(text, @"\((\d+)\)");
+        if (match.Success)
+        {
+            return match.Value; // Return the full "(number)" format
+        }
+
+        // If no parentheses found, try to extract just numbers
+        var numberMatch = Regex.Match(text, @"\d+");
+        if (numberMatch.Success)
+        {
+            return numberMatch.Value;
+        }
+
         return text;
     }
 

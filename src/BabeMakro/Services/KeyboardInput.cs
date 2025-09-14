@@ -13,18 +13,16 @@ public static class KeyboardInput
 
         try
         {
-            // Clear any existing text first
-            SendKey(hwnd, VK.VK_CONTROL, VK.VK_A); // Select All
-            System.Threading.Thread.Sleep(50);
-            SendKey(hwnd, VK.VK_DELETE); // Delete
-            System.Threading.Thread.Sleep(100);
+            Console.WriteLine($"KeyboardInput: Sending text '{text}' to window {hwnd}");
 
-            // Send each character
+            // Send each character directly, no clearing
             foreach (char c in text)
             {
                 SendChar(hwnd, c);
                 System.Threading.Thread.Sleep(50);
             }
+
+            Console.WriteLine($"KeyboardInput: Sent '{text}' successfully");
         }
         catch (Exception ex)
         {
