@@ -485,6 +485,17 @@ public partial class ClientCard : UserControl, IDisposable
             return;
         }
 
+        ShowPartyHealCoordinateOverlay();
+    }
+
+    private void ShowPartyHealCoordinateOverlay()
+    {
+        if (_partyHealService?.Configuration?.Members == null)
+        {
+            MessageBox.Show("Party heal system not initialized!", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
         // Create a transparent overlay window
         var overlayWindow = new Window
         {
@@ -493,7 +504,8 @@ public partial class ClientCard : UserControl, IDisposable
             Background = System.Windows.Media.Brushes.Transparent,
             Topmost = true,
             ShowInTaskbar = false,
-            WindowStartupLocation = WindowStartupLocation.Manual
+            WindowStartupLocation = WindowStartupLocation.Manual,
+            Title = $"Party Heal Coordinates - Client {ClientId}"
         };
 
         // Get target window position and size
@@ -516,10 +528,56 @@ public partial class ClientCard : UserControl, IDisposable
             Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(20, 138, 43, 226)) // Very transparent purple
         };
         
+        // Add party heal coordinate rectangles first
+        foreach (var member in _partyHealService.Configuration.Members.Where(m => m.Enabled))
+        {
+            // Draw HP bar area (XStart to XStop at Y)
+            var hpBarRect = new System.Windows.Shapes.Rectangle
+            {
+                Width = member.XStop - member.XStart,
+                Height = 3,
+                Stroke = member.IsCalibrated ? System.Windows.Media.Brushes.LimeGreen : System.Windows.Media.Brushes.Orange,
+                StrokeThickness = 2,
+                Fill = System.Windows.Media.Brushes.Transparent
+            };
+            Canvas.SetLeft(hpBarRect, member.XStart);
+            Canvas.SetTop(hpBarRect, member.Y - 1);
+            canvas.Children.Add(hpBarRect);
+
+            // Draw threshold pixel point
+            var thresholdPoint = new Ellipse
+            {
+                Width = 8,
+                Height = 8,
+                Fill = member.IsCalibrated ? System.Windows.Media.Brushes.LimeGreen : System.Windows.Media.Brushes.Red,
+                Stroke = System.Windows.Media.Brushes.White,
+                StrokeThickness = 1
+            };
+            Canvas.SetLeft(thresholdPoint, member.ThresholdPixel.X - 4);
+            Canvas.SetTop(thresholdPoint, member.ThresholdPixel.Y - 4);
+            canvas.Children.Add(thresholdPoint);
+
+            // Add member label
+            var memberLabel = new TextBlock
+            {
+                Text = $"M{member.Index + 1}",
+                Foreground = System.Windows.Media.Brushes.White,
+                Background = member.IsCalibrated ?
+                    new SolidColorBrush(System.Windows.Media.Color.FromArgb(200, 0, 255, 0)) :
+                    new SolidColorBrush(System.Windows.Media.Color.FromArgb(200, 255, 165, 0)),
+                Padding = new Thickness(3),
+                FontSize = 10,
+                FontWeight = FontWeights.Bold
+            };
+            Canvas.SetLeft(memberLabel, member.XStart);
+            Canvas.SetTop(memberLabel, member.Y - 20);
+            canvas.Children.Add(memberLabel);
+        }
+
         // Create coordinate display label
         var coordLabel = new TextBlock
         {
-            Text = "Move mouse to see coordinates",
+            Text = "Party Heal Coordinates Overlay - Move mouse to see coordinates",
             Foreground = System.Windows.Media.Brushes.White,
             Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(200, 138, 43, 226)),
             Padding = new Thickness(8),
@@ -635,7 +693,7 @@ public partial class ClientCard : UserControl, IDisposable
         // Add help text
         var helpText = new TextBlock
         {
-            Text = "Left Click: Copy coords | Right Click or ESC: Close",
+            Text = "🟢 Calibrated | 🟠 Not Calibrated | Rectangles: HP bars | Circles: Threshold points | Left Click: Copy coords | Right Click/ESC: Close",
             Foreground = System.Windows.Media.Brushes.White,
             Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(180, 0, 0, 0)),
             Padding = new Thickness(5),
@@ -648,7 +706,7 @@ public partial class ClientCard : UserControl, IDisposable
         overlayWindow.Content = canvas;
         overlayWindow.Show();
         
-        Console.WriteLine($"[{ViewModel.ClientName}] 📍 Coordinate overlay opened for window 0x{ViewModel.TargetHwnd:X8}");
+        Console.WriteLine($"[{ViewModel.ClientName}] 📍 Party Heal coordinate overlay opened for window 0x{ViewModel.TargetHwnd:X8}");
     }
 
     private void PickHpCoord_Click(object sender, RoutedEventArgs e)
@@ -1089,6 +1147,9 @@ public partial class ClientCard : UserControl, IDisposable
                     
                     // Show visual HP bar indicator
                     ShowBarIndicator("HP", hpBar.Value.startX, hpBar.Value.endX, hpBar.Value.y, System.Windows.Media.Colors.Red);
+
+                    // Debug: Show HP bar coordinates (manual coordination required)
+                    Console.WriteLine($"[{ViewModel.ClientName}] HP Bar algılandı: StartX={ViewModel.HpPercentageProbe.StartX} EndX={ViewModel.HpPercentageProbe.EndX} Y={ViewModel.HpPercentageProbe.Y}");
                 });
             }
             else
@@ -2777,12 +2838,22 @@ public partial class ClientCard : UserControl, IDisposable
         {
             // Use master timer instead of individual DispatcherTimer
             _masterTimer?.AddOrUpdateTask(
-                "HPMPMonitoring", 
+                "HPMPMonitoring",
                 TimeSpan.FromMilliseconds(50), // 20Hz for responsive detection
                 () => MonitoringTimer_Tick(null, null),
                 enabled: true,
                 priority: 10 // High priority for HP/MP monitoring
             );
+
+            // Add PartyHeal HP percentage monitoring task
+            _masterTimer?.AddOrUpdateTask(
+                "PartyHealHPDisplay",
+                TimeSpan.FromMilliseconds(500), // 2Hz for HP percentage display update
+                () => UpdatePartyHealHPDisplay(),
+                enabled: true,
+                priority: 5 // Lower priority than main monitoring
+            );
+
             _masterTimer?.Start();
             Console.WriteLine($"[{ViewModel.ClientName}] HP/MP monitoring STARTED: HP enabled={ViewModel.HpTrigger.Enabled}, MP enabled={ViewModel.MpTrigger.Enabled}");
         }
@@ -2796,6 +2867,7 @@ public partial class ClientCard : UserControl, IDisposable
     {
         // Disable tasks in master timer instead of stopping individual timers
         _masterTimer?.SetTaskEnabled("HPMPMonitoring", false);
+        _masterTimer?.SetTaskEnabled("PartyHealHPDisplay", false);
         _masterTimer?.SetTaskEnabled("HPTriggerCooldown", false);
         _masterTimer?.SetTaskEnabled("MPTriggerCooldown", false);
         
@@ -5947,7 +6019,7 @@ public partial class ClientCard : UserControl, IDisposable
             StopAttackSystem();
         }
     }
-    
+
     private void ResumeAttackAfterBuffAc()
     {
         // Resume attack system if it was enabled
@@ -5955,6 +6027,26 @@ public partial class ClientCard : UserControl, IDisposable
         if (enabledSkills.Any())
         {
             Console.WriteLine($"[{ViewModel.ClientName}] ▶️ Resuming attack system after buff/AC cycle");
+            StartAttackSystem();
+        }
+    }
+
+    private void PauseAttackForPartyHeal()
+    {
+        if (_attackRunning)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] ⏸️ Pausing attack system for party heal");
+            StopAttackSystem();
+        }
+    }
+
+    private void ResumeAttackAfterPartyHeal()
+    {
+        // Resume attack system only if it was enabled before pause
+        var enabledSkills = ViewModel.AttackSkills.Where(s => s.Enabled).ToList();
+        if (enabledSkills.Any())
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] ▶️ Resuming attack system after party heal");
             StartAttackSystem();
         }
     }
@@ -6388,6 +6480,20 @@ public partial class ClientCard : UserControl, IDisposable
         StopBuffAcSystem();
     }
 
+    private async void StartPartyHeal_Click(object sender, RoutedEventArgs e)
+    {
+        StartPartyHealButton.IsEnabled = false;
+        StopPartyHealButton.IsEnabled = true;
+        await StartPartyHealAsync();
+    }
+
+    private async void StopPartyHeal_Click(object sender, RoutedEventArgs e)
+    {
+        StartPartyHealButton.IsEnabled = true;
+        StopPartyHealButton.IsEnabled = false;
+        await StopPartyHealAsync();
+    }
+
     #endregion
     
     #region Party Heal System
@@ -6404,7 +6510,11 @@ public partial class ClientCard : UserControl, IDisposable
             var taskQueue = new BoundedTaskQueue(maxQueueSize: 100, maxConcurrency: 2);
             
             _partyHealService = new PartyHealService(logger, captureBackend, clickProvider, taskQueue);
-            
+
+            // Subscribe to PartyHeal service events for real-time UI updates
+            _partyHealService.MemberHealed += OnPartyMemberHealed;
+            _partyHealService.StatusChanged += OnPartyHealStatusChanged;
+
             // Setup UI event handlers for PartyHeal tab
             SetupPartyHealEventHandlers();
             
@@ -6493,6 +6603,124 @@ public partial class ClientCard : UserControl, IDisposable
         PartyMember7Enabled.Unchecked += (s, e) => UpdatePartyHealSettings();
         PartyMember8Enabled.Checked += (s, e) => UpdatePartyHealSettings();
         PartyMember8Enabled.Unchecked += (s, e) => UpdatePartyHealSettings();
+    }
+
+    // Party Heal Kalibrasyon metodları
+    private async void CalibratePartyMember_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.TargetHwnd == IntPtr.Zero)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] ❌ Önce bir pencere seç!");
+            return;
+        }
+
+        if (_partyHealService == null)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] ❌ Party Heal servisi başlatılmamış!");
+            return;
+        }
+
+        try
+        {
+            var button = sender as Button;
+            var memberIndex = GetMemberIndexFromButton(button);
+
+            if (memberIndex == -1)
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] ❌ Buton member index bulunamadı!");
+                return;
+            }
+
+            Console.WriteLine($"[{ViewModel.ClientName}] Member {memberIndex + 1} kalibre ediliyor...");
+
+            // Koordinatları güncelle
+            UpdatePartyHealSettings();
+
+            var member = _partyHealService.Configuration.Members[memberIndex];
+            if (!member.IsConfigured)
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] ❌ Member {memberIndex + 1} koordinatları ayarlanmamış!");
+                return;
+            }
+
+            // Kalibrasyon yap
+            var (fullHpColor, currentColor) = await _partyHealService.CalibrateMemberHpColorsAsync(memberIndex, ViewModel.TargetHwnd);
+
+            // Kalibre edilmiş renkleri kaydet
+            member.FullHpColor = fullHpColor;
+            member.CurrentColor = currentColor;
+            member.IsCalibrated = true;
+
+            Console.WriteLine($"[{ViewModel.ClientName}] ✅ Member {memberIndex + 1} kalibre edildi!");
+
+            // UI'da kalibrasyon durumunu göster
+            UpdatePartyMemberCalibrationUI(memberIndex, member);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] ❌ Kalibrasyon hatası: {ex.Message}");
+        }
+    }
+
+    private int GetMemberIndexFromButton(Button button)
+    {
+        if (button == null) return -1;
+
+        var buttonName = button.Name;
+        if (buttonName.Contains("Member1")) return 0;
+        if (buttonName.Contains("Member2")) return 1;
+        if (buttonName.Contains("Member3")) return 2;
+        if (buttonName.Contains("Member4")) return 3;
+        if (buttonName.Contains("Member5")) return 4;
+        if (buttonName.Contains("Member6")) return 5;
+        if (buttonName.Contains("Member7")) return 6;
+        if (buttonName.Contains("Member8")) return 7;
+
+        return -1;
+    }
+
+    private void UpdatePartyMemberCalibrationUI(int memberIndex, PixelAutomation.Core.Models.PartyMemberConfig member)
+    {
+        try
+        {
+            // Member checkbox'ının border rengini değiştirerek kalibrasyon durumunu göster
+            CheckBox memberCheckbox = memberIndex switch
+            {
+                0 => PartyMember1Enabled,
+                1 => PartyMember2Enabled,
+                2 => PartyMember3Enabled,
+                3 => PartyMember4Enabled,
+                4 => PartyMember5Enabled,
+                5 => PartyMember6Enabled,
+                6 => PartyMember7Enabled,
+                7 => PartyMember8Enabled,
+                _ => null
+            };
+
+            if (memberCheckbox != null)
+            {
+                if (member.IsCalibrated)
+                {
+                    // Kalibre edilmiş - yeşil border
+                    memberCheckbox.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 255, 0));
+                    memberCheckbox.BorderThickness = new Thickness(2);
+                    memberCheckbox.ToolTip = $"Member {memberIndex + 1} kalibre edildi!\nFull HP: RGB({member.FullHpColor.R},{member.FullHpColor.G},{member.FullHpColor.B})\nCurrent: RGB({member.CurrentColor.R},{member.CurrentColor.G},{member.CurrentColor.B})";
+                }
+                else
+                {
+                    // Kalibre edilmemiş - varsayılan
+                    memberCheckbox.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(156, 39, 176)); // Original purple
+                    memberCheckbox.BorderThickness = new Thickness(1);
+                    memberCheckbox.ToolTip = $"Member {memberIndex + 1} - Kalibrasyon gerekli";
+                }
+            }
+
+            Console.WriteLine($"[{ViewModel.ClientName}] UI güncellendi - Member {memberIndex + 1} kalibrasyon durumu: {member.IsCalibrated}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] UI güncelleme hatası: {ex.Message}");
+        }
     }
     
     private void UpdatePartyHealSettings()
@@ -6590,14 +6818,26 @@ public partial class ClientCard : UserControl, IDisposable
             _partyHealService.Configuration.Global.MinActionSpacingMs = 200; // 200ms minimum between actions
             _partyHealService.Configuration.Global.HumanizeDelayMsMin = 50;
             _partyHealService.Configuration.Global.HumanizeDelayMsMax = 150;
-            _partyHealService.Configuration.Global.ColorTolerance = 30; // Reasonable color tolerance
-            
+            _partyHealService.Configuration.Global.ColorTolerance = 80; // High tolerance for HP colors
+
+            // Auto-fix baseline color if it's obviously wrong (old red values)
+            var currentBaseline = _partyHealService.Configuration.Global.BaselineColor;
+            if (currentBaseline.R < 200 || currentBaseline.G < 150) // If it's dark red/old color
+            {
+                _partyHealService.Configuration.Global.BaselineColor = Color.FromArgb(235, 199, 199); // Set to proper light pink HP color
+                PartyHealBaselineColor.Text = "EBCBC7"; // Update UI too
+                Console.WriteLine($"[{ClientId}] 🔧 Auto-fixed BaselineColor from RGB({currentBaseline.R},{currentBaseline.G},{currentBaseline.B}) to RGB(235,199,199)");
+            }
+
             // Set target window for PartyHeal service
             _partyHealService.SetTargetWindow(ViewModel.TargetHwnd);
             
             // Set key press callback to use ClientCard's SendKeyPress method
             _partyHealService.SetKeyPressCallback(SendKeyPress);
-            
+
+            // Set attack control callbacks for smart pause/resume logic
+            _partyHealService.SetAttackControlCallbacks(PauseAttackForPartyHeal, ResumeAttackAfterPartyHeal);
+
             await _partyHealService.StartAsync();
             _partyHealRunning = true;
             
@@ -6627,7 +6867,303 @@ public partial class ClientCard : UserControl, IDisposable
             Console.WriteLine($"[{ClientId}] ❌ Failed to stop PartyHeal: {ex.Message}");
         }
     }
-    
+
+    // Party Heal Service Event Handlers
+    private void OnPartyMemberHealed(object? sender, PartyMemberHealedEventArgs e)
+    {
+        try
+        {
+            // Update UI on main thread
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                // Get member status and update UI with real-time healing information
+                var memberStatus = _partyHealService?.GetMemberStatus(e.MemberIndex);
+                if (memberStatus != null)
+                {
+                    // Update checkbox visual feedback to show member was healed
+                    UpdatePartyMemberHealStatus(e.MemberIndex, memberStatus);
+                }
+
+                Console.WriteLine($"[{ViewModel.ClientName}] 💚 Member {e.MemberIndex + 1} healed! Color distance: {e.ColorDistance:F2}");
+            }));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] Error in OnPartyMemberHealed: {ex.Message}");
+        }
+    }
+
+    private void OnPartyHealStatusChanged(object? sender, PartyHealStatusChangedEventArgs e)
+    {
+        try
+        {
+            // Update UI on main thread
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] 🔄 PartyHeal Status: {e.StatusMessage} (Running: {e.IsRunning})");
+
+                // Update all member statuses when system status changes
+                if (_partyHealService != null)
+                {
+                    for (int i = 0; i < 8; i++)
+                    {
+                        var memberStatus = _partyHealService.GetMemberStatus(i);
+                        if (memberStatus != null && memberStatus.IsEnabled)
+                        {
+                            UpdatePartyMemberHealStatus(i, memberStatus);
+                        }
+                    }
+                }
+            }));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] Error in OnPartyHealStatusChanged: {ex.Message}");
+        }
+    }
+
+    private void UpdatePartyMemberHealStatus(int memberIndex, PartyMemberStatus memberStatus)
+    {
+        try
+        {
+            // Get the corresponding checkbox
+            CheckBox memberCheckbox = memberIndex switch
+            {
+                0 => PartyMember1Enabled,
+                1 => PartyMember2Enabled,
+                2 => PartyMember3Enabled,
+                3 => PartyMember4Enabled,
+                4 => PartyMember5Enabled,
+                5 => PartyMember6Enabled,
+                6 => PartyMember7Enabled,
+                7 => PartyMember8Enabled,
+                _ => null
+            };
+
+            if (memberCheckbox != null && memberStatus.IsEnabled)
+            {
+                // Update border color based on status
+                var borderColor = System.Windows.Media.Color.FromRgb(156, 39, 176); // Default purple
+
+                if (memberStatus.IsOnCooldown)
+                {
+                    // Orange border when on cooldown
+                    borderColor = System.Windows.Media.Color.FromRgb(255, 165, 0);
+                }
+                else if (memberStatus.LastHealed.HasValue &&
+                         DateTime.Now - memberStatus.LastHealed.Value < TimeSpan.FromSeconds(5))
+                {
+                    // Bright green border for recently healed (5 seconds)
+                    borderColor = System.Windows.Media.Color.FromRgb(0, 255, 0);
+                }
+                else if (_partyHealService?.Configuration.Members[memberIndex].IsCalibrated == true)
+                {
+                    // Dark green border for calibrated members
+                    borderColor = System.Windows.Media.Color.FromRgb(0, 150, 0);
+                }
+
+                memberCheckbox.BorderBrush = new SolidColorBrush(borderColor);
+                memberCheckbox.BorderThickness = new Thickness(2);
+
+                // Update tooltip with real-time info
+                var tooltipText = $"Member {memberIndex + 1}\n" +
+                                 $"Total Heals: {memberStatus.TotalHeals}\n" +
+                                 $"Last Check: {memberStatus.LastCheck:HH:mm:ss}\n";
+
+                if (memberStatus.LastHealed.HasValue)
+                {
+                    tooltipText += $"Last Healed: {memberStatus.LastHealed.Value:HH:mm:ss}\n";
+                }
+
+                if (memberStatus.IsOnCooldown)
+                {
+                    tooltipText += "Status: On Cooldown\n";
+                }
+
+                var config = _partyHealService?.Configuration.Members[memberIndex];
+                if (config?.IsCalibrated == true)
+                {
+                    tooltipText += $"Calibrated: RGB({config.FullHpColor.R},{config.FullHpColor.G},{config.FullHpColor.B})";
+                }
+                else
+                {
+                    tooltipText += "Not calibrated - using global baseline";
+                }
+
+                memberCheckbox.ToolTip = tooltipText;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] Error updating member {memberIndex + 1} heal status: {ex.Message}");
+        }
+    }
+
+    // Party Member HP Bar Visualization Methods
+    private void ShowPartyMemberHP(int memberIndex, TextBox startX, TextBox endX, TextBox yPos)
+    {
+        if (ViewModel.TargetHwnd == IntPtr.Zero)
+        {
+            MessageBox.Show("Please select a window first!", "No Window Selected", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        try
+        {
+            // Get coordinates from textboxes
+            if (!int.TryParse(startX.Text, out int xStart) ||
+                !int.TryParse(endX.Text, out int xEnd) ||
+                !int.TryParse(yPos.Text, out int y))
+            {
+                MessageBox.Show($"Invalid coordinates for Member {memberIndex}", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Get window position
+            User32.GetWindowRect(ViewModel.TargetHwnd, out var windowRect);
+
+            // Create overlay window
+            var overlayWindow = new Window
+            {
+                Title = $"Party Member {memberIndex} HP Bar",
+                WindowStyle = WindowStyle.None,
+                AllowsTransparency = true,
+                Background = System.Windows.Media.Brushes.Transparent,
+                Topmost = true,
+                ShowInTaskbar = false,
+                WindowStartupLocation = WindowStartupLocation.Manual,
+                Left = windowRect.Left,
+                Top = windowRect.Top,
+                Width = windowRect.Right - windowRect.Left,
+                Height = windowRect.Bottom - windowRect.Top
+            };
+
+            var canvas = new Canvas { Background = System.Windows.Media.Brushes.Transparent };
+
+            // Create HP bar rectangle with thin white border
+            var hpBarRect = new System.Windows.Shapes.Rectangle
+            {
+                Width = xEnd - xStart,
+                Height = 8, // Thin height for HP bar
+                Stroke = System.Windows.Media.Brushes.White,
+                StrokeThickness = 1,
+                Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(30, 255, 255, 255)) // Transparent white fill
+            };
+
+            Canvas.SetLeft(hpBarRect, xStart);
+            Canvas.SetTop(hpBarRect, y - 4); // Center around Y coordinate
+            canvas.Children.Add(hpBarRect);
+
+            // Add label
+            var label = new TextBlock
+            {
+                Text = $"Member {memberIndex} HP ({xStart},{y} to {xEnd},{y})",
+                Foreground = System.Windows.Media.Brushes.Yellow,
+                Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(180, 0, 0, 0)),
+                Padding = new Thickness(5),
+                FontSize = 11
+            };
+
+            Canvas.SetLeft(label, xStart);
+            Canvas.SetTop(label, y - 25);
+            canvas.Children.Add(label);
+
+            // Close button
+            var closeButton = new Button
+            {
+                Content = "❌ Close",
+                Width = 80,
+                Height = 25,
+                Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(200, 220, 53, 69)),
+                Foreground = System.Windows.Media.Brushes.White,
+                BorderThickness = new Thickness(0)
+            };
+
+            closeButton.Click += (s, e) => overlayWindow.Close();
+            Canvas.SetRight(closeButton, 10);
+            Canvas.SetTop(closeButton, 10);
+            canvas.Children.Add(closeButton);
+
+            // Instructions
+            var instructions = new TextBlock
+            {
+                Text = "Red rectangle shows HP bar area | ESC to close",
+                Foreground = System.Windows.Media.Brushes.White,
+                Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(180, 0, 0, 0)),
+                Padding = new Thickness(5),
+                FontSize = 10
+            };
+
+            Canvas.SetLeft(instructions, 10);
+            Canvas.SetBottom(instructions, 10);
+            canvas.Children.Add(instructions);
+
+            // ESC to close
+            overlayWindow.PreviewKeyDown += (s, e) =>
+            {
+                if (e.Key == System.Windows.Input.Key.Escape)
+                    overlayWindow.Close();
+            };
+
+            // Click through except on UI elements
+            overlayWindow.MouseLeftButtonDown += (s, e) =>
+            {
+                if (e.Source == canvas)
+                    overlayWindow.Close();
+            };
+
+            overlayWindow.Content = canvas;
+            overlayWindow.Show();
+
+            Console.WriteLine($"[{ViewModel.ClientName}] Showing Party Member {memberIndex} HP bar visualization");
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error showing HP bar: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    // Individual member HP bar visualization click handlers
+    private void ShowPartyMember1HP_Click(object sender, RoutedEventArgs e)
+    {
+        ShowPartyMemberHP(1, PartyMember1XStart, PartyMember1XEnd, PartyMember1Y);
+    }
+
+    private void ShowPartyMember2HP_Click(object sender, RoutedEventArgs e)
+    {
+        ShowPartyMemberHP(2, PartyMember2XStart, PartyMember2XEnd, PartyMember2Y);
+    }
+
+    private void ShowPartyMember3HP_Click(object sender, RoutedEventArgs e)
+    {
+        ShowPartyMemberHP(3, PartyMember3XStart, PartyMember3XEnd, PartyMember3Y);
+    }
+
+    private void ShowPartyMember4HP_Click(object sender, RoutedEventArgs e)
+    {
+        ShowPartyMemberHP(4, PartyMember4XStart, PartyMember4XEnd, PartyMember4Y);
+    }
+
+    private void ShowPartyMember5HP_Click(object sender, RoutedEventArgs e)
+    {
+        ShowPartyMemberHP(5, PartyMember5XStart, PartyMember5XEnd, PartyMember5Y);
+    }
+
+    private void ShowPartyMember6HP_Click(object sender, RoutedEventArgs e)
+    {
+        ShowPartyMemberHP(6, PartyMember6XStart, PartyMember6XEnd, PartyMember6Y);
+    }
+
+    private void ShowPartyMember7HP_Click(object sender, RoutedEventArgs e)
+    {
+        ShowPartyMemberHP(7, PartyMember7XStart, PartyMember7XEnd, PartyMember7Y);
+    }
+
+    private void ShowPartyMember8HP_Click(object sender, RoutedEventArgs e)
+    {
+        ShowPartyMemberHP(8, PartyMember8XStart, PartyMember8XEnd, PartyMember8Y);
+    }
+
     #endregion
 
     #region Anti-Captcha Event Handlers
@@ -8509,6 +9045,112 @@ public partial class ClientCard : UserControl, IDisposable
         {
             Console.WriteLine($"[{ViewModel.ClientName}] Error disposing PartyHeal service: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Updates the PartyHeal HP percentage display for all enabled members.
+    /// Called by MasterTimer every 500ms to show real-time HP status.
+    /// </summary>
+    private void UpdatePartyHealHPDisplay()
+    {
+        try
+        {
+            // Only update if PartyHeal service is available and running
+            if (_partyHealService == null || !_partyHealRunning)
+                return;
+
+            // Use Dispatcher.Invoke to ensure UI updates on the correct thread
+            Dispatcher.Invoke(() =>
+            {
+                try
+                {
+                    // Update HP percentages for all 8 members
+                    for (int i = 0; i < 8; i++)
+                    {
+                        UpdateSingleMemberHPDisplay(i);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[{ClientId}] Error updating PartyHeal HP display: {ex.Message}");
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ClientId}] Error in UpdatePartyHealHPDisplay: {ex.Message}");
+        }
+    }
+
+    private void UpdateSingleMemberHPDisplay(int memberIndex)
+    {
+        var memberStatus = _partyHealService.GetMemberStatus(memberIndex);
+        var hpStatusElement = GetPartyMemberHPStatusElement(memberIndex);
+
+        if (hpStatusElement == null) return;
+
+        if (memberStatus.IsEnabled)
+        {
+            var memberConfig = _partyHealService.Configuration.Members[memberIndex];
+            if (memberConfig.IsConfigured)
+            {
+                // Get current HP percentage asynchronously
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        var hpPercentage = await _partyHealService.GetMemberHpPercentageAsync(memberIndex);
+
+                        // Update UI on main thread
+                        Dispatcher.Invoke(() =>
+                        {
+                            if (hpStatusElement != null)
+                            {
+                                hpStatusElement.Text = $"HP: {hpPercentage:F1}%";
+
+                                // Color code based on HP level
+                                if (hpPercentage >= 80)
+                                    hpStatusElement.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 255, 0)); // Green
+                                else if (hpPercentage >= 50)
+                                    hpStatusElement.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 255, 0)); // Yellow
+                                else
+                                    hpStatusElement.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 0, 0)); // Red
+                            }
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[{ClientId}] Error getting Member {memberIndex + 1} HP: {ex.Message}");
+                    }
+                });
+            }
+            else
+            {
+                hpStatusElement.Text = "HP: Not configured";
+                hpStatusElement.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 85, 85));
+            }
+        }
+        else
+        {
+            hpStatusElement.Text = "HP: Disabled";
+            hpStatusElement.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(128, 128, 128));
+        }
+    }
+
+    private TextBlock? GetPartyMemberHPStatusElement(int memberIndex)
+    {
+        return memberIndex switch
+        {
+            0 => PartyMember1HPStatus,
+            1 => PartyMember2HPStatus,
+            2 => PartyMember3HPStatus,
+            3 => PartyMember4HPStatus,
+            4 => PartyMember5HPStatus,
+            5 => PartyMember6HPStatus,
+            6 => PartyMember7HPStatus,
+            7 => PartyMember8HPStatus,
+            _ => null
+        };
     }
 
     /// <summary>

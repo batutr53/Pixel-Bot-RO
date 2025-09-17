@@ -14,7 +14,7 @@ public class PartyHealService : IPartyHealService
     private readonly IClickProvider _clickProvider;
     private readonly BoundedTaskQueue _taskQueue;
     private readonly ConcurrentDictionary<int, PartyMemberState> _memberStates = new();
-    
+
     private Timer? _monitoringTimer;
     private IntPtr _targetWindow = IntPtr.Zero;
     private volatile bool _isRunning = false;
@@ -40,7 +40,7 @@ public class PartyHealService : IPartyHealService
         _captureBackend = captureBackend;
         _clickProvider = clickProvider;
         _taskQueue = taskQueue;
-        
+
         // Initialize member states
         for (int i = 0; i < 8; i++)
         {
@@ -51,9 +51,9 @@ public class PartyHealService : IPartyHealService
     public async Task StartAsync()
     {
         if (_isRunning) return;
-        
+
         _logger.LogInformation("Starting PartyHeal monitoring");
-        
+
         // Initialize capture backend with target window if available
         if (_targetWindow != IntPtr.Zero)
         {
@@ -63,51 +63,56 @@ public class PartyHealService : IPartyHealService
                 _logger.LogWarning("Failed to initialize capture backend with target window");
             }
         }
-        
+
         _isRunning = true;
-        
-        // Use higher default interval to reduce CPU usage
-        var pollInterval = Math.Max(Configuration.Global.PollIntervalMs, 100); // Minimum 100ms
-        _monitoringTimer = new Timer(MonitorPartyMembers, null, 
+
+        // Simple timer like BabeBot HP/MP monitoring
+        var pollInterval = Configuration.Global.PollIntervalMs;
+        _monitoringTimer = new Timer(MonitorPartyMembers, null,
             TimeSpan.Zero, TimeSpan.FromMilliseconds(pollInterval));
-        
-        StatusChanged?.Invoke(this, new PartyHealStatusChangedEventArgs 
-        { 
-            IsRunning = true, 
-            StatusMessage = "Party healing started" 
+
+        StatusChanged?.Invoke(this, new PartyHealStatusChangedEventArgs
+        {
+            IsRunning = true,
+            StatusMessage = "Party healing started"
         });
     }
 
     public async Task StopAsync()
     {
         if (!_isRunning) return;
-        
+
         _logger.LogInformation("Stopping PartyHeal monitoring");
         _isRunning = false;
-        
+
         _monitoringTimer?.Dispose();
         _monitoringTimer = null;
-        
+
         _currentHealingMember = -1;
         _healAnimationEndTime = DateTime.MinValue;
-        
-        StatusChanged?.Invoke(this, new PartyHealStatusChangedEventArgs 
-        { 
-            IsRunning = false, 
-            StatusMessage = "Party healing stopped" 
+
+        StatusChanged?.Invoke(this, new PartyHealStatusChangedEventArgs
+        {
+            IsRunning = false,
+            StatusMessage = "Party healing stopped"
         });
     }
-    
+
     public void SetTargetWindow(IntPtr hwnd)
     {
         _targetWindow = hwnd;
         _logger.LogInformation("PartyHeal target window set to 0x{Window:X8}", hwnd.ToInt64());
     }
-    
+
     public void SetKeyPressCallback(Action<string> keyPressCallback)
     {
         _keyPressCallback = keyPressCallback;
         _logger.LogInformation("PartyHeal key press callback set");
+    }
+
+    public void SetAttackControlCallbacks(Action pauseAttack, Action resumeAttack)
+    {
+        // Not used in simple version - empty implementation
     }
 
     public async Task<Color> CalibrateBaselineColorAsync(int memberIndex, IntPtr targetWindow)
@@ -124,30 +129,50 @@ public class PartyHealService : IPartyHealService
         if (!initialized)
             throw new InvalidOperationException("Failed to initialize capture backend");
 
+        // Get color at threshold position
         var thresholdPixel = member.ThresholdPixel;
-        var roi = new Rectangle(thresholdPixel.X - 2, thresholdPixel.Y, 5, 1);
-        
+        var roi = new Rectangle(thresholdPixel.X, thresholdPixel.Y, 1, 1);
+
         using var bitmap = await _captureBackend.CaptureAsync(roi);
         if (bitmap == null)
             throw new InvalidOperationException("Failed to capture screen for calibration");
 
-        // Sample 5x1 area and get average color for anti-aliasing
-        var colors = new List<Color>();
-        for (int x = 0; x < Math.Min(5, bitmap.Width); x++)
-        {
-            colors.Add(bitmap.GetPixel(x, 0));
-        }
+        var baselineColor = bitmap.GetPixel(0, 0);
 
-        var avgR = (int)colors.Average(c => c.R);
-        var avgG = (int)colors.Average(c => c.G);
-        var avgB = (int)colors.Average(c => c.B);
-        
-        var baselineColor = Color.FromArgb(avgR, avgG, avgB);
-        
-        _logger.LogInformation("Calibrated baseline color for member {MemberIndex}: {Color}", 
+        _logger.LogInformation("Calibrated baseline color for member {MemberIndex}: {Color}",
             memberIndex, baselineColor);
-        
+
         return baselineColor;
+    }
+
+    public async Task<(Color fullHpColor, Color currentHpColor)> CalibrateMemberHpColorsAsync(int memberIndex, IntPtr targetWindow)
+    {
+        if (memberIndex < 0 || memberIndex >= 8)
+            throw new ArgumentOutOfRangeException(nameof(memberIndex));
+
+        var member = Configuration.Members[memberIndex];
+        if (!member.IsConfigured)
+            throw new InvalidOperationException($"Member {memberIndex} is not configured");
+
+        _targetWindow = targetWindow;
+        var initialized = await _captureBackend.InitializeAsync(targetWindow);
+        if (!initialized)
+            throw new InvalidOperationException("Failed to initialize capture backend");
+
+        // Sadece threshold position'dan renk oku
+        var thresholdPixel = member.ThresholdPixel;
+        var thresholdRoi = new Rectangle(thresholdPixel.X, thresholdPixel.Y, 1, 1);
+        using var thresholdBitmap = await _captureBackend.CaptureAsync(thresholdRoi);
+        if (thresholdBitmap == null)
+            throw new InvalidOperationException("Failed to capture threshold color");
+
+        var currentColor = thresholdBitmap.GetPixel(0, 0);
+
+        Console.WriteLine($"[PartyHeal] Member {memberIndex + 1} Kalibrasyon:");
+        Console.WriteLine($"[PartyHeal] Current HP Color: RGB({currentColor.R},{currentColor.G},{currentColor.B}) at ({thresholdPixel.X},{thresholdPixel.Y})");
+
+        // Aynı rengi hem full hem current olarak döndür - basit yaklaşım
+        return (currentColor, currentColor);
     }
 
     public PartyMemberStatus GetMemberStatus(int memberIndex)
@@ -161,7 +186,6 @@ public class PartyHealService : IPartyHealService
             Index = memberIndex,
             IsEnabled = config.Enabled,
             LastDetectedColor = state.LastDetectedColor,
-            LastColorDistance = state.LastColorDistance,
             LastCheck = state.LastCheck,
             LastHealed = state.LastHealed,
             IsOnCooldown = DateTime.Now < state.NextAvailableTime,
@@ -169,128 +193,54 @@ public class PartyHealService : IPartyHealService
         };
     }
 
+    // BASİT HEAL LOGIC
     private async void MonitorPartyMembers(object? state)
     {
         if (!_isRunning || _disposed || _targetWindow == IntPtr.Zero)
-        {
-            _logger.LogDebug("Monitor skipped: running={Running} disposed={Disposed} window={Window:X8}", 
-                _isRunning, _disposed, _targetWindow.ToInt64());
-            return;
-        }
-
-        // Run monitoring on background thread to prevent UI blocking
-        await Task.Run(async () =>
-        {
-            try
-            {
-                var now = DateTime.Now;
-                var enabledMembers = Configuration.Members.Where(m => m.Enabled && m.IsConfigured).ToList();
-                
-                // Skip this cycle if no members are enabled
-                if (!enabledMembers.Any()) return;
-                
-                // Check if we're still in heal animation delay
-                bool inHealAnimation = now < _healAnimationEndTime;
-                if (inHealAnimation) return; // Skip check during animation
-                
-                var membersNeedingHeal = new List<(int index, double distance, DateTime detectedAt)>();
-
-                // Batch capture all member pixels in one operation for efficiency
-                var captureResults = new Dictionary<int, Color?>();
-                
-                // Parallel check for better performance
-                await Parallel.ForEachAsync(enabledMembers, new ParallelOptions { MaxDegreeOfParallelism = 2 }, async (member, ct) =>
-                {
-                    var memberState = _memberStates[member.Index];
-                    
-                    // Skip if member is on cooldown
-                    if (now < memberState.NextAvailableTime)
-                        return;
-
-                    var color = await GetPixelColorSafeAsync(member.ThresholdPixel);
-                    if (color != null)
-                    {
-                        lock (captureResults)
-                        {
-                            captureResults[member.Index] = color;
-                        }
-                    }
-                });
-                
-                // Process results
-                foreach (var kvp in captureResults)
-                {
-                    var member = enabledMembers.First(m => m.Index == kvp.Key);
-                    var memberState = _memberStates[member.Index];
-                    var color = kvp.Value;
-                    
-                    if (color == null) continue;
-                    
-                    var distance = CalculateColorDistance(color.Value, Configuration.Global.BaselineColor);
-                    
-                    memberState.LastDetectedColor = color.Value;
-                    memberState.LastColorDistance = distance;
-                    memberState.LastCheck = now;
-                    
-                    // Check if HP is below threshold (color distance > tolerance)
-                    if (distance > Configuration.Global.ColorTolerance)
-                    {
-                        membersNeedingHeal.Add((member.Index, distance, now));
-                    }
-                }
-
-                // Process healing logic
-                if (membersNeedingHeal.Count > 0)
-                {
-                    await ProcessHealingQueue(membersNeedingHeal, inHealAnimation);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error in party heal monitoring cycle");
-            }
-        });
-    }
-
-    private async Task ProcessHealingQueue(List<(int index, double distance, DateTime detectedAt)> needsHealing, bool inHealAnimation)
-    {
-        var now = DateTime.Now;
-        
-        // Sort by priority: higher distance (lower HP) = higher priority
-        var prioritized = needsHealing.OrderByDescending(x => x.distance).ToList();
-        
-        // Determine who to heal
-        int targetMember;
-        
-        if (Configuration.Global.PreemptEnabled && _currentHealingMember >= 0)
-        {
-            // Check if any member has significantly lower HP than current target
-            var currentTarget = needsHealing.FirstOrDefault(x => x.index == _currentHealingMember);
-            var highestPriority = prioritized.First();
-            
-            // Preempt if new target has >10 more color distance (significantly lower HP)
-            if (highestPriority.distance > currentTarget.distance + 10)
-            {
-                targetMember = highestPriority.index;
-                _logger.LogDebug("Preempting heal: member {Old} -> {New} (distance: {OldDist} -> {NewDist})",
-                    _currentHealingMember, targetMember, currentTarget.distance, highestPriority.distance);
-            }
-            else
-            {
-                targetMember = _currentHealingMember;
-            }
-        }
-        else
-        {
-            targetMember = prioritized.First().index;
-        }
-
-        // Check action spacing
-        if (now - _lastHealTime < TimeSpan.FromMilliseconds(Configuration.Global.MinActionSpacingMs))
             return;
 
-        // Execute heal
-        await ExecuteHealSequence(targetMember);
+        try
+        {
+            var now = DateTime.Now;
+
+            // Skip if still in heal animation
+            if (now < _healAnimationEndTime)
+                return;
+
+            var enabledMembers = Configuration.Members.Where(m => m.Enabled && m.IsConfigured).ToList();
+            if (!enabledMembers.Any())
+                return;
+
+            foreach (var member in enabledMembers)
+            {
+                var memberState = _memberStates[member.Index];
+
+                // Skip if on cooldown
+                if (now < memberState.NextAvailableTime)
+                    continue;
+
+                // Get current color at threshold position
+                var currentColor = await GetPixelColorSafeAsync(member.ThresholdPixel);
+                if (currentColor == null)
+                    continue;
+
+                memberState.LastDetectedColor = currentColor.Value;
+                memberState.LastCheck = now;
+
+                // ÇOK BASİT: Sadece renk değişimini kontrol et
+                bool needsHeal = await CheckNeedsHeal(member);
+
+                if (needsHeal && (now - _lastHealTime >= TimeSpan.FromMilliseconds(Configuration.Global.MinActionSpacingMs)))
+                {
+                    await ExecuteHealSequence(member.Index);
+                    break; // Heal one at a time
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in party heal monitoring");
+        }
     }
 
     private async Task ExecuteHealSequence(int memberIndex)
@@ -304,35 +254,31 @@ public class PartyHealService : IPartyHealService
             _currentHealingMember = memberIndex;
             _lastHealTime = now;
 
-            Console.WriteLine($"[PartyHeal] 🎯 HEALING Member {memberIndex}: SelectKey='{member.SelectKey}' HealKey='{Configuration.Global.SkillKey}'");
-            
+            Console.WriteLine($"[PartyHeal] HEALING Member {memberIndex + 1}: SelectKey='{member.SelectKey}' HealKey='{Configuration.Global.SkillKey}'");
+
             if (_keyPressCallback == null)
             {
-                Console.WriteLine($"[PartyHeal] ❌ Key press callback not set! Cannot send keys.");
+                Console.WriteLine($"[PartyHeal] Key press callback not set!");
                 return;
             }
-            
-            // 1. Press select key using ClientCard's SendKeyPress method
-            Console.WriteLine($"[PartyHeal] 🔹 Pressing SELECT key '{member.SelectKey}' for member {memberIndex}");
+
+            // 1. Press select key
+            Console.WriteLine($"[PartyHeal] Pressing SELECT key '{member.SelectKey}'");
             _keyPressCallback.Invoke(member.SelectKey);
 
-            // 2. Humanize delay
-            var humanizeDelay = Random.Shared.Next(
-                Configuration.Global.HumanizeDelayMsMin,
-                Configuration.Global.HumanizeDelayMsMax);
-            
-            Console.WriteLine($"[PartyHeal] ⏳ Humanize delay: {humanizeDelay}ms");
-            await Task.Delay(humanizeDelay);
+            // 2. Small delay
+            var delay = Random.Shared.Next(Configuration.Global.HumanizeDelayMsMin, Configuration.Global.HumanizeDelayMsMax);
+            await Task.Delay(delay);
 
-            // 3. Press heal skill key using ClientCard's SendKeyPress method
-            Console.WriteLine($"[PartyHeal] 🔹 Pressing HEAL key '{Configuration.Global.SkillKey}' for member {memberIndex}");
+            // 3. Press heal skill key
+            Console.WriteLine($"[PartyHeal] Pressing HEAL key '{Configuration.Global.SkillKey}'");
             _keyPressCallback.Invoke(Configuration.Global.SkillKey);
 
-            // 4. Set cooldowns and animation delay
+            // 4. Set cooldowns
             memberState.LastHealed = now;
             memberState.NextAvailableTime = now.AddMilliseconds(member.RearmMs);
             memberState.TotalHeals++;
-            
+
             _healAnimationEndTime = now.AddMilliseconds(Configuration.Global.AnimationDelayMs);
 
             // 5. Fire event
@@ -340,12 +286,10 @@ public class PartyHealService : IPartyHealService
             {
                 MemberIndex = memberIndex,
                 Timestamp = now,
-                DetectedColor = memberState.LastDetectedColor,
-                ColorDistance = memberState.LastColorDistance
+                DetectedColor = memberState.LastDetectedColor
             });
 
-            _logger.LogInformation("Healed party member {MemberIndex} (distance: {Distance:F1})", 
-                memberIndex, memberState.LastColorDistance);
+            _logger.LogInformation("Healed party member {MemberIndex}", memberIndex + 1);
         }
         catch (Exception ex)
         {
@@ -353,8 +297,8 @@ public class PartyHealService : IPartyHealService
         }
         finally
         {
-            // Clear current healing member after animation delay
-            _ = Task.Delay(Configuration.Global.AnimationDelayMs).ContinueWith(_ => 
+            // Clear current healing member after animation
+            _ = Task.Delay(Configuration.Global.AnimationDelayMs).ContinueWith(_ =>
             {
                 if (_currentHealingMember == memberIndex)
                     _currentHealingMember = -1;
@@ -377,18 +321,124 @@ public class PartyHealService : IPartyHealService
         }
     }
 
-    private static double CalculateColorDistance(Color color1, Color color2)
+
+    private async Task<bool> CheckNeedsHeal(PartyMemberConfig member)
     {
-        var dr = color1.R - color2.R;
-        var dg = color1.G - color2.G;
-        var db = color1.B - color2.B;
-        return Math.Sqrt(dr * dr + dg * dg + db * db);
+        try
+        {
+            // ÇOK BASİT: Kullanıcının belirlediği % noktasındaki rengi kontrol et
+            int barWidth = member.XStop - member.XStart;
+            if (barWidth <= 0) return false;
+
+            // Eşik noktasını hesapla (kullanıcı %44 demiş, barın %44'ünde ki nokta)
+            int thresholdX = member.XStart + (int)(barWidth * (member.HealThresholdPercent / 100.0));
+
+            // Eşik noktasındaki rengi oku
+            var currentColor = await GetPixelColorSafeAsync(new Point(thresholdX, member.Y));
+            if (currentColor == null) return false;
+
+            // Eğer member state'inde baseline renk yoksa, şu anki rengi baseline yap
+            var memberState = _memberStates[member.Index];
+            if (memberState.LastDetectedColor == Color.Empty)
+            {
+                memberState.LastDetectedColor = currentColor.Value;
+                Console.WriteLine($"[PartyHeal] Member {member.Index + 1} Baseline set at {member.HealThresholdPercent}% point (x={thresholdX}): RGB({currentColor.Value.R},{currentColor.Value.G},{currentColor.Value.B})");
+                return false; // İlk sefer, heal etme
+            }
+
+            // Baseline ile şu anki rengi karşılaştır
+            bool colorChanged = !IsColorSameSimple(memberState.LastDetectedColor, currentColor.Value);
+
+            if (colorChanged)
+            {
+                Console.WriteLine($"[PartyHeal] Member {member.Index + 1} NEEDS HEAL! Color changed at {member.HealThresholdPercent}% point:");
+                Console.WriteLine($"[PartyHeal] Baseline: RGB({memberState.LastDetectedColor.R},{memberState.LastDetectedColor.G},{memberState.LastDetectedColor.B})");
+                Console.WriteLine($"[PartyHeal] Current:  RGB({currentColor.Value.R},{currentColor.Value.G},{currentColor.Value.B})");
+
+                // ÖNEMLİ: Baseline'ı güncelle ki bir sonraki heal'de doğru çalışsın
+                memberState.LastDetectedColor = currentColor.Value;
+                Console.WriteLine($"[PartyHeal] Member {member.Index + 1} Baseline updated to new color");
+
+                return true;
+            }
+            else
+            {
+                Console.WriteLine($"[PartyHeal] Member {member.Index + 1} HP OK at {member.HealThresholdPercent}% point: RGB({currentColor.Value.R},{currentColor.Value.G},{currentColor.Value.B})");
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[PartyHeal-Error] Check needs heal failed: {ex.Message}");
+            return false;
+        }
+    }
+
+    private bool ColorsAreSimilar(Color color1, Color color2, int tolerance)
+    {
+        var dr = Math.Abs(color1.R - color2.R);
+        var dg = Math.Abs(color1.G - color2.G);
+        var db = Math.Abs(color1.B - color2.B);
+        return dr <= tolerance && dg <= tolerance && db <= tolerance;
+    }
+
+    // BASİT renk karşılaştırması - senin dediğin gibi
+    private bool IsColorSameSimple(Color baseline, Color current)
+    {
+        var dr = Math.Abs(baseline.R - current.R);
+        var dg = Math.Abs(baseline.G - current.G);
+        var db = Math.Abs(baseline.B - current.B);
+
+        // Basit tolerance - küçük varyasyonlar normal
+        return dr <= 25 && dg <= 25 && db <= 25;
+    }
+
+    // HP barı için özel renk benzerlik kontrolü - daha akıllı algoritma
+    private bool IsColorSimilarToHP(Color baseline, Color current)
+    {
+        // RGB farkları
+        var dr = Math.Abs(baseline.R - current.R);
+        var dg = Math.Abs(baseline.G - current.G);
+        var db = Math.Abs(baseline.B - current.B);
+
+        // Toplam fark (Manhattan distance)
+        var totalDiff = dr + dg + db;
+
+        // HP barları genelde kırmızı tonlarında, büyük farklar gerçek HP kaybını gösterir
+        // Küçük varyasyonlar (toplam < 40) normal, büyük farklar (toplam > 40) HP kaybı
+        return totalDiff < 40;
+    }
+
+
+    public async Task<double> GetMemberHpPercentageAsync(int memberIndex)
+    {
+        if (memberIndex < 0 || memberIndex >= 8)
+            return 100.0; // Invalid index, assume full HP
+
+        var member = Configuration.Members[memberIndex];
+        if (!member.IsConfigured || !member.Enabled)
+            return 100.0; // Not configured or disabled, assume full HP
+
+        if (_targetWindow == IntPtr.Zero)
+            return 100.0; // No target window
+
+        try
+        {
+            // Basit: eğer heal gerekiyorsa %44'ün altında, yoksa %100
+            bool needsHeal = await CheckNeedsHeal(member);
+            return needsHeal ? (member.HealThresholdPercent - 5) : 100.0;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error calculating HP percentage for member {MemberIndex}", memberIndex);
+            return 100.0; // Error, assume full HP to prevent unnecessary healing
+        }
     }
 
     public void Dispose()
     {
         if (_disposed) return;
-        
+
         _disposed = true;
         _monitoringTimer?.Dispose();
         _memberStates.Clear();
@@ -398,7 +448,6 @@ public class PartyHealService : IPartyHealService
     {
         public int Index { get; set; }
         public Color LastDetectedColor { get; set; }
-        public double LastColorDistance { get; set; }
         public DateTime LastCheck { get; set; }
         public DateTime? LastHealed { get; set; }
         public DateTime NextAvailableTime { get; set; }

@@ -1,16 +1,27 @@
 using System;
 using System.Windows;
 using BabeMakro.Services;
+using System.Runtime.InteropServices;
 
 namespace BabeMakro;
 
 public partial class App : Application
 {
+    [DllImport("kernel32.dll")]
+    static extern bool AllocConsole();
+
+    [DllImport("kernel32.dll")]
+    static extern bool FreeConsole();
+
     private readonly ApiService _apiService;
 
     public App()
     {
         _apiService = new ApiService();
+
+        // Allocate a console window for debug output
+        AllocConsole();
+        Console.WriteLine("[BabeMakro] Console initialized for debug output");
     }
 
     protected override async void OnStartup(StartupEventArgs e)

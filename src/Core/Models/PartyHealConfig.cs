@@ -16,7 +16,7 @@ public class PartyHealConfig
             Index = i,
             SelectKey = GetDefaultSelectKey(i),
             ThresholdPercent = 50,
-            RearmMs = 500
+            RearmMs = 200
         }).ToList();
     }
 
@@ -38,12 +38,12 @@ public class PartyHealGlobalConfig
 {
     public string SkillKey { get; set; } = "F1";
     public int PollIntervalMs { get; set; } = 10;
-    public int AnimationDelayMs { get; set; } = 1500;
-    public int ColorTolerance { get; set; } = 25;
+    public int AnimationDelayMs { get; set; } = 200;
+    public int ColorTolerance { get; set; } = 15; // Strict tolerance like Kozy Macro
     public int HumanizeDelayMsMin { get; set; } = 20;
     public int HumanizeDelayMsMax { get; set; } = 60;
     public int MinActionSpacingMs { get; set; } = 90;
-    public Color BaselineColor { get; set; } = Color.FromArgb(255, 0, 0); // Default red HP
+    public Color BaselineColor { get; set; } = Color.FromArgb(235, 199, 199); // Default full HP color (light pink/red)
     public bool PreemptEnabled { get; set; } = true; // New lower HP preempts current heal
 }
 
@@ -56,11 +56,18 @@ public class PartyMemberConfig
     public int XStart { get; set; } = 0;
     public int XStop { get; set; } = 100;
     public int Y { get; set; } = 0;
-    public int RearmMs { get; set; } = 500;
-    
+    public int RearmMs { get; set; } = 200;
+
+    // HP yüzdesi hesaplama için gerekli özellikler
+    public double HealThresholdPercent { get; set; } = 55.0;   // Heal eşiği (%55)
+    public Color FullHpColor { get; set; } = Color.FromArgb(235, 199, 199);  // %100 HP rengi
+    public Color EmptyHpColor { get; set; } = Color.FromArgb(50, 20, 20);    // %0 HP rengi
+    public Color CurrentColor { get; set; } = Color.Red;       // Şu anki renk (uyumluluk için)
+    public bool IsCalibrated { get; set; } = false;           // Kalibre edildi mi?
+
     [JsonIgnore]
     public Point ThresholdPixel => new(XStart + (int)Math.Floor((XStop - XStart) * (ThresholdPercent / 100.0)), Y);
-    
+
     [JsonIgnore]
     public bool IsConfigured => XStart != XStop && Y > 0;
 }

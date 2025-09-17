@@ -1210,6 +1210,11 @@
                                         <TextBox x:Name="PartyMember1XEnd" Style="{StaticResource CoordTextBoxStyle}" Text="200" Width="35" ToolTip="HP Bar X End" Margin="2,0,0,0"/>
                                         <TextBox x:Name="PartyMember1Y" Style="{StaticResource CoordTextBoxStyle}" Text="50" Width="30" ToolTip="HP Bar Y" Margin="2,0,0,0"/>
                                     </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <Button Content="👁" Width="20" Height="20" Click="ShowPartyMember1HP_Click" ToolTip="Show HP bar area" FontSize="10"/>
+                                        <Button Content="🎯" Width="20" Height="20" Click="CalibratePartyMember1_Click" ToolTip="Calibrate HP colors" FontSize="10" Margin="2,0,0,0"/>
+                                    </StackPanel>
+                                    <TextBlock x:Name="PartyMember1HPStatus" Text="HP: --%" Style="{StaticResource ValueStyle}" FontSize="8" Foreground="#00ff00" Margin="0,2,0,0" ToolTip="Current HP percentage"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Orientation="Vertical" Margin="0,0,5,0">
@@ -1227,6 +1232,11 @@
                                         <TextBox x:Name="PartyMember2XEnd" Style="{StaticResource CoordTextBoxStyle}" Text="200" Width="35" ToolTip="HP Bar X End" Margin="2,0,0,0"/>
                                         <TextBox x:Name="PartyMember2Y" Style="{StaticResource CoordTextBoxStyle}" Text="70" Width="30" ToolTip="HP Bar Y" Margin="2,0,0,0"/>
                                     </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <Button Content="👁" Width="20" Height="20" Click="ShowPartyMember2HP_Click" ToolTip="Show HP bar area" FontSize="10"/>
+                                        <Button Content="🎯" Width="20" Height="20" Click="CalibratePartyMember2_Click" ToolTip="Calibrate HP colors" FontSize="10" Margin="2,0,0,0"/>
+                                    </StackPanel>
+                                    <TextBlock x:Name="PartyMember2HPStatus" Text="HP: --%" Style="{StaticResource ValueStyle}" FontSize="8" Foreground="#00ff00" Margin="0,2,0,0" ToolTip="Current HP percentage"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="2" Orientation="Vertical" Margin="0,0,5,0">
@@ -1244,6 +1254,11 @@
                                         <TextBox x:Name="PartyMember3XEnd" Style="{StaticResource CoordTextBoxStyle}" Text="200" Width="35" ToolTip="HP Bar X End" Margin="2,0,0,0"/>
                                         <TextBox x:Name="PartyMember3Y" Style="{StaticResource CoordTextBoxStyle}" Text="90" Width="30" ToolTip="HP Bar Y" Margin="2,0,0,0"/>
                                     </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <Button Content="👁" Width="20" Height="20" Click="ShowPartyMember3HP_Click" ToolTip="Show HP bar area" FontSize="10"/>
+                                        <Button Content="🎯" Width="20" Height="20" Click="CalibratePartyMember3_Click" ToolTip="Calibrate HP colors" FontSize="10" Margin="2,0,0,0"/>
+                                    </StackPanel>
+                                    <TextBlock x:Name="PartyMember3HPStatus" Text="HP: --%" Style="{StaticResource ValueStyle}" FontSize="8" Foreground="#00ff00" Margin="0,2,0,0" ToolTip="Current HP percentage"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="3" Orientation="Vertical">
@@ -1261,6 +1276,11 @@
                                         <TextBox x:Name="PartyMember4XEnd" Style="{StaticResource CoordTextBoxStyle}" Text="200" Width="35" ToolTip="HP Bar X End" Margin="2,0,0,0"/>
                                         <TextBox x:Name="PartyMember4Y" Style="{StaticResource CoordTextBoxStyle}" Text="110" Width="30" ToolTip="HP Bar Y" Margin="2,0,0,0"/>
                                     </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <Button Content="👁" Width="20" Height="20" Click="ShowPartyMember4HP_Click" ToolTip="Show HP bar area" FontSize="10"/>
+                                        <Button Content="🎯" Width="20" Height="20" Click="CalibratePartyMember4_Click" ToolTip="Calibrate HP colors" FontSize="10" Margin="2,0,0,0"/>
+                                    </StackPanel>
+                                    <TextBlock x:Name="PartyMember4HPStatus" Text="HP: --%" Style="{StaticResource ValueStyle}" FontSize="8" Foreground="#00ff00" Margin="0,2,0,0" ToolTip="Current HP percentage"/>
                                 </StackPanel>
                             </Grid>
 
@@ -1288,6 +1308,11 @@
                                         <TextBox x:Name="PartyMember5XEnd" Style="{StaticResource CoordTextBoxStyle}" Text="200" Width="35" ToolTip="HP Bar X End" Margin="2,0,0,0"/>
                                         <TextBox x:Name="PartyMember5Y" Style="{StaticResource CoordTextBoxStyle}" Text="130" Width="30" ToolTip="HP Bar Y" Margin="2,0,0,0"/>
                                     </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <Button Content="👁" Width="20" Height="20" Click="ShowPartyMember5HP_Click" ToolTip="Show HP bar area" FontSize="10"/>
+                                        <Button Content="🎯" Width="20" Height="20" Click="CalibratePartyMember5_Click" ToolTip="Calibrate HP colors" FontSize="10" Margin="2,0,0,0"/>
+                                    </StackPanel>
+                                    <TextBlock x:Name="PartyMember5HPStatus" Text="HP: --%" Style="{StaticResource ValueStyle}" FontSize="8" Foreground="#00ff00" Margin="0,2,0,0" ToolTip="Current HP percentage"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Orientation="Vertical" Margin="0,0,5,0">
@@ -1305,6 +1330,11 @@
                                         <TextBox x:Name="PartyMember6XEnd" Style="{StaticResource CoordTextBoxStyle}" Text="200" Width="35" ToolTip="HP Bar X End" Margin="2,0,0,0"/>
                                         <TextBox x:Name="PartyMember6Y" Style="{StaticResource CoordTextBoxStyle}" Text="150" Width="30" ToolTip="HP Bar Y" Margin="2,0,0,0"/>
                                     </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <Button Content="👁" Width="20" Height="20" Click="ShowPartyMember6HP_Click" ToolTip="Show HP bar area" FontSize="10"/>
+                                        <Button Content="🎯" Width="20" Height="20" Click="CalibratePartyMember6_Click" ToolTip="Calibrate HP colors" FontSize="10" Margin="2,0,0,0"/>
+                                    </StackPanel>
+                                    <TextBlock x:Name="PartyMember6HPStatus" Text="HP: --%" Style="{StaticResource ValueStyle}" FontSize="8" Foreground="#00ff00" Margin="0,2,0,0" ToolTip="Current HP percentage"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="2" Orientation="Vertical" Margin="0,0,5,0">
@@ -1322,6 +1352,11 @@
                                         <TextBox x:Name="PartyMember7XEnd" Style="{StaticResource CoordTextBoxStyle}" Text="200" Width="35" ToolTip="HP Bar X End" Margin="2,0,0,0"/>
                                         <TextBox x:Name="PartyMember7Y" Style="{StaticResource CoordTextBoxStyle}" Text="170" Width="30" ToolTip="HP Bar Y" Margin="2,0,0,0"/>
                                     </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <Button Content="👁" Width="20" Height="20" Click="ShowPartyMember7HP_Click" ToolTip="Show HP bar area" FontSize="10"/>
+                                        <Button Content="🎯" Width="20" Height="20" Click="CalibratePartyMember7_Click" ToolTip="Calibrate HP colors" FontSize="10" Margin="2,0,0,0"/>
+                                    </StackPanel>
+                                    <TextBlock x:Name="PartyMember7HPStatus" Text="HP: --%" Style="{StaticResource ValueStyle}" FontSize="8" Foreground="#00ff00" Margin="0,2,0,0" ToolTip="Current HP percentage"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="3" Orientation="Vertical">
@@ -1339,10 +1374,26 @@
                                         <TextBox x:Name="PartyMember8XEnd" Style="{StaticResource CoordTextBoxStyle}" Text="200" Width="35" ToolTip="HP Bar X End" Margin="2,0,0,0"/>
                                         <TextBox x:Name="PartyMember8Y" Style="{StaticResource CoordTextBoxStyle}" Text="190" Width="30" ToolTip="HP Bar Y" Margin="2,0,0,0"/>
                                     </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <Button Content="👁" Width="20" Height="20" Click="ShowPartyMember8HP_Click" ToolTip="Show HP bar area" FontSize="10"/>
+                                        <Button Content="🎯" Width="20" Height="20" Click="CalibratePartyMember8_Click" ToolTip="Calibrate HP colors" FontSize="10" Margin="2,0,0,0"/>
+                                    </StackPanel>
+                                    <TextBlock x:Name="PartyMember8HPStatus" Text="HP: --%" Style="{StaticResource ValueStyle}" FontSize="8" Foreground="#00ff00" Margin="0,2,0,0" ToolTip="Current HP percentage"/>
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
                     </Border>
+
+                    <!-- Party Heal Control Buttons -->
+                    <Grid Margin="0,8,0,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0" Content="🧙 Start Party Heal" x:Name="StartPartyHealButton" Style="{StaticResource SmallButtonStyle}" Click="StartPartyHeal_Click" Height="28" Margin="0,0,2,0" Background="#9C27B0"/>
+                        <Button Grid.Column="1" Content="🛑 Stop Party Heal" x:Name="StopPartyHealButton" Style="{StaticResource SmallButtonStyle}" Click="StopPartyHeal_Click" Height="28" Margin="2,0,0,0" IsEnabled="False"/>
+                    </Grid>
 
                     <!-- Help Text -->
                     <Border Background="#1a1a1a" CornerRadius="3" Padding="8" Margin="0,5,0,0">

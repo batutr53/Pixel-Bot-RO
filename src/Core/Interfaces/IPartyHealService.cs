@@ -15,8 +15,11 @@ public interface IPartyHealService : IDisposable
     Task StopAsync();
     void SetTargetWindow(IntPtr hwnd);
     void SetKeyPressCallback(Action<string> keyPressCallback);
+    void SetAttackControlCallbacks(Action pauseAttack, Action resumeAttack);
     Task<Color> CalibrateBaselineColorAsync(int memberIndex, IntPtr targetWindow);
+    Task<(Color fullHpColor, Color currentHpColor)> CalibrateMemberHpColorsAsync(int memberIndex, IntPtr targetWindow);
     PartyMemberStatus GetMemberStatus(int memberIndex);
+    Task<double> GetMemberHpPercentageAsync(int memberIndex);
 }
 
 public class PartyMemberHealedEventArgs : EventArgs
