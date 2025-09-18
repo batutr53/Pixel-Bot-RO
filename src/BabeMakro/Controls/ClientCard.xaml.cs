@@ -102,6 +102,10 @@ public partial class ClientCard : UserControl, IDisposable
     private System.Windows.Shapes.Rectangle? _babeBotMpCoordIndicator;
     private System.Windows.Shapes.Rectangle? _babeBotHpReadingArea;
     private System.Windows.Shapes.Rectangle? _babeBotMpReadingArea;
+
+    // Performance optimization - UI update throttling
+    private DateTime _lastHpUiUpdate = DateTime.MinValue;
+    private DateTime _lastMpUiUpdate = DateTime.MinValue;
     
     // Disposal Management
     private bool _disposed = false;
@@ -2719,64 +2723,23 @@ public partial class ClientCard : UserControl, IDisposable
         StartButton.IsEnabled = false;
         StopButton.IsEnabled = true;
         StatusIndicator.Fill = new SolidColorBrush(Colors.Green);
-        StatusIndicator.ToolTip = $"Running automation for {ViewModel.ClientName}";
-        
-        // StartPeriodicClicks(); // Disabled - periodic clicks section is hidden
+        StatusIndicator.ToolTip = $"Running HP/MP monitoring for {ViewModel.ClientName}";
+
+        // 1. Start HP/MP Monitoring
         StartMonitoring();
-        
-        // Auto-enable BabeBot HP/MP when starting client
+
+        // 2. Auto-enable BabeBot HP/MP when starting client
         ViewModel.BabeBotHp.Enabled = true;
         ViewModel.BabeBotMp.Enabled = true;
         StartBabeBotMonitoring();
-        
-        // Auto-start Attack System removed - user must manually start attack system
-        
-        // Auto-start Buff/AC System if enabled
-        if (BuffAcSystemEnabled.IsChecked == true)
-        {
-            StartBuffAcSystem();
-            Console.WriteLine($"[{ViewModel.ClientName}] 🎭 Buff/AC System auto-started");
-        }
-        
-        // Auto-start Anti-Captcha System if enabled
-        if (CaptchaEnabled.IsChecked == true)
-        {
-            CaptchaStart_Click(null, null);
-            Console.WriteLine($"[{ViewModel.ClientName}] 🤖 Anti-Captcha System auto-started");
-        }
-        
-        // Auto-start PartyHeal System if enabled
-        if (PartyHealSystemEnabled.IsChecked == true)
-        {
-            await StartPartyHealAsync();
-            Console.WriteLine($"[{ViewModel.ClientName}] 🧙 PartyHeal System auto-started");
-        }
-        
-        // Multi-HP System auto-start removed
-        
-        // Auto-enable Party Heal monitoring for all active members
-        for (int i = 1; i <= 8; i++)
-        {
-            var userKeyControl = FindName($"PartyMember{i}UserKey") as TextBox;
-            var skillKeyControl = FindName($"PartyMember{i}SkillKey") as TextBox;
-            
-            if (userKeyControl != null && skillKeyControl != null && 
-                !string.IsNullOrEmpty(userKeyControl.Text) && !string.IsNullOrEmpty(skillKeyControl.Text))
-            {
-                var monitorBtn = GetPartyMemberMonitorButton(i);
-                if (monitorBtn != null && monitorBtn.Content.ToString() == "Monitor")
-                {
-                    TogglePartyMemberMonitor(i);
-                    Console.WriteLine($"[{ViewModel.ClientName}] 👥 Party Member {i} monitoring auto-started");
-                }
-            }
-        }
-        
-        Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot HP/MP auto-enabled on start");
+
+        Console.WriteLine($"[{ViewModel.ClientName}] ✅ Started: HP/MP Monitoring + BabeBot HP/MP");
         
         // Debug HP/MP settings
-        Console.WriteLine($"[{ViewModel.ClientName}] START: HP Enabled={ViewModel.HpTrigger.Enabled}, Coords=({ViewModel.HpTrigger.X},{ViewModel.HpTrigger.Y}), Tolerance={ViewModel.HpProbe.Tolerance}");
-        Console.WriteLine($"[{ViewModel.ClientName}] START: MP Enabled={ViewModel.MpTrigger.Enabled}, Coords=({ViewModel.MpTrigger.X},{ViewModel.MpTrigger.Y}), Tolerance={ViewModel.MpProbe.Tolerance}");
+        Console.WriteLine($"[{ViewModel.ClientName}] HP Monitor: Enabled={ViewModel.HpTrigger.Enabled}, Coords=({ViewModel.HpTrigger.X},{ViewModel.HpTrigger.Y})");
+        Console.WriteLine($"[{ViewModel.ClientName}] MP Monitor: Enabled={ViewModel.MpTrigger.Enabled}, Coords=({ViewModel.MpTrigger.X},{ViewModel.MpTrigger.Y})");
+        Console.WriteLine($"[{ViewModel.ClientName}] BabeBot HP: Enabled={ViewModel.BabeBotHp.Enabled}, Threshold={ViewModel.BabeBotHp.ThresholdPercentage}%");
+        Console.WriteLine($"[{ViewModel.ClientName}] BabeBot MP: Enabled={ViewModel.BabeBotMp.Enabled}, Threshold={ViewModel.BabeBotMp.ThresholdPercentage}%");
     }
 
     private async void StopClient_Click(object sender, RoutedEventArgs e)
@@ -2786,93 +2749,17 @@ public partial class ClientCard : UserControl, IDisposable
         StartButton.IsEnabled = true;
         StopButton.IsEnabled = false;
         StatusIndicator.Fill = new SolidColorBrush(Colors.Orange);
-        StatusIndicator.ToolTip = "Stopped";
-        
-        // StopPeriodicClicks(); // Disabled - periodic clicks section is hidden
+        StatusIndicator.ToolTip = "HP/MP monitoring stopped";
+
+        // 1. Stop HP/MP Monitoring
         StopMonitoring();
-        
-        // Auto-disable BabeBot HP/MP when stopping client
+
+        // 2. Auto-disable BabeBot HP/MP when stopping client
         ViewModel.BabeBotHp.Enabled = false;
         ViewModel.BabeBotMp.Enabled = false;
         StopBabeBotMonitoring();
-        
-        // Auto-stop Attack System if enabled
-        if (AttackSystemEnabled.IsChecked == true)
-        {
-            try
-            {
-                StopAttackSystem();
-                Console.WriteLine($"[{ViewModel.ClientName}] ⚔️ Attack System auto-stopped");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[{ViewModel.ClientName}] Error stopping Attack System: {ex.Message}");
-            }
-        }
-        
-        // Auto-stop Buff/AC System if enabled
-        if (BuffAcSystemEnabled.IsChecked == true)
-        {
-            try
-            {
-                StopBuffAcSystem();
-                Console.WriteLine($"[{ViewModel.ClientName}] 🎭 Buff/AC System auto-stopped");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[{ViewModel.ClientName}] Error stopping Buff/AC System: {ex.Message}");
-            }
-        }
-        
-        // Auto-stop Anti-Captcha System if enabled
-        if (CaptchaEnabled.IsChecked == true)
-        {
-            try
-            {
-                CaptchaStop_Click(null, null);
-                Console.WriteLine($"[{ViewModel.ClientName}] 🤖 Anti-Captcha System auto-stopped");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[{ViewModel.ClientName}] Error stopping Anti-Captcha System: {ex.Message}");
-            }
-        }
-        
-        // Auto-stop PartyHeal System if running
-        if (_partyHealRunning)
-        {
-            try
-            {
-                await StopPartyHealAsync();
-                Console.WriteLine($"[{ViewModel.ClientName}] 🧙 PartyHeal System auto-stopped");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[{ViewModel.ClientName}] Error stopping PartyHeal System: {ex.Message}");
-            }
-        }
-        
-        // Multi-HP System auto-stop removed
-        
-        // Auto-disable Party Heal monitoring for all active members
-        for (int i = 1; i <= 8; i++)
-        {
-            try
-            {
-                var monitorBtn = GetPartyMemberMonitorButton(i);
-                if (monitorBtn != null && monitorBtn.Content.ToString() == "Stop")
-                {
-                    TogglePartyMemberMonitor(i);
-                    Console.WriteLine($"[{ViewModel.ClientName}] 👥 Party Member {i} monitoring auto-stopped");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[{ViewModel.ClientName}] Error stopping Party Member {i} monitoring: {ex.Message}");
-            }
-        }
-        
-        Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot HP/MP auto-disabled on stop");
+
+        Console.WriteLine($"[{ViewModel.ClientName}] 🛑 Stopped: HP/MP Monitoring + BabeBot HP/MP");
     }
 
     private void TestClient_Click(object sender, RoutedEventArgs e)
@@ -3229,7 +3116,7 @@ public partial class ClientCard : UserControl, IDisposable
             // Use master timer instead of individual DispatcherTimer
             _masterTimer?.AddOrUpdateTask(
                 "HPMPMonitoring",
-                TimeSpan.FromMilliseconds(50), // 20Hz for responsive detection
+                TimeSpan.FromMilliseconds(100), // 10Hz - reduced for better performance
                 () => MonitoringTimer_Tick(null, null),
                 enabled: true,
                 priority: 10 // High priority for HP/MP monitoring
@@ -5511,8 +5398,8 @@ public partial class ClientCard : UserControl, IDisposable
         
         // Use master timer for BabeBot system instead of separate DispatcherTimer
         _masterTimer?.AddOrUpdateTask(
-            "BabeBot", 
-            TimeSpan.FromMilliseconds(120), // Same as BabeBot timer
+            "BabeBot",
+            TimeSpan.FromMilliseconds(1000), // 1 second timer
             () => BabeBotTimer_Tick(null, null),
             enabled: true,
             priority: 8 // High priority for BabeBot system
@@ -5571,21 +5458,26 @@ public partial class ClientCard : UserControl, IDisposable
             // BabeBot logic: if current color != reference color then trigger
             bool colorChanged = !ColorsMatch(currentColor, ViewModel.BabeBotHp.ReferenceColor);
             
-            // Update UI
-            Dispatcher.BeginInvoke(() =>
+            // Update UI less frequently to reduce overhead - only every 2 seconds
+            var currentTime = DateTime.UtcNow;
+            if ((currentTime - _lastHpUiUpdate).TotalMilliseconds >= 2000)
             {
-                BabeBotHpCurrentColor.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(currentColor.R, currentColor.G, currentColor.B));
-                BabeBotHpCurrentText.Text = $"{currentColor.R},{currentColor.G},{currentColor.B}";
-                
-                if (colorChanged)
+                _lastHpUiUpdate = currentTime;
+                Dispatcher.BeginInvoke(() =>
                 {
-                    ViewModel.BabeBotHp.Status = $"LOW {ViewModel.BabeBotHp.ThresholdPercentage}%";
-                }
-                else
-                {
-                    ViewModel.BabeBotHp.Status = $"OK {ViewModel.BabeBotHp.ThresholdPercentage}%";
-                }
-            });
+                    BabeBotHpCurrentColor.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(currentColor.R, currentColor.G, currentColor.B));
+                    BabeBotHpCurrentText.Text = $"{currentColor.R},{currentColor.G},{currentColor.B}";
+
+                    if (colorChanged)
+                    {
+                        ViewModel.BabeBotHp.Status = $"LOW {ViewModel.BabeBotHp.ThresholdPercentage}%";
+                    }
+                    else
+                    {
+                        ViewModel.BabeBotHp.Status = $"OK {ViewModel.BabeBotHp.ThresholdPercentage}%";
+                    }
+                });
+            }
             
             // Trigger logic - BabeBot style (simplified for testing)
             if (colorChanged)
@@ -5634,21 +5526,26 @@ public partial class ClientCard : UserControl, IDisposable
             // BabeBot logic: if current color != reference color then trigger
             bool colorChanged = !ColorsMatch(currentColor, ViewModel.BabeBotMp.ReferenceColor);
             
-            // Update UI
-            Dispatcher.BeginInvoke(() =>
+            // Update UI less frequently to reduce overhead - only every 2 seconds
+            var currentTime = DateTime.UtcNow;
+            if ((currentTime - _lastMpUiUpdate).TotalMilliseconds >= 2000)
             {
-                BabeBotMpCurrentColor.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(currentColor.R, currentColor.G, currentColor.B));
-                BabeBotMpCurrentText.Text = $"{currentColor.R},{currentColor.G},{currentColor.B}";
-                
-                if (colorChanged)
+                _lastMpUiUpdate = currentTime;
+                Dispatcher.BeginInvoke(() =>
                 {
-                    ViewModel.BabeBotMp.Status = $"LOW {ViewModel.BabeBotMp.ThresholdPercentage}%";
-                }
-                else
-                {
-                    ViewModel.BabeBotMp.Status = $"OK {ViewModel.BabeBotMp.ThresholdPercentage}%";
-                }
-            });
+                    BabeBotMpCurrentColor.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(currentColor.R, currentColor.G, currentColor.B));
+                    BabeBotMpCurrentText.Text = $"{currentColor.R},{currentColor.G},{currentColor.B}";
+
+                    if (colorChanged)
+                    {
+                        ViewModel.BabeBotMp.Status = $"LOW {ViewModel.BabeBotMp.ThresholdPercentage}%";
+                    }
+                    else
+                    {
+                        ViewModel.BabeBotMp.Status = $"OK {ViewModel.BabeBotMp.ThresholdPercentage}%";
+                    }
+                });
+            }
             
             // Trigger logic - BabeBot style (simplified for testing)
             if (colorChanged)
@@ -6222,12 +6119,15 @@ public partial class ClientCard : UserControl, IDisposable
             Console.WriteLine($"[{ViewModel.ClientName}] 🎭 Buff/AC system already running");
             return;
         }
-        
+
         if (ViewModel.TargetHwnd == IntPtr.Zero)
         {
             MessageBox.Show("Please select a window first!", "No Window Selected", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
+
+        // PAUSE other systems when Buff/AC starts
+        PauseOtherSystemsForBuffAc();
         
         // Get list of enabled party members from BuffAc settings (independent from Party Heal)
         _buffAcEnabledMembers.Clear();
@@ -6304,8 +6204,8 @@ public partial class ClientCard : UserControl, IDisposable
             _activeBuffAcTimers.Clear();
         }
         
-        // Resume other systems
-        ResumeAttackAfterBuffAc();
+        // RESUME other systems when Buff/AC stops
+        ResumeOtherSystemsAfterBuffAc();
         
         StartBuffAcButton.IsEnabled = true;
         StopBuffAcButton.IsEnabled = false;
@@ -6565,6 +6465,43 @@ public partial class ClientCard : UserControl, IDisposable
             Console.WriteLine($"[{ViewModel.ClientName}] ▶️ Resuming party heal system after buff/AC cycle");
             Task.Run(async () => await StartPartyHealAsync());
         }
+    }
+
+    // Master pause/resume methods for Buff/AC system
+    private void PauseOtherSystemsForBuffAc()
+    {
+        Console.WriteLine($"[{ViewModel.ClientName}] 🎭 Buff/AC starting - pausing other systems");
+
+        // Pause Main (HP/MP monitoring)
+        if (ViewModel.IsRunning)
+        {
+            StopClient_Click(null, null);
+            Console.WriteLine($"[{ViewModel.ClientName}] ⏸️ Main system paused for buff/AC");
+        }
+
+        // Pause Attack system
+        PauseAttackForBuffAc();
+
+        // Pause Party Heal system
+        PausePartyHealForBuffAc();
+    }
+
+    private void ResumeOtherSystemsAfterBuffAc()
+    {
+        Console.WriteLine($"[{ViewModel.ClientName}] 🎭 Buff/AC finished - resuming other systems");
+
+        // Resume Main (HP/MP monitoring) if it was running before
+        if (!ViewModel.IsRunning && StartButton.IsEnabled)
+        {
+            StartClient_Click(null, null);
+            Console.WriteLine($"[{ViewModel.ClientName}] ▶️ Main system resumed after buff/AC");
+        }
+
+        // Resume Attack system
+        ResumeAttackAfterBuffAc();
+
+        // Resume Party Heal system
+        ResumePartyHealAfterBuffAc();
     }
     
 
