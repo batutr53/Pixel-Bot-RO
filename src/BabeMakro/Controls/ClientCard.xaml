@@ -258,6 +258,7 @@
                                 <TextBox Grid.Column="5" x:Name="HpTriggerCooldown" Style="{StaticResource CoordTextBoxStyle}" Text="120" ToolTip="Cooldown ms"/>
                                 <StackPanel Grid.Column="6" Orientation="Horizontal" Margin="5,0,0,0">
                                     <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickHpTrigger_Click" Width="20" Margin="0,0,2,0" IsEnabled="{Binding ElementName=HpUseCoordinate, Path=IsChecked}"/>
+                                    <Button Content="👁️" Style="{StaticResource SmallButtonStyle}" Click="ShowHpTriggerShape_Click" Width="20" Margin="0,0,2,0" ToolTip="Show HP monitoring area (5x5 pixels)"/>
                                     <TextBox x:Name="HpKeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="Q" Width="25" IsEnabled="{Binding ElementName=HpUseKeyPress, Path=IsChecked}"/>
                                 </StackPanel>
                             </Grid>
@@ -336,6 +337,7 @@
                                 <TextBox Grid.Column="5" x:Name="MpTriggerCooldown" Style="{StaticResource CoordTextBoxStyle}" Text="120" ToolTip="Cooldown ms"/>
                                 <StackPanel Grid.Column="6" Orientation="Horizontal" Margin="5,0,0,0">
                                     <Button Content="📍" Style="{StaticResource SmallButtonStyle}" Click="PickMpTrigger_Click" Width="20" Margin="0,0,2,0" IsEnabled="{Binding ElementName=MpUseCoordinate, Path=IsChecked}"/>
+                                    <Button Content="👁️" Style="{StaticResource SmallButtonStyle}" Click="ShowMpTriggerShape_Click" Width="20" Margin="0,0,2,0" ToolTip="Show MP monitoring area (5x5 pixels)"/>
                                     <TextBox x:Name="MpKeyToPress" Style="{StaticResource CoordTextBoxStyle}" Text="W" Width="25" IsEnabled="{Binding ElementName=MpUseKeyPress, Path=IsChecked}"/>
                                 </StackPanel>
                             </Grid>

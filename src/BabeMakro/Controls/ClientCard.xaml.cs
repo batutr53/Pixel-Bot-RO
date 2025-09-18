@@ -93,6 +93,15 @@ public partial class ClientCard : UserControl, IDisposable
     private readonly BoundedTaskQueue _boundedTaskQueue = new(maxQueueSize: 500, maxConcurrency: 4);
     private volatile bool _highPerformanceMode = true;
     private readonly object _lockObject = new();
+    private Window _monitoringOverlay;
+    private Canvas _hpTriggerShape;
+    private Canvas _mpTriggerShape;
+
+    // Visual indicators for HP/MP BabeBot coordinates
+    private System.Windows.Shapes.Rectangle? _babeBotHpCoordIndicator;
+    private System.Windows.Shapes.Rectangle? _babeBotMpCoordIndicator;
+    private System.Windows.Shapes.Rectangle? _babeBotHpReadingArea;
+    private System.Windows.Shapes.Rectangle? _babeBotMpReadingArea;
     
     // Disposal Management
     private bool _disposed = false;
@@ -301,22 +310,22 @@ public partial class ClientCard : UserControl, IDisposable
         PythonMpKeyToPress.TextChanged += (s, e) => ViewModel.PythonMpPotionClick.KeyToPress = PythonMpKeyToPress.Text;
         
         // Trigger coordinate, cooldown and enable handlers
-        HpTriggerX.TextChanged += (s, e) => { if (int.TryParse(HpTriggerX.Text, out var v)) ViewModel.HpTrigger.X = v; };
-        HpTriggerY.TextChanged += (s, e) => { if (int.TryParse(HpTriggerY.Text, out var v)) ViewModel.HpTrigger.Y = v; };
+        HpTriggerX.TextChanged += (s, e) => { if (int.TryParse(HpTriggerX.Text, out var v)) { ViewModel.HpTrigger.X = v; ViewModel.HpTrigger.Enabled = v > 0; ShowMonitoringAreaIndicators(); } };
+        HpTriggerY.TextChanged += (s, e) => { if (int.TryParse(HpTriggerY.Text, out var v)) { ViewModel.HpTrigger.Y = v; ViewModel.HpTrigger.Enabled = v > 0; ShowMonitoringAreaIndicators(); } };
         HpTriggerCooldown.TextChanged += (s, e) => { if (int.TryParse(HpTriggerCooldown.Text, out var v)) ViewModel.HpTrigger.CooldownMs = v; };
-        HpTriggerEnabled.Checked += (s, e) => ViewModel.HpTrigger.Enabled = true;
-        HpTriggerEnabled.Unchecked += (s, e) => ViewModel.HpTrigger.Enabled = false;
+        HpTriggerEnabled.Checked += (s, e) => { ViewModel.HpTrigger.Enabled = true; ShowMonitoringAreaIndicators(); };
+        HpTriggerEnabled.Unchecked += (s, e) => { ViewModel.HpTrigger.Enabled = false; HideMonitoringAreaIndicators(); };
         HpUseCoordinate.Checked += (s, e) => ViewModel.HpTrigger.UseCoordinate = true;
         HpUseCoordinate.Unchecked += (s, e) => ViewModel.HpTrigger.UseCoordinate = false;
         HpUseKeyPress.Checked += (s, e) => ViewModel.HpTrigger.UseKeyPress = true;
         HpUseKeyPress.Unchecked += (s, e) => ViewModel.HpTrigger.UseKeyPress = false;
         HpKeyToPress.TextChanged += (s, e) => ViewModel.HpTrigger.KeyToPress = HpKeyToPress.Text;
         
-        MpTriggerX.TextChanged += (s, e) => { if (int.TryParse(MpTriggerX.Text, out var v)) ViewModel.MpTrigger.X = v; };
-        MpTriggerY.TextChanged += (s, e) => { if (int.TryParse(MpTriggerY.Text, out var v)) ViewModel.MpTrigger.Y = v; };
+        MpTriggerX.TextChanged += (s, e) => { if (int.TryParse(MpTriggerX.Text, out var v)) { ViewModel.MpTrigger.X = v; ViewModel.MpTrigger.Enabled = v > 0; ShowMonitoringAreaIndicators(); } };
+        MpTriggerY.TextChanged += (s, e) => { if (int.TryParse(MpTriggerY.Text, out var v)) { ViewModel.MpTrigger.Y = v; ViewModel.MpTrigger.Enabled = v > 0; ShowMonitoringAreaIndicators(); } };
         MpTriggerCooldown.TextChanged += (s, e) => { if (int.TryParse(MpTriggerCooldown.Text, out var v)) ViewModel.MpTrigger.CooldownMs = v; };
-        MpTriggerEnabled.Checked += (s, e) => ViewModel.MpTrigger.Enabled = true;
-        MpTriggerEnabled.Unchecked += (s, e) => ViewModel.MpTrigger.Enabled = false;
+        MpTriggerEnabled.Checked += (s, e) => { ViewModel.MpTrigger.Enabled = true; ShowMonitoringAreaIndicators(); };
+        MpTriggerEnabled.Unchecked += (s, e) => { ViewModel.MpTrigger.Enabled = false; HideMonitoringAreaIndicators(); };
         MpUseCoordinate.Checked += (s, e) => ViewModel.MpTrigger.UseCoordinate = true;
         MpUseCoordinate.Unchecked += (s, e) => ViewModel.MpTrigger.UseCoordinate = false;
         MpUseKeyPress.Checked += (s, e) => ViewModel.MpTrigger.UseKeyPress = true;
@@ -452,6 +461,58 @@ public partial class ClientCard : UserControl, IDisposable
         _mpPercentageShape.MouseLeftButtonDown += MpPercentageShape_MouseLeftButtonDown;
         _mpPercentageShape.MouseMove += MpPercentageShape_MouseMove;
         _mpPercentageShape.MouseLeftButtonUp += MpPercentageShape_MouseLeftButtonUp;
+
+        // Initialize BabeBot HP/MP coordinate visual indicators
+        InitializeBabeBotVisualIndicators();
+    }
+
+    private void InitializeBabeBotVisualIndicators()
+    {
+        // BabeBot HP bar area indicator (red border)
+        _babeBotHpCoordIndicator = new System.Windows.Shapes.Rectangle
+        {
+            Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(50, 255, 69, 0)), // Semi-transparent orange
+            Stroke = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 69, 0)), // OrangeRed
+            StrokeThickness = 2,
+            ToolTip = $"BabeBot HP Bar Area (StartX to EndX) - Client {ClientId}",
+            Visibility = Visibility.Collapsed
+        };
+
+        // BabeBot MP bar area indicator (blue border)
+        _babeBotMpCoordIndicator = new System.Windows.Shapes.Rectangle
+        {
+            Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(50, 30, 144, 255)), // Semi-transparent blue
+            Stroke = new SolidColorBrush(System.Windows.Media.Color.FromRgb(30, 144, 255)), // DodgerBlue
+            StrokeThickness = 2,
+            ToolTip = $"BabeBot MP Bar Area (StartX to EndX) - Client {ClientId}",
+            Visibility = Visibility.Collapsed
+        };
+
+        // BabeBot HP threshold monitoring point (bright red)
+        _babeBotHpReadingArea = new System.Windows.Shapes.Rectangle
+        {
+            Width = 5,
+            Height = 5,
+            Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(100, 255, 0, 0)), // Bright red
+            Stroke = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 0, 0)),
+            StrokeThickness = 2,
+            StrokeDashArray = new DoubleCollection { 2, 2 },
+            ToolTip = $"BabeBot HP Threshold Point ({ViewModel.BabeBotHp.ThresholdPercentage}%) - Client {ClientId}",
+            Visibility = Visibility.Collapsed
+        };
+
+        // BabeBot MP threshold monitoring point (bright blue)
+        _babeBotMpReadingArea = new System.Windows.Shapes.Rectangle
+        {
+            Width = 5,
+            Height = 5,
+            Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(100, 0, 0, 255)), // Bright blue
+            Stroke = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 255)),
+            StrokeThickness = 2,
+            StrokeDashArray = new DoubleCollection { 2, 2 },
+            ToolTip = $"BabeBot MP Threshold Point ({ViewModel.BabeBotMp.ThresholdPercentage}%) - Client {ClientId}",
+            Visibility = Visibility.Collapsed
+        };
     }
 
     private void SelectWindow_Click(object sender, RoutedEventArgs e)
@@ -815,6 +876,9 @@ public partial class ClientCard : UserControl, IDisposable
             HpTriggerY.Text = y.ToString();
             ViewModel.HpTrigger.X = x;
             ViewModel.HpTrigger.Y = y;
+            ViewModel.HpTrigger.Enabled = true;
+            Console.WriteLine($"[{ViewModel.ClientName}] HP Trigger picked at ({x},{y}) - Creating test overlay");
+            CreateTestHPOverlay(x, y);
         });
     }
 
@@ -826,6 +890,9 @@ public partial class ClientCard : UserControl, IDisposable
             MpTriggerY.Text = y.ToString();
             ViewModel.MpTrigger.X = x;
             ViewModel.MpTrigger.Y = y;
+            ViewModel.MpTrigger.Enabled = true;
+            Console.WriteLine($"[{ViewModel.ClientName}] MP Trigger picked at ({x},{y}) - Creating test overlay");
+            CreateTestMPOverlay(x, y);
         });
     }
 
@@ -1077,12 +1144,335 @@ public partial class ClientCard : UserControl, IDisposable
         {
             var hpCalcX = ViewModel.HpPercentageProbe.CalculatedX;
             var mpCalcX = ViewModel.MpPercentageProbe.CalculatedX;
-            
+
             PercentageMonitorPosition.Text = $"HP: {hpCalcX} ({ViewModel.HpPercentageProbe.MonitorPercentage:F0}%) MP: {mpCalcX} ({ViewModel.MpPercentageProbe.MonitorPercentage:F0}%)";
+
+            // Show visual indicators for monitoring areas
+            ShowMonitoringAreaIndicators();
         }
         catch
         {
             PercentageMonitorPosition.Text = "Error calculating position";
+        }
+    }
+
+    private void ShowMonitoringAreaIndicators()
+    {
+        try
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] ShowMonitoringAreaIndicators called");
+            Console.WriteLine($"[{ViewModel.ClientName}] HP Trigger: Enabled={ViewModel.HpTrigger.Enabled}, X={ViewModel.HpTrigger.X}, Y={ViewModel.HpTrigger.Y}");
+            Console.WriteLine($"[{ViewModel.ClientName}] MP Trigger: Enabled={ViewModel.MpTrigger.Enabled}, X={ViewModel.MpTrigger.X}, Y={ViewModel.MpTrigger.Y}");
+            Console.WriteLine($"[{ViewModel.ClientName}] TargetHwnd: {ViewModel.TargetHwnd:X8}");
+
+            // Create overlay window if it doesn't exist
+            if (_monitoringOverlay == null)
+            {
+                _monitoringOverlay = new Window
+                {
+                    WindowStyle = WindowStyle.None,
+                    AllowsTransparency = true,
+                    Background = System.Windows.Media.Brushes.Transparent,
+                    Topmost = true,
+                    ShowInTaskbar = false,
+                    IsHitTestVisible = false, // Make it click-through
+                    WindowStartupLocation = WindowStartupLocation.Manual
+                };
+
+                var overlayCanvas = new Canvas();
+                _monitoringOverlay.Content = overlayCanvas;
+                Console.WriteLine($"[{ViewModel.ClientName}] Created new overlay window");
+            }
+
+            if (ViewModel.TargetHwnd == IntPtr.Zero)
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] TargetHwnd is zero, returning");
+                return;
+            }
+
+            // Get window position
+            User32.GetWindowRect(ViewModel.TargetHwnd, out var rect);
+            Console.WriteLine($"[{ViewModel.ClientName}] Window rect: ({rect.left},{rect.top}) to ({rect.right},{rect.bottom})");
+
+            // Position overlay window
+            _monitoringOverlay.Left = rect.left;
+            _monitoringOverlay.Top = rect.top;
+            _monitoringOverlay.Width = rect.right - rect.left;
+            _monitoringOverlay.Height = rect.bottom - rect.top;
+            Console.WriteLine($"[{ViewModel.ClientName}] Overlay positioned at ({_monitoringOverlay.Left},{_monitoringOverlay.Top}) size ({_monitoringOverlay.Width}x{_monitoringOverlay.Height})");
+
+            var canvas = _monitoringOverlay.Content as Canvas;
+            canvas.Children.Clear();
+            Console.WriteLine($"[{ViewModel.ClientName}] Canvas cleared");
+
+        // Draw HP monitoring area (5x5 box centered at monitoring point)
+        if (ViewModel.HpTrigger.Enabled && ViewModel.HpTrigger.X > 0)
+        {
+            int boxSize = 5; // box parameter from config
+            int halfBox = boxSize / 2;
+
+            // Create vertical bar indicator at the monitoring position
+            var hpBar = new System.Windows.Shapes.Rectangle
+            {
+                Width = boxSize,
+                Height = 30, // Vertical bar height
+                Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(180, 255, 0, 0)), // Semi-transparent red
+                Stroke = System.Windows.Media.Brushes.Red,
+                StrokeThickness = 2
+            };
+
+            Canvas.SetLeft(hpBar, ViewModel.HpTrigger.X - halfBox);
+            Canvas.SetTop(hpBar, ViewModel.HpTrigger.Y - 15); // Center vertically on Y coordinate
+            canvas.Children.Add(hpBar);
+
+            // Add label
+            var hpLabel = new TextBlock
+            {
+                Text = "HP",
+                Foreground = System.Windows.Media.Brushes.White,
+                FontSize = 10,
+                FontWeight = FontWeights.Bold,
+                Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(200, 255, 0, 0)),
+                Padding = new Thickness(2)
+            };
+            Canvas.SetLeft(hpLabel, ViewModel.HpTrigger.X - 10);
+            Canvas.SetTop(hpLabel, ViewModel.HpTrigger.Y - 30);
+            canvas.Children.Add(hpLabel);
+
+            // Add box outline showing the 5x5 area
+            var hpBox = new System.Windows.Shapes.Rectangle
+            {
+                Width = boxSize,
+                Height = boxSize,
+                Fill = System.Windows.Media.Brushes.Transparent,
+                Stroke = System.Windows.Media.Brushes.Yellow,
+                StrokeThickness = 1,
+                StrokeDashArray = new DoubleCollection { 2, 2 }
+            };
+            Canvas.SetLeft(hpBox, ViewModel.HpTrigger.X - halfBox);
+            Canvas.SetTop(hpBox, ViewModel.HpTrigger.Y - halfBox);
+            canvas.Children.Add(hpBox);
+
+            Console.WriteLine($"[{ViewModel.ClientName}] HP indicator added at ({ViewModel.HpTrigger.X},{ViewModel.HpTrigger.Y}) with {boxSize}x{boxSize} px area");
+        }
+
+        // Draw MP monitoring area (5x5 box centered at monitoring point)
+        if (ViewModel.MpTrigger.Enabled && ViewModel.MpTrigger.X > 0)
+        {
+            int boxSize = 5; // box parameter from config
+            int halfBox = boxSize / 2;
+
+            // Create vertical bar indicator at the monitoring position
+            var mpBar = new System.Windows.Shapes.Rectangle
+            {
+                Width = boxSize,
+                Height = 30, // Vertical bar height
+                Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(180, 0, 100, 255)), // Semi-transparent blue
+                Stroke = System.Windows.Media.Brushes.Blue,
+                StrokeThickness = 2
+            };
+
+            Canvas.SetLeft(mpBar, ViewModel.MpTrigger.X - halfBox);
+            Canvas.SetTop(mpBar, ViewModel.MpTrigger.Y - 15); // Center vertically on Y coordinate
+            canvas.Children.Add(mpBar);
+
+            // Add label
+            var mpLabel = new TextBlock
+            {
+                Text = "MP",
+                Foreground = System.Windows.Media.Brushes.White,
+                FontSize = 10,
+                FontWeight = FontWeights.Bold,
+                Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(200, 0, 100, 255)),
+                Padding = new Thickness(2)
+            };
+            Canvas.SetLeft(mpLabel, ViewModel.MpTrigger.X - 10);
+            Canvas.SetTop(mpLabel, ViewModel.MpTrigger.Y - 30);
+            canvas.Children.Add(mpLabel);
+
+            // Add box outline showing the 5x5 area
+            var mpBox = new System.Windows.Shapes.Rectangle
+            {
+                Width = boxSize,
+                Height = boxSize,
+                Fill = System.Windows.Media.Brushes.Transparent,
+                Stroke = System.Windows.Media.Brushes.Cyan,
+                StrokeThickness = 1,
+                StrokeDashArray = new DoubleCollection { 2, 2 }
+            };
+            Canvas.SetLeft(mpBox, ViewModel.MpTrigger.X - halfBox);
+            Canvas.SetTop(mpBox, ViewModel.MpTrigger.Y - halfBox);
+            canvas.Children.Add(mpBox);
+
+            Console.WriteLine($"[{ViewModel.ClientName}] MP indicator added at ({ViewModel.MpTrigger.X},{ViewModel.MpTrigger.Y}) with {boxSize}x{boxSize} px area");
+        }
+
+            // Show the overlay window
+            if (!_monitoringOverlay.IsVisible)
+            {
+                _monitoringOverlay.Show();
+                Console.WriteLine($"[{ViewModel.ClientName}] Overlay window shown");
+            }
+            else
+            {
+                Console.WriteLine($"[{ViewModel.ClientName}] Overlay already visible");
+            }
+
+            Console.WriteLine($"[{ViewModel.ClientName}] ShowMonitoringAreaIndicators completed. HP indicators: {(ViewModel.HpTrigger.Enabled && ViewModel.HpTrigger.X > 0)}, MP indicators: {(ViewModel.MpTrigger.Enabled && ViewModel.MpTrigger.X > 0)}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] Error in ShowMonitoringAreaIndicators: {ex.Message}");
+        }
+    }
+
+    private void HideMonitoringAreaIndicators()
+    {
+        if (_monitoringOverlay != null && _monitoringOverlay.IsVisible)
+        {
+            _monitoringOverlay.Hide();
+        }
+    }
+
+    private void CreateTestHPOverlay(int x, int y)
+    {
+        try
+        {
+            // Force create a simple window for testing
+            var testWindow = new Window
+            {
+                Title = "HP Test",
+                Width = 100,
+                Height = 100,
+                Left = x - 50,
+                Top = y - 50,
+                Background = System.Windows.Media.Brushes.Red,
+                WindowStyle = WindowStyle.None,
+                Topmost = true,
+                AllowsTransparency = true,
+                Opacity = 0.7
+            };
+
+            var canvas = new Canvas();
+            var rect = new System.Windows.Shapes.Rectangle
+            {
+                Width = 5,
+                Height = 5,
+                Fill = System.Windows.Media.Brushes.Yellow,
+                Stroke = System.Windows.Media.Brushes.Black,
+                StrokeThickness = 1
+            };
+            Canvas.SetLeft(rect, 47);
+            Canvas.SetTop(rect, 47);
+            canvas.Children.Add(rect);
+
+            var label = new TextBlock
+            {
+                Text = "HP 5x5",
+                Foreground = System.Windows.Media.Brushes.White,
+                FontSize = 10,
+                FontWeight = FontWeights.Bold
+            };
+            Canvas.SetLeft(label, 25);
+            Canvas.SetTop(label, 10);
+            canvas.Children.Add(label);
+
+            testWindow.Content = canvas;
+            testWindow.Show();
+
+            Console.WriteLine($"[{ViewModel.ClientName}] TEST HP overlay created at ({x},{y})");
+
+            // Auto close after 5 seconds
+            var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+            timer.Tick += (s, e) => { testWindow.Close(); timer.Stop(); };
+            timer.Start();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] Error creating HP test overlay: {ex.Message}");
+        }
+    }
+
+    private void CreateTestMPOverlay(int x, int y)
+    {
+        try
+        {
+            // Force create a simple window for testing
+            var testWindow = new Window
+            {
+                Title = "MP Test",
+                Width = 100,
+                Height = 100,
+                Left = x - 50,
+                Top = y - 50,
+                Background = System.Windows.Media.Brushes.Blue,
+                WindowStyle = WindowStyle.None,
+                Topmost = true,
+                AllowsTransparency = true,
+                Opacity = 0.7
+            };
+
+            var canvas = new Canvas();
+            var rect = new System.Windows.Shapes.Rectangle
+            {
+                Width = 5,
+                Height = 5,
+                Fill = System.Windows.Media.Brushes.Cyan,
+                Stroke = System.Windows.Media.Brushes.Black,
+                StrokeThickness = 1
+            };
+            Canvas.SetLeft(rect, 47);
+            Canvas.SetTop(rect, 47);
+            canvas.Children.Add(rect);
+
+            var label = new TextBlock
+            {
+                Text = "MP 5x5",
+                Foreground = System.Windows.Media.Brushes.White,
+                FontSize = 10,
+                FontWeight = FontWeights.Bold
+            };
+            Canvas.SetLeft(label, 25);
+            Canvas.SetTop(label, 10);
+            canvas.Children.Add(label);
+
+            testWindow.Content = canvas;
+            testWindow.Show();
+
+            Console.WriteLine($"[{ViewModel.ClientName}] TEST MP overlay created at ({x},{y})");
+
+            // Auto close after 5 seconds
+            var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+            timer.Tick += (s, e) => { testWindow.Close(); timer.Stop(); };
+            timer.Start();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] Error creating MP test overlay: {ex.Message}");
+        }
+    }
+
+    private void ShowHpTriggerShape_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.HpTrigger.X > 0 && ViewModel.HpTrigger.Y > 0)
+        {
+            CreateTestHPOverlay(ViewModel.HpTrigger.X, ViewModel.HpTrigger.Y);
+        }
+        else
+        {
+            MessageBox.Show("HP koordinatları henüz ayarlanmamış. Önce koordinat girin veya Pick butonunu kullanın.", "Koordinat Gerekli", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+    }
+
+    private void ShowMpTriggerShape_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.MpTrigger.X > 0 && ViewModel.MpTrigger.Y > 0)
+        {
+            CreateTestMPOverlay(ViewModel.MpTrigger.X, ViewModel.MpTrigger.Y);
+        }
+        else
+        {
+            MessageBox.Show("MP koordinatları henüz ayarlanmamış. Önce koordinat girin veya Pick butonunu kullanın.", "Koordinat Gerekli", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
     
@@ -4605,7 +4995,140 @@ public partial class ClientCard : UserControl, IDisposable
         
         Console.WriteLine($"[{ViewModel.ClientName}] Overlay shapes hidden");
     }
-   
+
+    // Show/Hide Visual Indicators for BabeBot HP/MP coordinates
+    public void ShowVisualIndicators(bool show)
+    {
+        if (ViewModel.TargetHwnd == IntPtr.Zero)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] Cannot show visual indicators - no window selected");
+            return;
+        }
+
+        if (!_monitoringOverlay?.IsVisible == true)
+        {
+            // Create or show the monitoring overlay first
+            if (_monitoringOverlay == null)
+            {
+                _monitoringOverlay = new Window
+                {
+                    Title = $"BabeBot Visual Indicators - {ViewModel.ClientName}",
+                    WindowStyle = WindowStyle.None,
+                    AllowsTransparency = true,
+                    Background = System.Windows.Media.Brushes.Transparent,
+                    ShowInTaskbar = false,
+                    Topmost = true,
+                    IsHitTestVisible = false
+                };
+
+                var overlayCanvas = new Canvas();
+                _monitoringOverlay.Content = overlayCanvas;
+            }
+
+            // Position overlay over the target window's client area
+            User32.GetWindowRect(ViewModel.TargetHwnd, out var windowRect);
+            User32.GetClientRect(ViewModel.TargetHwnd, out var clientRect);
+
+            // Calculate client area position in screen coordinates
+            var clientPoint = new Vanara.PInvoke.POINT(0, 0);
+            User32.ClientToScreen(ViewModel.TargetHwnd, ref clientPoint);
+
+            _monitoringOverlay.Left = clientPoint.X;
+            _monitoringOverlay.Top = clientPoint.Y;
+            _monitoringOverlay.Width = clientRect.right - clientRect.left;
+            _monitoringOverlay.Height = clientRect.bottom - clientRect.top;
+        }
+
+        var canvas = _monitoringOverlay.Content as Canvas;
+        if (canvas == null) return;
+
+        if (show)
+        {
+            // Show BabeBot HP bar area (StartX to EndX)
+            if (_babeBotHpCoordIndicator != null && !canvas.Children.Contains(_babeBotHpCoordIndicator))
+            {
+                canvas.Children.Add(_babeBotHpCoordIndicator);
+                // Show the entire HP bar from StartX to EndX
+                Canvas.SetLeft(_babeBotHpCoordIndicator, ViewModel.BabeBotHp.StartX);
+                Canvas.SetTop(_babeBotHpCoordIndicator, ViewModel.BabeBotHp.Y - 4);
+                _babeBotHpCoordIndicator.Width = ViewModel.BabeBotHp.EndX - ViewModel.BabeBotHp.StartX;
+                _babeBotHpCoordIndicator.Height = 8;
+                _babeBotHpCoordIndicator.Visibility = Visibility.Visible;
+            }
+
+            // Show BabeBot MP bar area (StartX to EndX)
+            if (_babeBotMpCoordIndicator != null && !canvas.Children.Contains(_babeBotMpCoordIndicator))
+            {
+                canvas.Children.Add(_babeBotMpCoordIndicator);
+                // Show the entire MP bar from StartX to EndX
+                Canvas.SetLeft(_babeBotMpCoordIndicator, ViewModel.BabeBotMp.StartX);
+                Canvas.SetTop(_babeBotMpCoordIndicator, ViewModel.BabeBotMp.Y - 4);
+                _babeBotMpCoordIndicator.Width = ViewModel.BabeBotMp.EndX - ViewModel.BabeBotMp.StartX;
+                _babeBotMpCoordIndicator.Height = 8;
+                _babeBotMpCoordIndicator.Visibility = Visibility.Visible;
+            }
+
+            // Show BabeBot HP threshold monitoring point (5x5px reading area)
+            if (_babeBotHpReadingArea != null && !canvas.Children.Contains(_babeBotHpReadingArea))
+            {
+                canvas.Children.Add(_babeBotHpReadingArea);
+                Canvas.SetLeft(_babeBotHpReadingArea, ViewModel.BabeBotHp.MonitorX - 2.5);
+                Canvas.SetTop(_babeBotHpReadingArea, ViewModel.BabeBotHp.Y - 2.5);
+                _babeBotHpReadingArea.Visibility = Visibility.Visible;
+            }
+
+            // Show BabeBot MP threshold monitoring point (5x5px reading area)
+            if (_babeBotMpReadingArea != null && !canvas.Children.Contains(_babeBotMpReadingArea))
+            {
+                canvas.Children.Add(_babeBotMpReadingArea);
+                Canvas.SetLeft(_babeBotMpReadingArea, ViewModel.BabeBotMp.MonitorX - 2.5);
+                Canvas.SetTop(_babeBotMpReadingArea, ViewModel.BabeBotMp.Y - 2.5);
+                _babeBotMpReadingArea.Visibility = Visibility.Visible;
+            }
+
+            // Show the overlay window
+            if (!_monitoringOverlay.IsVisible)
+            {
+                _monitoringOverlay.Show();
+                Console.WriteLine($"[{ViewModel.ClientName}] BabeBot visual indicators shown");
+            }
+        }
+        else
+        {
+            // Hide all BabeBot visual indicators
+            if (_babeBotHpCoordIndicator != null)
+            {
+                _babeBotHpCoordIndicator.Visibility = Visibility.Collapsed;
+                canvas.Children.Remove(_babeBotHpCoordIndicator);
+            }
+
+            if (_babeBotMpCoordIndicator != null)
+            {
+                _babeBotMpCoordIndicator.Visibility = Visibility.Collapsed;
+                canvas.Children.Remove(_babeBotMpCoordIndicator);
+            }
+
+            if (_babeBotHpReadingArea != null)
+            {
+                _babeBotHpReadingArea.Visibility = Visibility.Collapsed;
+                canvas.Children.Remove(_babeBotHpReadingArea);
+            }
+
+            if (_babeBotMpReadingArea != null)
+            {
+                _babeBotMpReadingArea.Visibility = Visibility.Collapsed;
+                canvas.Children.Remove(_babeBotMpReadingArea);
+            }
+
+            // Hide the overlay window if no other elements are visible
+            if (_monitoringOverlay != null && _monitoringOverlay.IsVisible && canvas.Children.Count == 0)
+            {
+                _monitoringOverlay.Hide();
+                Console.WriteLine($"[{ViewModel.ClientName}] BabeBot visual indicators hidden");
+            }
+        }
+    }
+
     // Show Draggable Shapes Button Event Handler
     private void ShowDraggableShapes_Click(object sender, RoutedEventArgs e)
     {
@@ -4759,25 +5282,12 @@ public partial class ClientCard : UserControl, IDisposable
             try
             {
                 Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot HP Calibration started...");
-                
-                // Clear existing reference colors
-                ViewModel.BabeBotHp.ReferenceColors.Clear();
-                
-                // BabeBot calibration logic - sample colors at %5-%95
-                for (int percentage = 5; percentage <= 95; percentage += 5)
-                {
-                    int sampleX = ViewModel.BabeBotHp.CalculateXForPercentage(percentage);
-                    var color = ColorSampler.GetColorAt(ViewModel.TargetHwnd, sampleX, ViewModel.BabeBotHp.Y);
-                    
-                    ViewModel.BabeBotHp.ReferenceColors[percentage] = color;
-                    Console.WriteLine($"[{ViewModel.ClientName}] BabeBot HP {percentage}%: X={sampleX}, Color=RGB({color.R},{color.G},{color.B})");
-                    
-                    Thread.Sleep(50); // Small delay between samples
-                }
-                
-                // Set reference color to the threshold percentage
+
+                // SIMPLE: Only get color at threshold percentage (e.g. 90% HP)
                 var thresholdX = ViewModel.BabeBotHp.MonitorX;
-                var thresholdColor = ColorSampler.GetColorAt(ViewModel.TargetHwnd, thresholdX, ViewModel.BabeBotHp.Y);
+                var thresholdColor = ColorSampler.GetAverageColorInArea(ViewModel.TargetHwnd, thresholdX, ViewModel.BabeBotHp.Y, 5);
+
+                Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot HP Simple Calibration: {ViewModel.BabeBotHp.ThresholdPercentage}% at X={thresholdX}, Color=RGB({thresholdColor.R},{thresholdColor.G},{thresholdColor.B}) [5x5 area]");
                 ViewModel.BabeBotHp.ReferenceColor = thresholdColor;
                 
                 Dispatcher.BeginInvoke(() =>
@@ -4810,25 +5320,12 @@ public partial class ClientCard : UserControl, IDisposable
             try
             {
                 Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot MP Calibration started...");
-                
-                // Clear existing reference colors
-                ViewModel.BabeBotMp.ReferenceColors.Clear();
-                
-                // BabeBot calibration logic - sample colors at %5-%95
-                for (int percentage = 5; percentage <= 95; percentage += 5)
-                {
-                    int sampleX = ViewModel.BabeBotMp.CalculateXForPercentage(percentage);
-                    var color = ColorSampler.GetColorAt(ViewModel.TargetHwnd, sampleX, ViewModel.BabeBotMp.Y);
-                    
-                    ViewModel.BabeBotMp.ReferenceColors[percentage] = color;
-                    Console.WriteLine($"[{ViewModel.ClientName}] BabeBot MP {percentage}%: X={sampleX}, Color=RGB({color.R},{color.G},{color.B})");
-                    
-                    Thread.Sleep(50); // Small delay between samples
-                }
-                
-                // Set reference color to the threshold percentage
+
+                // SIMPLE: Only get color at threshold percentage (e.g. 90% MP)
                 var thresholdX = ViewModel.BabeBotMp.MonitorX;
-                var thresholdColor = ColorSampler.GetColorAt(ViewModel.TargetHwnd, thresholdX, ViewModel.BabeBotMp.Y);
+                var thresholdColor = ColorSampler.GetAverageColorInArea(ViewModel.TargetHwnd, thresholdX, ViewModel.BabeBotMp.Y, 5);
+
+                Console.WriteLine($"[{ViewModel.ClientName}] 🤖 BabeBot MP Simple Calibration: {ViewModel.BabeBotMp.ThresholdPercentage}% at X={thresholdX}, Color=RGB({thresholdColor.R},{thresholdColor.G},{thresholdColor.B}) [5x5 area]");
                 ViewModel.BabeBotMp.ReferenceColor = thresholdColor;
                 
                 Dispatcher.BeginInvoke(() =>
@@ -5067,8 +5564,8 @@ public partial class ClientCard : UserControl, IDisposable
         try
         {
             // HP/MP monitoring needs real-time data, NO CACHE for accurate detection
-            // Always get fresh color data for HP monitoring to avoid false triggers
-            Color currentColor = ColorSampler.GetColorAt(ViewModel.TargetHwnd, ViewModel.BabeBotHp.MonitorX, ViewModel.BabeBotHp.Y);
+            // Always get fresh color data for HP monitoring using 5x5 area to avoid false triggers
+            Color currentColor = ColorSampler.GetAverageColorInArea(ViewModel.TargetHwnd, ViewModel.BabeBotHp.MonitorX, ViewModel.BabeBotHp.Y, 5);
             ViewModel.BabeBotHp.CurrentColor = currentColor;
             
             // BabeBot logic: if current color != reference color then trigger
@@ -5130,8 +5627,8 @@ public partial class ClientCard : UserControl, IDisposable
         try
         {
             // HP/MP monitoring needs real-time data, NO CACHE for accurate detection
-            // Always get fresh color data for MP monitoring to avoid false triggers
-            Color currentColor = ColorSampler.GetColorAt(ViewModel.TargetHwnd, ViewModel.BabeBotMp.MonitorX, ViewModel.BabeBotMp.Y);
+            // Always get fresh color data for MP monitoring using 5x5 area to avoid false triggers
+            Color currentColor = ColorSampler.GetAverageColorInArea(ViewModel.TargetHwnd, ViewModel.BabeBotMp.MonitorX, ViewModel.BabeBotMp.Y, 5);
             ViewModel.BabeBotMp.CurrentColor = currentColor;
             
             // BabeBot logic: if current color != reference color then trigger
@@ -8886,6 +9383,7 @@ public partial class ClientCard : UserControl, IDisposable
                     DisposeCaptchaResources();
                     DisposePartyHealService();
                     DisposeFastSampler();
+                    DisposeVisualIndicators();
                 }
                 catch (Exception ex)
                 {
@@ -9277,6 +9775,37 @@ public partial class ClientCard : UserControl, IDisposable
         catch (Exception ex)
         {
             Console.WriteLine($"[{ViewModel.ClientName}] Error disposing fast sampler: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Disposes BabeBot visual indicator resources.
+    /// </summary>
+    private void DisposeVisualIndicators()
+    {
+        try
+        {
+            // Hide visual indicators first
+            ShowVisualIndicators(false);
+
+            // Dispose overlay window
+            if (_monitoringOverlay != null)
+            {
+                _monitoringOverlay.Close();
+                _monitoringOverlay = null;
+            }
+
+            // Clear shape references
+            _babeBotHpCoordIndicator = null;
+            _babeBotMpCoordIndicator = null;
+            _babeBotHpReadingArea = null;
+            _babeBotMpReadingArea = null;
+
+            Console.WriteLine($"[{ViewModel.ClientName}] BabeBot visual indicators disposed");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{ViewModel.ClientName}] Error disposing visual indicators: {ex.Message}");
         }
     }
 

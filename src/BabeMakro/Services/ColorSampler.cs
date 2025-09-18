@@ -16,18 +16,17 @@ public static class ColorSampler
             var compensatedY = clientY;
             
             var processName = GetProcessName(hwnd);
-            if (processName.Contains("NemuPlayer") || processName.Contains("MuMuPlayer") || processName.Contains("MuMuNxDevice"))
-            {
-                // FIXED: Use SAME offset direction as CoordinatePicker
-                compensatedX = clientX + 8;  // CoordinatePicker does -8, so for reading we need +8
-                compensatedY = clientY + 50; // CoordinatePicker does -50, so for reading we need +50
-                
-                // Debug color sampling coordinates (reduced frequency)
-                if (clientX < 1000 && clientY < 1000 && (clientX + clientY) % 100 == 0) // Log every 100th coordinate
-                {
-                    System.Console.WriteLine($"ColorSampler MuMu OFFSET: Original({clientX},{clientY}) -> Compensated({compensatedX},{compensatedY}) Process:{processName}");
-                }
-            }
+
+            // Debug - ALWAYS log process name and coordinates
+            System.Console.WriteLine($"🔍 ColorSampler Process: {processName} - Coordinates: ({clientX},{clientY})");
+
+            // DISABLED MuMu offset - causing wrong color sampling
+            // if (processName.Contains("NemuPlayer") || processName.Contains("MuMuPlayer") || processName.Contains("MuMuNxDevice"))
+            // {
+            //     compensatedX = clientX + 8;
+            //     compensatedY = clientY + 50;
+            //     System.Console.WriteLine($"🔍 ColorSampler MuMu OFFSET: Original({clientX},{clientY}) -> Compensated({compensatedX},{compensatedY}) Process:{processName}");
+            // }
             
             // Convert compensated client coordinates to screen coordinates
             var point = new POINT { x = compensatedX, y = compensatedY };

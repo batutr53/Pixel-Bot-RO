@@ -31,6 +31,7 @@ namespace PixelAutomation.Tool.Overlay.WPF
         private bool _masterAttackRunning = false;
         private bool _masterHealRunning = false;
         private bool _panicModeActive = false;
+        private bool _visualIndicatorsActive = false;
 
         // Public access to overlay canvas for client cards
         public System.Windows.Controls.Canvas GetOverlayCanvas() => OverlayCanvas;
@@ -388,6 +389,44 @@ namespace PixelAutomation.Tool.Overlay.WPF
             {
                 MessageBox.Show($"Error loading configuration: {ex.Message}", "Load Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 StatusText.Text = "Load failed";
+            }
+        }
+
+        private void VisualIndicatorsToggle_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                _visualIndicatorsActive = !_visualIndicatorsActive;
+
+                if (_visualIndicatorsActive)
+                {
+                    VisualIndicatorsToggleButton.Content = "👁️ Hide";
+                    VisualIndicatorsToggleButton.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(40, 167, 69)); // Green
+                    StatusText.Text = "Visual indicators enabled - HP/MP coordinates visible";
+
+                    // Enable visual indicators on all client cards
+                    foreach (var clientCard in _clientCards)
+                    {
+                        clientCard.ShowVisualIndicators(true);
+                    }
+                }
+                else
+                {
+                    VisualIndicatorsToggleButton.Content = "👁️ Visual";
+                    VisualIndicatorsToggleButton.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(108, 117, 125)); // Gray
+                    StatusText.Text = "Visual indicators disabled";
+
+                    // Disable visual indicators on all client cards
+                    foreach (var clientCard in _clientCards)
+                    {
+                        clientCard.ShowVisualIndicators(false);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error toggling visual indicators: {ex.Message}", "Visual Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                StatusText.Text = "Visual toggle failed";
             }
         }
 
