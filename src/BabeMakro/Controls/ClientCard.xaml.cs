@@ -3054,7 +3054,7 @@ public partial class ClientCard : UserControl, IDisposable
             // Use master timer instead of individual DispatcherTimer
             _masterTimer?.AddOrUpdateTask(
                 "HPMPMonitoring",
-                TimeSpan.FromMilliseconds(100), // 10Hz - reduced for better performance
+                TimeSpan.FromMilliseconds(1000), // 1Hz - 1 saniyede bir kontrol
                 () => MonitoringTimer_Tick(null, null),
                 enabled: true,
                 priority: 10 // High priority for HP/MP monitoring
