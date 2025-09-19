@@ -12,16 +12,17 @@ public static class ServiceCollectionExtensions
     {
         // Register captcha solver
         services.AddSingleton<ICaptchaSolver, TesseractCaptchaSolver>();
-        
+
         // Register captcha detector
         services.AddSingleton<ICaptchaDetector, ColorBasedCaptchaDetector>();
-        
+
         // Register captcha service
+        // Note: ICaptureBackend must be registered separately by the consuming application
         services.AddScoped<CaptchaService>();
-        
+
         // Register click provider with text support
         services.AddSingleton<IClickProvider, WindowsMessageClickProvider>();
-        
+
         return services;
     }
     

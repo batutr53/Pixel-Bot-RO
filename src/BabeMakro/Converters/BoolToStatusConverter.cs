@@ -16,7 +16,9 @@ public class BoolToStatusConverter : IValueConverter
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        throw new NotImplementedException();
+        // This is a one-way converter, ConvertBack is not supported
+        // Return DoNothing to indicate that the binding should not be updated
+        return System.Windows.Data.Binding.DoNothing;
     }
 }
 
@@ -33,7 +35,9 @@ public class BoolToColorConverter : IValueConverter
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        throw new NotImplementedException();
+        // This is a one-way converter, ConvertBack is not supported
+        // Return DoNothing to indicate that the binding should not be updated
+        return System.Windows.Data.Binding.DoNothing;
     }
 }
 

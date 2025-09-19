@@ -12,7 +12,8 @@ public class CaptchaService : IDisposable
     private readonly ICaptchaDetector _captchaDetector;
     private readonly IClickProvider _clickProvider;
     private readonly IEventBus _eventBus;
-    
+    private readonly ICaptureBackend _captureBackend;
+
     private CaptchaConfig _config = new();
     private Timer? _detectionTimer;
     private IntPtr _targetWindow;
@@ -27,13 +28,15 @@ public class CaptchaService : IDisposable
         ICaptchaSolver captchaSolver,
         ICaptchaDetector captchaDetector,
         IClickProvider clickProvider,
-        IEventBus eventBus)
+        IEventBus eventBus,
+        ICaptureBackend captureBackend)
     {
         _logger = logger;
         _captchaSolver = captchaSolver;
         _captchaDetector = captchaDetector;
         _clickProvider = clickProvider;
         _eventBus = eventBus;
+        _captureBackend = captureBackend;
     }
 
     public async Task<bool> InitializeAsync(CaptchaConfig config, IntPtr targetWindow)
@@ -49,14 +52,23 @@ public class CaptchaService : IDisposable
 
         try
         {
-            var initialized = await _captchaSolver.InitializeAsync();
-            if (!initialized)
+            // Initialize capture backend
+            var captureInitialized = await _captureBackend.InitializeAsync(targetWindow);
+            if (!captureInitialized)
+            {
+                _logger.LogError("Failed to initialize capture backend for captcha service");
+                return false;
+            }
+
+            var solverInitialized = await _captchaSolver.InitializeAsync();
+            if (!solverInitialized)
             {
                 _logger.LogError("Failed to initialize captcha solver");
                 return false;
             }
 
-            _logger.LogInformation("Captcha service initialized successfully");
+            _logger.LogInformation("Captcha service initialized successfully with capture backend: {BackendName}",
+                _captureBackend.Name);
             return true;
         }
         catch (Exception ex)
@@ -211,13 +223,26 @@ public class CaptchaService : IDisposable
     {
         try
         {
-            // This would use the existing capture backend
-            // For now, return null as placeholder
-            return null;
+            if (_captureBackend == null)
+            {
+                _logger.LogError("Capture backend is not initialized");
+                return null;
+            }
+
+            var screenshot = await _captureBackend.CaptureAsync();
+            if (screenshot == null)
+            {
+                _logger.LogWarning("Capture backend returned null screenshot");
+                return null;
+            }
+
+            _logger.LogDebug("Successfully captured screenshot: {Width}x{Height}",
+                screenshot.Width, screenshot.Height);
+            return screenshot;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to capture screenshot");
+            _logger.LogError(ex, "Failed to capture screenshot for captcha detection");
             return null;
         }
     }
@@ -301,6 +326,7 @@ public class CaptchaService : IDisposable
     {
         StopMonitoring();
         _captchaSolver?.Dispose();
+        _captureBackend?.Dispose();
         GC.SuppressFinalize(this);
     }
 }

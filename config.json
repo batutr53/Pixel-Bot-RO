@@ -12,7 +12,7 @@
       "windows": [
         {
           "titleRegex": "Client 1",
-          "hwndString": "3213840",
+          "hwndString": "1049368",
           "processName": null,
           "dpiAware": true,
           "probes": [
